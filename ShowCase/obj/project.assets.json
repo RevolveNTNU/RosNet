@@ -1,11 +1,30 @@
 {
   "version": 3,
   "targets": {
-    ".NETCoreApp,Version=v3.1": {}
+    ".NETCoreApp,Version=v3.1": {
+      "ROSbag-ReadWrite/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v3.1",
+        "compile": {
+          "bin/placeholder/ROSbag-ReadWrite.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/ROSbag-ReadWrite.dll": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "ROSbag-ReadWrite/1.0.0": {
+      "type": "project",
+      "path": "../ROSbag-ReadWrite/ROSbag-ReadWrite.csproj",
+      "msbuildProject": "../ROSbag-ReadWrite/ROSbag-ReadWrite.csproj"
+    }
+  },
   "projectFileDependencyGroups": {
-    ".NETCoreApp,Version=v3.1": []
+    ".NETCoreApp,Version=v3.1": [
+      "ROSbag-ReadWrite >= 1.0.0"
+    ]
   },
   "packageFolders": {
     "C:\\Users\\ingeg\\.nuget\\packages\\": {}
@@ -13,11 +32,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\ingeg\\Documents\\Revolve\\ROSbag-ReadWrite\\ROSbag-ReadWrite\\ROSbag-ReadWrite.csproj",
-      "projectName": "ROSbag-ReadWrite",
-      "projectPath": "C:\\Users\\ingeg\\Documents\\Revolve\\ROSbag-ReadWrite\\ROSbag-ReadWrite\\ROSbag-ReadWrite.csproj",
+      "projectUniqueName": "C:\\Users\\ingeg\\Documents\\Revolve\\ROSbag-ReadWrite\\ShowCase\\ShowCase.csproj",
+      "projectName": "ShowCase",
+      "projectPath": "C:\\Users\\ingeg\\Documents\\Revolve\\ROSbag-ReadWrite\\ShowCase\\ShowCase.csproj",
       "packagesPath": "C:\\Users\\ingeg\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\ingeg\\Documents\\Revolve\\ROSbag-ReadWrite\\ROSbag-ReadWrite\\obj\\",
+      "outputPath": "C:\\Users\\ingeg\\Documents\\Revolve\\ROSbag-ReadWrite\\ShowCase\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\ingeg\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -33,7 +52,11 @@
       "frameworks": {
         "netcoreapp3.1": {
           "targetAlias": "netcoreapp3.1",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\ingeg\\Documents\\Revolve\\ROSbag-ReadWrite\\ROSbag-ReadWrite\\ROSbag-ReadWrite.csproj": {
+              "projectPath": "C:\\Users\\ingeg\\Documents\\Revolve\\ROSbag-ReadWrite\\ROSbag-ReadWrite\\ROSbag-ReadWrite.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

@@ -1,0 +1,10 @@
+C:\Users\ingeg\Documents\Revolve\ROSbag-ReadWrite\ROSbag-ReadWrite\bin\Debug\netcoreapp3.1\ROSbag-ReadWrite.deps.json
+C:\Users\ingeg\Documents\Revolve\ROSbag-ReadWrite\ROSbag-ReadWrite\bin\Debug\netcoreapp3.1\ROSbag-ReadWrite.dll
+C:\Users\ingeg\Documents\Revolve\ROSbag-ReadWrite\ROSbag-ReadWrite\bin\Debug\netcoreapp3.1\ROSbag-ReadWrite.pdb
+C:\Users\ingeg\Documents\Revolve\ROSbag-ReadWrite\ROSbag-ReadWrite\obj\Debug\netcoreapp3.1\ROSbag-ReadWrite.csproj.AssemblyReference.cache
+C:\Users\ingeg\Documents\Revolve\ROSbag-ReadWrite\ROSbag-ReadWrite\obj\Debug\netcoreapp3.1\ROSbag-ReadWrite.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ingeg\Documents\Revolve\ROSbag-ReadWrite\ROSbag-ReadWrite\obj\Debug\netcoreapp3.1\ROSbag-ReadWrite.AssemblyInfoInputs.cache
+C:\Users\ingeg\Documents\Revolve\ROSbag-ReadWrite\ROSbag-ReadWrite\obj\Debug\netcoreapp3.1\ROSbag-ReadWrite.AssemblyInfo.cs
+C:\Users\ingeg\Documents\Revolve\ROSbag-ReadWrite\ROSbag-ReadWrite\obj\Debug\netcoreapp3.1\ROSbag-ReadWrite.csproj.CoreCompileInputs.cache
+C:\Users\ingeg\Documents\Revolve\ROSbag-ReadWrite\ROSbag-ReadWrite\obj\Debug\netcoreapp3.1\ROSbag-ReadWrite.dll
+C:\Users\ingeg\Documents\Revolve\ROSbag-ReadWrite\ROSbag-ReadWrite\obj\Debug\netcoreapp3.1\ROSbag-ReadWrite.pdb
