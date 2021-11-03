@@ -41,8 +41,8 @@ namespace ROSbag_ReadWrite
                             Console.WriteLine($"{fieldName} : {fieldValue}");
                         }
                         int dataLen = reader.ReadInt32();
-                        byte[] data = reader.ReadBytes(dataLen);
-                        Console.WriteLine($"\nDATA HERE OF {dataLen} BYTES\n");
+                        string data = DataReader.ReadData(reader, dataLen, fields["op"]);
+                        Console.WriteLine($"\n{data}\n");
                     }
                 }
             }
