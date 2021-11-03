@@ -20,7 +20,6 @@ namespace ROSbag_ReadWrite
         {
             char curChar;
             string fieldName = "";
-            int len = 0;
             do
             {
                 curChar = reader.ReadChar();
@@ -28,9 +27,8 @@ namespace ROSbag_ReadWrite
                 {
                     fieldName += curChar;
                 }
-                len++;
             }
-            while (curChar != '=' && len < fieldLen);
+            while (curChar != '=');
             return fieldName;
         }
 
