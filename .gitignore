@@ -38,6 +38,8 @@ srv/_*.py
 *.pyc
 qtcreator-*
 *.user
+*.obj
+*.pdb
 
 /planning/cfg
 /planning/docs
@@ -50,3 +52,23 @@ qtcreator-*
 
 # Catkin custom files
 CATKIN_IGNORE
+
+# Visual Studio cache files
+# files ending in .cache can be ignored
+*.[Cc]ache
+# but keep track of directories ending in .cache
+!*.[Cc]ache/
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+[Xx]64/
+[Xx]86/
+[Bb]uild/
+bld/
+[Bb]in/
+[Oo]bj/
+
+.vs/
