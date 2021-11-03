@@ -8,7 +8,7 @@ namespace ROSbag_ReadWrite
     {
         public static void Read()
         {
-            const string path = @"C:\Users\ingeg\source\repos\RosReadTest\RosReadTest\bags\acc19-11.bag";
+            const string path = @"";
             if (File.Exists(path))
             {
                 using (BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open)))
