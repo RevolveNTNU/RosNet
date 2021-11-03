@@ -70,3 +70,5 @@ CATKIN_IGNORE
 bld/
 [Bb]in/
 [Oo]bj/
+
+.vs/
