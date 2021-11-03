@@ -1,5 +1,6 @@
 devel/
 logs/
+# "bags" used to store testbags
 bags/
 build/
 bin/
