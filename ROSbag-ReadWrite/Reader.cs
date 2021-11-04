@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace ROSbag_ReadWrite
 {
@@ -8,12 +9,15 @@ namespace ROSbag_ReadWrite
     {
         public static void Read()
         {
-            const string path = @"";
-            if (File.Exists(path))
+            string currentDir = Directory.GetCurrentDirectory();
+            string regexPath = Regex.Replace(currentDir, "ROSbag-ReadWrite.*", "ROSbag-ReadWrite/bags/acc19-11.bag");
+
+            if (File.Exists(regexPath))
             {
-                using (BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open)))
+                using (BinaryReader reader = new BinaryReader(File.Open(regexPath, FileMode.Open)))
                 {
                     Console.Write(reader.ReadChars(13));
+
                     while (reader.BaseStream.Position != reader.BaseStream.Length)
                     {
                         int headerLen = reader.ReadInt32();
