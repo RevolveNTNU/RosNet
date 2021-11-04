@@ -7,7 +7,7 @@ namespace ROSbag_ReadWrite
 {
     public static class Reader
     {
-        public static void Read()
+        public static void Read(string path)
         {
             string currentDir = Directory.GetCurrentDirectory();
             string regexPath = Regex.Replace(currentDir, "ROSbag-ReadWrite.*", "ROSbag-ReadWrite/bags/acc19-11.bag");
