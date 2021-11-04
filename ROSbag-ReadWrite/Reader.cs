@@ -9,10 +9,12 @@ namespace ROSbag_ReadWrite
     {
         public static void Read(string path)
         {
+            string currentDir = Directory.GetCurrentDirectory();
+            string regexPath = Regex.Replace(currentDir, "ROSbag-ReadWrite.*", "ROSbag-ReadWrite/bags/acc19-11.bag");
 
-            if (File.Exists(path))
+            if (File.Exists(regexPath))
             {
-                using (BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open)))
+                using (BinaryReader reader = new BinaryReader(File.Open(regexPath, FileMode.Open)))
                 {
                     Console.Write(reader.ReadChars(13));
 
@@ -43,8 +45,8 @@ namespace ROSbag_ReadWrite
                             Console.WriteLine($"{fieldName} : {fieldValue}");
                         }
                         int dataLen = reader.ReadInt32();
-                        byte[] data = reader.ReadBytes(dataLen);
-                        Console.WriteLine($"\nDATA HERE OF {dataLen} BYTES\n");
+                        string data = DataReader.ReadData(reader, dataLen, fields["op"]);
+                        Console.WriteLine($"\n{data}\n");
                     }
                 }
             }
