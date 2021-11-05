@@ -10,8 +10,8 @@ namespace ShowCase
 
         static void Main(string[] args)
         {
-        string currentDirectory = Directory.GetCurrentDirectory();
-        string path = Regex.Replace(currentDirectory, "ROSbag-ReadWrite.*", "ROSbag-ReadWrite/bags/acc19-11.bag");
+            string currentDirectory = Directory.GetCurrentDirectory();
+            string path = Regex.Replace(currentDirectory, "ROSbag-ReadWrite.*", "ROSbag-ReadWrite/bags/acc19-11.bag");
 
             Reader.Read(path);
             Console.ReadKey();
