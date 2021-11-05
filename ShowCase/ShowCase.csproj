@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ROSbag-ReadWrite\ROSbag-ReadWrite.csproj" />
+    <ProjectReference Include="..\ROSNET\ROSNET.csproj" />
   </ItemGroup>
 
 </Project>
