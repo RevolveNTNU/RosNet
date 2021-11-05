@@ -9,12 +9,10 @@ namespace ROSbag_ReadWrite
     {
         public static void Read(string path)
         {
-            string currentDir = Directory.GetCurrentDirectory();
-            string regexPath = Regex.Replace(currentDir, "ROSbag-ReadWrite.*", "ROSbag-ReadWrite/bags/acc19-11.bag");
 
-            if (File.Exists(regexPath))
+            if (File.Exists(path))
             {
-                using (BinaryReader reader = new BinaryReader(File.Open(regexPath, FileMode.Open)))
+                using (BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open)))
                 {
                     Console.Write(reader.ReadChars(13));
 
