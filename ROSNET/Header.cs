@@ -70,7 +70,7 @@ namespace ROSbag_ReadWrite
                     }
                     break;
                 case "topic":
-                    fieldValue = new string(reader.ReadChars(fieldLen - 5));
+                    fieldValue = new string(reader.ReadChars(fieldLen - 6));
                     break;
             }
             return fieldValue;
