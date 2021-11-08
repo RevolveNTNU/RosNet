@@ -4,8 +4,11 @@ using System.Text;
 using System.IO;
 using ROSNET;
 
-namespace ROSbag_ReadWrite.DataModel
+namespace ROSNET.DataModel
 {
+    /// <summary>
+    /// Represents a ROSbag connection
+    /// </summary>
     public class Connection
     {
         public int Conn { get; }
@@ -17,6 +20,9 @@ namespace ROSbag_ReadWrite.DataModel
         public string CallerID { get; private set; }
         public string Latching { get; private set; }
 
+        /// <summary>
+        /// Create a connection from conn and topic from connection record header, as well as a BinaryReader in position to read the connection header
+        /// </summary>
         public Connection(int conn, string topic, BinaryReader reader)
         {
             Conn = conn;
@@ -24,6 +30,9 @@ namespace ROSbag_ReadWrite.DataModel
             SetData(reader);
         }
 
+        /// <summary>
+        /// Helper function to extract data from connection header
+        /// </summary>
         private void SetData(BinaryReader reader)
         {
             long endPos = reader.BaseStream.Position + reader.ReadInt32();
