@@ -2,7 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 
-namespace ROSbag_ReadWrite
+namespace ROSNET
 {
     public static class DataReader
     {
