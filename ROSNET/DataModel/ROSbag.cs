@@ -25,9 +25,9 @@ namespace ROSNET.DataModel
         /// <returns>true if connection was successfully added</returns>
         public bool AddConnection(Connection conn)
         {
-            if (!Connections.ContainsKey(conn.Conn))
+            if (!Connections.ContainsKey(conn.ConnID))
             {
-                Connections.Add(conn.Conn, conn);
+                Connections.Add(conn.ConnID, conn);
                 return true;
             }
             return false;

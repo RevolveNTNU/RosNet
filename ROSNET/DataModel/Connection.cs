@@ -11,7 +11,7 @@ namespace ROSNET.DataModel
     /// </summary>
     public class Connection
     {
-        public int Conn { get; }
+        public int ConnID { get; }
         public string Topic { get; }
         public string OriginalTopic { get; private set; }
         public string Type { get; private set; }
@@ -23,9 +23,9 @@ namespace ROSNET.DataModel
         /// <summary>
         /// Create a connection from conn and topic from connection record header, as well as a BinaryReader in position to read the connection header
         /// </summary>
-        public Connection(int conn, string topic, BinaryReader reader)
+        public Connection(int connID, string topic, BinaryReader reader)
         {
-            Conn = conn;
+            ConnID = connID;
             Topic = topic;
             SetData(reader);
         }
