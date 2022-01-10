@@ -1,11 +1,13 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using ROSNET.DataModel;
 
 namespace ROSNET
 {
     public static class Reader
     {
+       
         public static void Read(string path)
         {
 
@@ -13,6 +15,9 @@ namespace ROSNET
             {
                 using (BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open)))
                 {
+                    Dictionary<int, Message> unReadMessages = new Dictionary<int, Message>();
+                    ROSbag rosbag = new ROSbag();
+
                     Console.Write(reader.ReadChars(13));
 
                     while (reader.BaseStream.Position != reader.BaseStream.Length)
@@ -26,24 +31,25 @@ namespace ROSNET
                         while (!hasReqs)
                         {
                             fieldLen = reader.ReadInt32();
-                            fieldName = Header.ReadName(reader, fieldLen);
-                            fieldValue = Header.ReadValue(reader, fieldName, fieldLen);
+                            fieldName = Header.ReadName(reader);
+                            fieldValue = Header.ReadFieldValue(reader, fieldName, fieldLen);
                             fields.Add(fieldName, fieldValue);
 
                             if (fields.ContainsKey("op"))
                             {
                                 hasReqs = true;
-                                foreach (string req in Header.OpReqs[fields["op"]])
+                                //foreach (string req in Header.OpReqs[fields["op"]])
                                 {
-                                    if (!fields.ContainsKey(req)) hasReqs = false;
+                                    //if (!fields.ContainsKey(req)) hasReqs = false;
                                 }
+                   
                             }
+                            //Console.WriteLine($"{fieldName} : {fieldValue}");
 
-                            Console.WriteLine($"{fieldName} : {fieldValue}");
                         }
                         int dataLen = reader.ReadInt32();
                         string data = DataReader.ReadData(reader, dataLen, fields["op"]);
-                        Console.WriteLine($"\n{data}\n");
+                        //Console.WriteLine($"\n{data}\n");
                     }
                 }
             }
