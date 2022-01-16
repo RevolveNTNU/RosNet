@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using ROSNET;
+using System.Linq;
+using ROSbag_ReadWrite.ROSMessageParser;
 
 namespace ROSNET.DataModel
 {
@@ -27,7 +29,7 @@ namespace ROSNET.DataModel
         public Connection(FieldValue conn, FieldValue topic, BinaryReader reader)
         {
             Conn = BitConverter.ToInt32(conn.Value);
-            Topic = topic.Value.ToString();
+            Topic = System.Text.Encoding.Default.GetString(topic.Value);
             SetData(reader);
         }
 
@@ -75,7 +77,9 @@ namespace ROSNET.DataModel
 
         private List<FieldValue> setMessageDefinition(string fieldValue)
         {
-            return new List<FieldValue>();
+            var messageDefinition = MessageDefinitionParser.ParseMessageDefinition(fieldValue);
+
+            return messageDefinition;
         }
 
         public string toString()

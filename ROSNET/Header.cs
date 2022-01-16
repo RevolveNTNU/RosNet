@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Collections.ObjectModel;
 using System.Linq;
+using ROSNET.Enum;
 
 namespace ROSNET
 {
@@ -48,7 +49,7 @@ namespace ROSNET
             int fieldLen = reader.ReadInt32();
             string fieldName = ReadName(reader);
 
-            String dataType;
+            PrimitiveType dataType;
             byte[] fieldValue;
             switch (fieldName)
             {
@@ -57,7 +58,7 @@ namespace ROSNET
                 case "chunk_pos":
                 case "start_time":
                 case "end_time":
-                    dataType = "long";
+                    dataType = PrimitiveType.INT64;
                     fieldValue = reader.ReadBytes(8);
                     break;
                 case "conn_count":
@@ -67,15 +68,15 @@ namespace ROSNET
                 case "ver":
                 case "count":
                 case "offset":
-                    dataType = "int";
+                    dataType = PrimitiveType.INT32;
                     fieldValue = reader.ReadBytes(4);
                     break;
                 case "op":
-                    dataType = "byte";
+                    dataType = PrimitiveType.INT8;
                     fieldValue = reader.ReadBytes(1);
                     break;
                 case "compression":
-                    dataType = "string";
+                    dataType = PrimitiveType.STRING;
                     string firstChar = reader.ReadChar().ToString();
                     if (firstChar.Equals("n"))
                     {
@@ -89,7 +90,7 @@ namespace ROSNET
                     }
                     break;
                 case "topic":
-                    dataType = "string";
+                    dataType = PrimitiveType.STRING;
                     fieldValue = Encoding.ASCII.GetBytes(new string(reader.ReadChars(fieldLen - 6)));
                     break;
                 default:

@@ -12,7 +12,7 @@ namespace ShowCase
             string currentDirectory = Directory.GetCurrentDirectory();
             string path = Regex.Replace(currentDirectory, "ROSNET.*", "ROSNET/bags/acc19-11.bag");
 
-            ROSbagReader.Read(path);
+            var rosbag = ROSbagReader.Read(path);
             //Console.ReadKey();
         }
     }

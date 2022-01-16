@@ -8,9 +8,13 @@
   <ItemGroup>
     <None Remove="DataModel\" />
     <None Remove="Reader\" />
+    <None Remove="Enum\" />
+    <None Remove="ROSMessageParser\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DataModel\" />
     <Folder Include="Reader\" />
+    <Folder Include="Enum\" />
+    <Folder Include="ROSMessageParser\" />
   </ItemGroup>
 </Project>
