@@ -10,11 +10,13 @@
     <None Remove="Reader\" />
     <None Remove="Enum\" />
     <None Remove="ROSMessageParser\" />
+    <None Remove="Field\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DataModel\" />
     <Folder Include="Reader\" />
     <Folder Include="Enum\" />
     <Folder Include="ROSMessageParser\" />
+    <Folder Include="Field\" />
   </ItemGroup>
 </Project>

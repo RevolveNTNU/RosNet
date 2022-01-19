@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections;
-using ROSNET.Enum;
+﻿using ROSNET.Enum;
 
-namespace ROSNET
+namespace ROSNET.Field
 {
     public class FieldValue
     {
@@ -25,9 +23,9 @@ namespace ROSNET
         }
 
 
-        public int GetBitLength()
+        public virtual int GetBitLength()
         {
-            switch(DataType)
+            switch (this.DataType)
             {
                 case PrimitiveType.BOOL:
                     return 1;
@@ -49,17 +47,17 @@ namespace ROSNET
                 case PrimitiveType.TIME:
                 case PrimitiveType.DURATION:
                     return 64;
-                case PrimitiveType.ARRAY:
-                    throw new Exception("FieldValue is not an array");
                 default:
                     return 0;
             }
-       
+
+
 
         }
 
         public string toString()
         {
+            //todo write Value nicely
             return ($"{DataType} {Name} {Value}");
 
         }

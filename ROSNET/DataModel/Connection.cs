@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
-using ROSNET;
-using System.Linq;
-using ROSbag_ReadWrite.ROSMessageParser;
+using ROSNET.Field;
+using ROSNET.Reader;
+using ROSNET.ROSMessageParser;
 
 namespace ROSNET.DataModel
 {
@@ -41,7 +40,6 @@ namespace ROSNET.DataModel
         {
             int dataLen = reader.ReadInt32();
             long endPos = reader.BaseStream.Position + dataLen;
-            Console.WriteLine("DataLength in Connection: " + dataLen);
             int fieldLen;
             string fieldName;
             string fieldValue;

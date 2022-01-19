@@ -1,12 +1,12 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Text;
-using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Text;
 using ROSNET.Enum;
+using ROSNET.Field;
 
-namespace ROSNET
+namespace ROSNET.Reader
 {
     public static class Header
     {
@@ -30,10 +30,13 @@ namespace ROSNET
             {
                 fieldValue = Header.ReadField(reader);
                 fields.Add(fieldValue.Name, fieldValue);
+
+                var opValue = Convert.ToInt32(fields["op"].Value[fields["op"].Value.Last()]);
+
                 if (fields.ContainsKey("op"))
                 {
                     hasReqs = true;
-                    foreach (string req in OpReqs[Convert.ToInt32(fields["op"].Value[fields["op"].Value.Length - 1])])
+                    foreach (string req in OpReqs[opValue])
                     {
                         if (!fields.ContainsKey(req)) hasReqs = false;
                     }
@@ -115,53 +118,6 @@ namespace ROSNET
             while (curChar != '=');
             
             return fieldName;
-        }
-
-
-        //UNUSED
-
-        public static string ReadFieldValue(BinaryReader reader, string fieldName, int fieldLen)
-        {
-            string fieldValue = "";
-            switch (fieldName)
-            {
-                case "index_pos":
-                case "time":
-                case "chunk_pos":
-                case "start_time":
-                case "end_time":
-                    fieldValue = reader.ReadInt64().ToString();
-                    break;
-                case "conn_count":
-                case "chunk_count":
-                case "size":
-                case "conn":
-                case "ver":
-                case "count":
-                case "offset":
-                    fieldValue = reader.ReadInt32().ToString();
-                    break;
-                case "op":
-                    fieldValue = reader.ReadByte().ToString();
-                    break;
-                case "compression":
-                    fieldValue = reader.ReadChar().ToString();
-                    if (fieldValue == "n")
-                    {
-                        reader.ReadChars(3);
-                        fieldValue = "none";
-                    }
-                    else
-                    {
-                        reader.ReadChars(2);
-                        fieldValue = "bz2";
-                    }
-                    break;
-                case "topic":
-                    fieldValue = new string(reader.ReadChars(fieldLen - 6));
-                    break;
-            }
-            return fieldValue;
         }
     }
 }

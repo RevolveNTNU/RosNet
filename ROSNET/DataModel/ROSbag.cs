@@ -1,6 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 
 namespace ROSNET.DataModel
 {
@@ -74,6 +74,7 @@ namespace ROSNET.DataModel
             {
                 foreach (Tuple<Message, byte[]> unReadMessage in UnReadMessages[connection.Conn])
                 {
+                    Console.WriteLine($"Sets data of Message with conn: {unReadMessage.Item1.Conn}");
                     unReadMessage.Item1.SetData(unReadMessage.Item2, connection.MessageDefinition);
                     AddMessage(unReadMessage.Item1);
                 }
@@ -94,7 +95,7 @@ namespace ROSNET.DataModel
 
                 foreach(Message message in Messages.GetValueOrDefault(kvp.Key))
                 {
-                    s += message.toString();
+                    s += message.ToString();
                 }
             }
             return s;

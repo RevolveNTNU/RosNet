@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using ROSNET.Field;
+using ROSNET.ROSMessageParser;
 
 namespace ROSNET.DataModel
 {
@@ -9,7 +10,7 @@ namespace ROSNET.DataModel
     {
         public int Conn { get; }
         public long Time { get;  }
-        private Dictionary<string,FieldValue> Data { get; }
+        public Dictionary<string,FieldValue> Data { get; private set; }
 
         public Message(FieldValue conn, FieldValue time)
         {
@@ -27,18 +28,21 @@ namespace ROSNET.DataModel
 
         private void ReadData(BinaryReader reader, List<FieldValue> messageDefinition)
         {
-            int dataLength = reader.ReadInt32();
-            reader.ReadBytes(dataLength);
+            var dataLength = reader.ReadInt32();
+            var data = reader.ReadBytes(dataLength);
+            SetData(data, messageDefinition);
         }
 
         public void SetData(byte[] data, List<FieldValue> messageDefinition)
         {
-            //les gjennom meldingen
+
+            this.Data = MessageDataParser.ParseMessageData(data, messageDefinition);
+
         }
 
         public string toString()
         {
-            string s = "Conn: " + Conn + "\n";
+            var s = "Conn: " + Conn + "\n";
             s += "Time: " + Time + "\n";
             s += "Data: " + "\n";
             foreach (KeyValuePair<string, FieldValue> kvp in Data)

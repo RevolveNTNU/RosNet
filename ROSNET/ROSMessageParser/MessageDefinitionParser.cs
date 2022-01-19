@@ -2,122 +2,122 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using ROSNET;
 using ROSNET.Enum;
+using ROSNET.Field;
 
-namespace ROSbag_ReadWrite.ROSMessageParser
+namespace ROSNET.ROSMessageParser
 {
     public static class MessageDefinitionParser
     {
 
-        public static List<FieldValue> ParseMessageDefinition(string OMessageDefinition)
+        public static List<FieldValue> ParseMessageDefinition(string messageDefinition)
         {
-            var messages = OMessageDefinition.Split("================================================================================\n");
-            var mainMessageDefinition = messages.First();
+            var definitions = messageDefinition.Split("================================================================================\n");
+            var mainDefinition = definitions.First();
 
-            var fieldValuesByMessageName = new Dictionary<string, List<FieldValue>>();
-            foreach(var messageDefinition in messages.Skip(1).Reverse())
+            var fieldValuesByDefinitionName = new Dictionary<string, List<FieldValue>>();
+            foreach(var definition in definitions.Skip(1).Reverse())
             {
-                (var name, var fields) = ParseSubMessage(messageDefinition, fieldValuesByMessageName);
-                fieldValuesByMessageName.Add(name, fields);
+                (var name, var fields) = ParseSubDefinition(definition, fieldValuesByDefinitionName);
+                fieldValuesByDefinitionName.Add(name, fields);
                 if (name.Contains("/"))
                 {
-                    fieldValuesByMessageName.Add(name.Split("/").Last(), fields);
+                    fieldValuesByDefinitionName.Add(name.Split("/").Last(), fields);
                 }
 
             }
 
-            return ParseMainMessage(mainMessageDefinition,fieldValuesByMessageName);
+            return ParseMainDefinition(mainDefinition,fieldValuesByDefinitionName);
 
 
         }
 
-        private static (string name, List<FieldValue> fields) ParseSubMessage(string subMessageDefinition, Dictionary<string, List<FieldValue>> fieldValuesByMessageName )
+        private static (string name, List<FieldValue> fields) ParseSubDefinition(string suDefinition, Dictionary<string, List<FieldValue>> fieldValuesByDefinitionName )
         {
             
-            var messageName = subMessageDefinition.Split("\n").First().Split(" ").Last();
-            var lines = subMessageDefinition.Split("\n").Skip(1);
+            var definitionName = suDefinition.Split("\n").First().Split(" ").Last();
+            var lines = suDefinition.Split("\n").Skip(1);
 
 
-            var fieldValues = ParseMessage(lines, fieldValuesByMessageName);
+            var fieldValues = ParseDefinition(lines, fieldValuesByDefinitionName);
 
 
-            return (messageName, fieldValues.ToList());
+            return (definitionName, fieldValues.ToList());
 
       
         }
 
-        private static List<FieldValue> ParseMainMessage(string mainMessageDefinition, Dictionary<string, List<FieldValue>> fieldValuesByMessageName)
+        private static List<FieldValue> ParseMainDefinition(string mainDefinition, Dictionary<string, List<FieldValue>> fieldValuesByDefinitionName)
         {
-            var lines = mainMessageDefinition.Split("\n");
+            var lines = mainDefinition.Split("\n");
 
-            var fieldValues = ParseMessage(lines, fieldValuesByMessageName);
-
+            var fieldValues = ParseDefinition(lines, fieldValuesByDefinitionName);
 
             return fieldValues.ToList();
 
 
         }
 
-        private static List<FieldValue> ParseMessage(IEnumerable<string> lines, Dictionary<string, List<FieldValue>> fieldValuesByMessageName)
+        private static List<FieldValue> ParseDefinition(IEnumerable<string> lines, Dictionary<string, List<FieldValue>> fieldValuesByDefinitionName)
         {
             var validLines = new List<String>();
-            Regex r = new Regex(@"#.*");
+            Regex commentRegex = new Regex(@"#.*");
             foreach (var line in lines)
             {
-                var tempLine = r.Replace(line, "").Trim();
+                var tempLine = commentRegex.Replace(line, "").Trim();
                 if (!string.IsNullOrWhiteSpace(tempLine))
                 {
                     validLines.Add(tempLine);
                 }
             }
 
-            var fieldDefinitions = validLines.Where(l => l.FirstOrDefault() != '#' && !string.IsNullOrWhiteSpace(l));
+            var validLinesList = validLines.Where(l => l.FirstOrDefault() != '#' && !string.IsNullOrWhiteSpace(l));
 
             var fieldValues = new List<FieldValue>();
             Regex arrayRegex = new Regex(@".*\[\]");
             Regex fixedLengthArrayRegex = new Regex(@".*\[[0-9]+\]");
-            foreach (var fieldDefinition in fieldDefinitions)
+            foreach (var line in validLinesList)
             {
-                var tokens = fieldDefinition.Split(" ").SelectMany(t => t.Split("="));
-                if (tokens.Count() == 2)
+                var fields = line.Split(" ").SelectMany(t => t.Split("="));
+                if (fields.Count() == 2)
                 {
-                    var name = tokens.Last();
-                    var dataDefinition = tokens.First();
-                    if (Enum.TryParse(typeof(PrimitiveType), dataDefinition.ToUpper(), out var dataType))
+                    var name = fields.Last();
+                    var dataTypeString = fields.First();
+                    if (Enum.TryParse(typeof(PrimitiveType), dataTypeString.ToUpper(), out var dataType))
                     {
                         var fieldValue = new FieldValue(name, (PrimitiveType)dataType);
+                        Console.WriteLine(fieldValue.toString());
                         fieldValues.Add(fieldValue);
 
                     }
-                    else if (arrayRegex.IsMatch(dataDefinition))
+                    else if (arrayRegex.IsMatch(dataTypeString))
                     {
-                        var arrayType = dataDefinition.Split("[]").First();
+                        var arrayDataTypeString = dataTypeString.Split("[]").First();
 
-                        if (Enum.TryParse(typeof(PrimitiveType), arrayType.ToUpper(), out var arrayDataType))
+                        if (Enum.TryParse(typeof(PrimitiveType), arrayDataTypeString.ToUpper(), out var arrayDataType))
                         {
-                            var arrayFieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue(name + "0", (PrimitiveType)arrayDataType) });
+                            var arrayFieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue(name + "InArray", (PrimitiveType)arrayDataType) });
                             fieldValues.Add(arrayFieldValue);
 
                         }
                         else
                         {
-                            if (fieldValuesByMessageName.TryGetValue(arrayType, out var subMessageFieldValues))
+                            if (fieldValuesByDefinitionName.TryGetValue(arrayDataTypeString, out var subMessageFieldValues))
                             {
                                 var arrayFieldValue = new ArrayFieldValue(name, subMessageFieldValues);
                                 fieldValues.Add(arrayFieldValue);
                             }
                             else
                             {
-                                throw new KeyNotFoundException($"Could not find {arrayType}");
+                                throw new KeyNotFoundException($"Could not find {arrayDataTypeString}");
                             }
                         }
                     }
-                    else if (fixedLengthArrayRegex.IsMatch(dataDefinition))
+                    else if (fixedLengthArrayRegex.IsMatch(dataTypeString))
                     {
                         Regex lengthRegex = new Regex(@"(?<=\[)([0-9]*?)(?=\])");
-                        var arrayType = dataDefinition.Split("[").First();
-                        var arrayLength = int.Parse(lengthRegex.Match(dataDefinition).Value);
+                        var arrayType = dataTypeString.Split("[").First();
+                        var arrayLength = int.Parse(lengthRegex.Match(dataTypeString).Value);
 
                         if (Enum.TryParse(typeof(PrimitiveType), arrayType.ToUpper(), out var arrayDataType))
                         {
@@ -128,26 +128,26 @@ namespace ROSbag_ReadWrite.ROSMessageParser
                         }
                         else
                         {
-                            if (fieldValuesByMessageName.TryGetValue(arrayType, out var subMessageFieldValues))
+                            if (fieldValuesByDefinitionName.TryGetValue(arrayType, out var subMessageFieldValues))
                             {
                                 var arrayFieldValue = new ArrayFieldValue(name, subMessageFieldValues, arrayLength);
                                 fieldValues.Add(arrayFieldValue);
                             }
                             else
                             {
-                                throw new KeyNotFoundException($"Could not find {arrayType}");
+                                throw new KeyNotFoundException($"The dataType of array: {arrayType} is not a primitive type or defined in MessageDefinition");
                             }
                         }
                     }
                     else
                     {
-                        if (fieldValuesByMessageName.TryGetValue(tokens.First(), out var subMessageFieldValues))
+                        if (fieldValuesByDefinitionName.TryGetValue(fields.First(), out var subMessageFieldValues))
                         {
                             fieldValues.AddRange(subMessageFieldValues);
                         }
                         else
                         {
-                            throw new KeyNotFoundException($"Could not find {tokens.First()}");
+                            throw new KeyNotFoundException($"The dataType: {fields.First()} is not a primitive type or defined in MessageDefinition");
                         }
                     }
 

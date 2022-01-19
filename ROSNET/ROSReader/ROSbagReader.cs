@@ -1,27 +1,15 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Dynamic;
 using System.IO;
-using System.Text;
 using ROSNET.DataModel;
-using ROSNET;
+using ROSNET.Field;
+using ROSNET.Reader;
 
-namespace ROSNET
+namespace ROSNET.ROSReader
 
 {
     public static class ROSbagReader
     {
-        public static Dictionary<string, string[]> OpReqs = new Dictionary<string, string[]>()
-        {
-            { "2" , new string[] {"conn", "time"} },
-            { "3" , new string[] {"index_pos", "conn_count", "chunk_count"} },
-            { "4" , new string[] {"ver", "conn", "count"} },
-            { "5" , new string[] {"compression", "size"} },
-            { "6" , new string[] {"ver", "chunk_pos", "start_time", "end_time", "count"} },
-            { "7" , new string[] {"conn", "topic"} }
-        };
 
         public static ROSbag Read(string path)
         {
@@ -56,8 +44,10 @@ namespace ROSNET
                                     if (rosbag.Connections.ContainsKey(chunkMessage.Item1.Conn))
                                     {
                                         Message message = chunkMessage.Item1;
+                                        Console.WriteLine($"Sets data of Message with conn: {message.Conn}");
                                         message.SetData(chunkMessage.Item2, rosbag.Connections[chunkMessage.Item1.Conn].MessageDefinition);
                                         rosbag.AddMessage(message);
+                                        
                                     }
                                     else
                                     {
@@ -136,7 +126,7 @@ namespace ROSNET
             long endPos = reader.BaseStream.Position + dataLen;
 
             List<Connection> connections = new List<Connection>();
-            List<Tuple<Message,byte[]>> messages = new List<Tuple<Message,byte[]>>();
+            List<Tuple<Message,byte[]>> messages = new List<Tuple<Message, byte[]>>();
 
             while (reader.BaseStream.Position != endPos)
             {
@@ -147,16 +137,15 @@ namespace ROSNET
                     case 7:
                         Connection connection = new Connection(header.GetValueOrDefault("conn"), header.GetValueOrDefault("topic"), reader);
                         connections.Add(connection);
-                       
                         break;
                     case 2:
                         Message message = new Message(header["conn"], header["time"]);
-                        int dataLength = reader.ReadInt32();
+                        var dataLength = reader.ReadInt32();
                         byte[] data = reader.ReadBytes(dataLength);
                         messages.Add(new Tuple<Message, byte[]>(message, data));
                         break;
                     default:
-                        int dataLe = reader.ReadInt32();
+                        var dataLe = reader.ReadInt32();
                         reader.ReadBytes(dataLen);
                         break;
                 }
