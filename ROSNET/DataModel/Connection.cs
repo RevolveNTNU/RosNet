@@ -61,7 +61,7 @@ namespace ROSNET.DataModel
                         Md5sum = fieldValue; 
                         break;
                     case "message_definition":
-                        MessageDefinition = setMessageDefinition(fieldValue);
+                        MessageDefinition = SetMessageDefinition(fieldValue);
                         break;
                     case "callerid":
                         CallerID = fieldValue;
@@ -73,7 +73,7 @@ namespace ROSNET.DataModel
             }
         }
 
-        private List<FieldValue> setMessageDefinition(string fieldValue)
+        private List<FieldValue> SetMessageDefinition(string fieldValue)
         {
             var messageDefinition = MessageDefinitionParser.ParseMessageDefinition(fieldValue);
 

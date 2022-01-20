@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using ROSNET.Enum;
+using ROSNET.Type;
 
 namespace ROSNET.Field
 {
     public class ArrayFieldValue : FieldValue
     {
         public List<FieldValue> ArrayFields { get; set; }
-        public int FixedArrayLength { get;}
+        public int FixedArrayLength { get; }
 
-        public ArrayFieldValue(string name, List<FieldValue> definition):base(name, definition.First().DataType)
+        public ArrayFieldValue(string name, List<FieldValue> definition) : base(name, definition.First().DataType)
         {
             this.ArrayFields = definition;
 
@@ -27,3 +27,4 @@ namespace ROSNET.Field
             return 0;
         }
     }
+}

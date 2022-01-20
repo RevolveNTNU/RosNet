@@ -40,7 +40,7 @@ namespace ROSNET.DataModel
 
         }
 
-        public string toString()
+        public override string ToString()
         {
             var s = "Conn: " + Conn + "\n";
             s += "Time: " + Time + "\n";

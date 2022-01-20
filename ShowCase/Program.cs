@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Text.RegularExpressions;
-using ROSNET;
+using ROSNET.ROSReader;
 
 namespace ShowCase
 {

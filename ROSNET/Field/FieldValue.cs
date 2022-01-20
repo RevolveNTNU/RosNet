@@ -1,4 +1,4 @@
-﻿using ROSNET.Enum;
+﻿using ROSNET.Type;
 
 namespace ROSNET.Field
 {
@@ -21,6 +21,7 @@ namespace ROSNET.Field
             this.Name = Name;
             this.DataType = DataType;
         }
+
 
 
         public virtual int GetBitLength()

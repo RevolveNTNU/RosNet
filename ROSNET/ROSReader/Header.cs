@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using ROSNET.Enum;
+using ROSNET.Type;
 using ROSNET.Field;
 
 namespace ROSNET.Reader
@@ -31,12 +31,11 @@ namespace ROSNET.Reader
                 fieldValue = Header.ReadField(reader);
                 fields.Add(fieldValue.Name, fieldValue);
 
-                var opValue = Convert.ToInt32(fields["op"].Value[fields["op"].Value.Last()]);
-
                 if (fields.ContainsKey("op"))
                 {
+                    
                     hasReqs = true;
-                    foreach (string req in OpReqs[opValue])
+                    foreach (string req in OpReqs[Convert.ToInt32(fields["op"].Value.Last())])
                     {
                         if (!fields.ContainsKey(req)) hasReqs = false;
                     }

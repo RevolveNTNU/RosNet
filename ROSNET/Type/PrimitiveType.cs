@@ -1,4 +1,4 @@
-﻿namespace ROSNET.Enum
+﻿namespace ROSNET.Type
 {
     public enum PrimitiveType
     {

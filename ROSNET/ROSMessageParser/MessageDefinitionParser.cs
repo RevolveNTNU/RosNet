@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using ROSNET.Enum;
+using ROSNET.Type;
 using ROSNET.Field;
 
 namespace ROSNET.ROSMessageParser
@@ -34,7 +34,7 @@ namespace ROSNET.ROSMessageParser
 
         private static (string name, List<FieldValue> fields) ParseSubDefinition(string suDefinition, Dictionary<string, List<FieldValue>> fieldValuesByDefinitionName )
         {
-            
+
             var definitionName = suDefinition.Split("\n").First().Split(" ").Last();
             var lines = suDefinition.Split("\n").Skip(1);
 
@@ -141,9 +141,12 @@ namespace ROSNET.ROSMessageParser
                     }
                     else
                     {
-                        if (fieldValuesByDefinitionName.TryGetValue(fields.First(), out var subMessageFieldValues))
+                        if (fieldValuesByDefinitionName.TryGetValue(fields.First(), out var subFieldValues))
                         {
-                            fieldValues.AddRange(subMessageFieldValues);
+                            //adds subDefinitionName to fieldName in fields from subdefinitions
+                            var subFieldValuesCopy = new List<FieldValue>();
+                            subFieldValuesCopy.AddRange(subFieldValues.Select(f => new FieldValue(name + "." + f.Name, f.DataType)));
+                            fieldValues.AddRange(subFieldValuesCopy);
                         }
                         else
                         {
