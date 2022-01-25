@@ -7,14 +7,12 @@
 
   <ItemGroup>
     <None Remove="DataModel\" />
-    <None Remove="Reader\" />
     <None Remove="Enum\" />
     <None Remove="ROSMessageParser\" />
     <None Remove="Field\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DataModel\" />
-    <Folder Include="Reader\" />
     <Folder Include="Type\" />
     <Folder Include="ROSMessageParser\" />
     <Folder Include="Field\" />

@@ -80,7 +80,7 @@ namespace ROSNET.DataModel
             return messageDefinition;
         }
 
-        public string toString()
+        public override string ToString()
         {
             string s = "Conn: " + Conn + "\n";
             s += "Topic: " + Topic + "\n";
@@ -88,9 +88,9 @@ namespace ROSNET.DataModel
             s += "Type: " + Type + "\n";
             s += "Md5sum: " + Md5sum + "\n";
             s += "MessageDefinition: " + "\n";
-            foreach (FieldValue dataField in MessageDefinition)
+            foreach (var dataField in MessageDefinition)
             {
-                s += dataField.toString();
+                s += dataField.ToString(false) + "\n";
             }
             s += "CallerID: " + CallerID + "\n";
             s += "Latching: " + Latching + "\n";

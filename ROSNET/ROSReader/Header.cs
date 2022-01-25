@@ -41,7 +41,6 @@ namespace ROSNET.Reader
                     }
 
                 }
-                //Console.WriteLine($"{fieldName} : {fieldValue}");
             }
             return fields;
         }

@@ -16,6 +16,8 @@ namespace ROSNET.ROSMessageParser
             var mainDefinition = definitions.First();
 
             var fieldValuesByDefinitionName = new Dictionary<string, List<FieldValue>>();
+
+            //skip the first messageDefinition which is the main definition and reverse the rest so we read the last ones first (they can be used by the ones above)
             foreach(var definition in definitions.Skip(1).Reverse())
             {
                 (var name, var fields) = ParseSubDefinition(definition, fieldValuesByDefinitionName);
@@ -85,8 +87,14 @@ namespace ROSNET.ROSMessageParser
                     var dataTypeString = fields.First();
                     if (Enum.TryParse(typeof(PrimitiveType), dataTypeString.ToUpper(), out var dataType))
                     {
-                        var fieldValue = new FieldValue(name, (PrimitiveType)dataType);
-                        Console.WriteLine(fieldValue.toString());
+                        FieldValue fieldValue;
+                        if ((PrimitiveType) dataType == PrimitiveType.STRING)
+                        {
+                            fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.CHAR) });
+                        } else
+                        {
+                            fieldValue = new FieldValue(name, (PrimitiveType)dataType);
+                        }
                         fieldValues.Add(fieldValue);
 
                     }
@@ -96,16 +104,29 @@ namespace ROSNET.ROSMessageParser
 
                         if (Enum.TryParse(typeof(PrimitiveType), arrayDataTypeString.ToUpper(), out var arrayDataType))
                         {
-                            var arrayFieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue(name + "InArray", (PrimitiveType)arrayDataType) });
-                            fieldValues.Add(arrayFieldValue);
+                            FieldValue fieldValue;
+                            if ((PrimitiveType)arrayDataType == PrimitiveType.STRING)
+                            {
+
+                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.CHAR) }) });
+
+                            }
+                            else { 
+                            
+                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue(name + "InArray", (PrimitiveType)arrayDataType) });
+                            }
+
+                            
+                            fieldValues.Add(fieldValue);
 
                         }
                         else
                         {
                             if (fieldValuesByDefinitionName.TryGetValue(arrayDataTypeString, out var subMessageFieldValues))
                             {
-                                var arrayFieldValue = new ArrayFieldValue(name, subMessageFieldValues);
-                                fieldValues.Add(arrayFieldValue);
+                                var subMessageFieldValuesCopy = new List<FieldValue>();
+                                subMessageFieldValuesCopy.AddRange(subMessageFieldValues.Select(f => new FieldValue(name + "." + f.Name + "InArray", f.DataType)));
+                                fieldValues.AddRange(subMessageFieldValuesCopy);
                             }
                             else
                             {
@@ -117,21 +138,51 @@ namespace ROSNET.ROSMessageParser
                     {
                         Regex lengthRegex = new Regex(@"(?<=\[)([0-9]*?)(?=\])");
                         var arrayType = dataTypeString.Split("[").First();
-                        var arrayLength = int.Parse(lengthRegex.Match(dataTypeString).Value);
+                        var arrayLength = uint.Parse(lengthRegex.Match(dataTypeString).Value);
 
                         if (Enum.TryParse(typeof(PrimitiveType), arrayType.ToUpper(), out var arrayDataType))
                         {
-                            
-                            var arrayFieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue(name + "0", (PrimitiveType)arrayDataType) }, arrayLength);
-                            fieldValues.Add(arrayFieldValue);
+                            FieldValue fieldValue;
+                            if ((PrimitiveType)arrayDataType == PrimitiveType.STRING)
+                            {
+
+                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.CHAR) }) }, arrayLength);
+
+                            }
+                            else
+                            {
+
+                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue(name + "InArray", (PrimitiveType)arrayDataType) }, arrayLength);
+                            }
+
+
+                            fieldValues.Add(fieldValue);
+
 
                         }
                         else
                         {
                             if (fieldValuesByDefinitionName.TryGetValue(arrayType, out var subMessageFieldValues))
                             {
-                                var arrayFieldValue = new ArrayFieldValue(name, subMessageFieldValues, arrayLength);
-                                fieldValues.Add(arrayFieldValue);
+                                var subFieldValuesCopy = new List<FieldValue>();
+
+                                foreach (var subFieldValue in subMessageFieldValues)
+                                {
+                                    if (subFieldValue is ArrayFieldValue)
+                                    {
+                                        var arrayFieldValue = subFieldValue as ArrayFieldValue;
+                                        subFieldValuesCopy.Add(new ArrayFieldValue(name + "." + arrayFieldValue.Name, arrayFieldValue.ArrayFields));
+                                    }
+                                    else
+                                    {
+                                        subFieldValuesCopy.Add(new FieldValue(name + "." + subFieldValue.Name, subFieldValue.DataType));
+                                    }
+
+
+                                }
+
+                                fieldValues.AddRange(subFieldValuesCopy);
+
                             }
                             else
                             {
@@ -143,9 +194,23 @@ namespace ROSNET.ROSMessageParser
                     {
                         if (fieldValuesByDefinitionName.TryGetValue(fields.First(), out var subFieldValues))
                         {
-                            //adds subDefinitionName to fieldName in fields from subdefinitions
+                            //adds subDefinitionName to fieldName in fields from subDefinitions
                             var subFieldValuesCopy = new List<FieldValue>();
-                            subFieldValuesCopy.AddRange(subFieldValues.Select(f => new FieldValue(name + "." + f.Name, f.DataType)));
+
+                            foreach (var subFieldValue in subFieldValues)
+                            {
+                                if (subFieldValue is ArrayFieldValue)
+                                {
+                                    var arrayFieldValue = subFieldValue as ArrayFieldValue;
+                                    subFieldValuesCopy.Add(new ArrayFieldValue(name + "." + arrayFieldValue.Name, arrayFieldValue.ArrayFields));
+                                } else
+                                {
+                                    subFieldValuesCopy.Add(new FieldValue(name + "." + subFieldValue.Name, subFieldValue.DataType));
+                                }
+                                    
+                                
+                            }
+
                             fieldValues.AddRange(subFieldValuesCopy);
                         }
                         else

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using ROSNET.DataModel;
 using ROSNET.Field;
 using ROSNET.Reader;
@@ -18,70 +19,63 @@ namespace ROSNET.ROSReader
                 using (BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open)))
                 {
                     ROSbag rosbag = new ROSbag();
+                    UnReadMessageHandler unReadMessageHandler = new UnReadMessageHandler(rosbag);
 
                     Console.Write(reader.ReadChars(13)); //reads inital line of ROSbag
 
+                    Dictionary<string, FieldValue> header;
+
                     while (reader.BaseStream.Position != reader.BaseStream.Length)
                     {
-                        Dictionary<string, FieldValue> header = Header.readHeader(reader);
-
-                        //Console.WriteLine("Header: ");
-                        foreach (KeyValuePair<string, FieldValue> kvp in header)
-                        {
-                            //Console.WriteLine(kvp.Key + kvp.Value);
-                        }
+                        header = Header.readHeader(reader);
                         
                         int conn;
-                        switch (Convert.ToInt32(header["op"].Value[header["op"].Value.Length - 1]))
+                        switch (Convert.ToInt32(header["op"].Value.Last()))
                         {
-                            case 5:
-                                //TODO hva med compression bz2
-                                Console.WriteLine("Compression type: " + System.Text.Encoding.Default.GetString(header["compression"].Value)); 
-
-                                Tuple<List<Connection>, List<Tuple<Message, byte[]>>> chunkData = ReadChunk(reader);
-                                foreach(Tuple<Message,byte[]> chunkMessage in chunkData.Item2)
-                                {
-                                    if (rosbag.Connections.ContainsKey(chunkMessage.Item1.Conn))
-                                    {
-                                        Message message = chunkMessage.Item1;
-                                        Console.WriteLine($"Sets data of Message with conn: {message.Conn}");
-                                        message.SetData(chunkMessage.Item2, rosbag.Connections[chunkMessage.Item1.Conn].MessageDefinition);
-                                        rosbag.AddMessage(message);
-                                        
-                                    }
-                                    else
-                                    {
-                                        rosbag.AddUnReadMessage(chunkMessage.Item1, chunkMessage.Item2);
-                                    }
-                                }
-                                foreach(Connection chunkConnection in chunkData.Item1)
-                                {
-                                    rosbag.AddConnection(chunkConnection);
-                                }
-                                
-                                
-                                break;
-                            case 7:
-                                conn = BitConverter.ToInt32(header.GetValueOrDefault("conn").Value);
-                                Connection connection = new Connection(header.GetValueOrDefault("conn"), header.GetValueOrDefault("topic"), reader);
-                                rosbag.AddConnection(connection);
-                                break;
                             case 2:
-                                conn = BitConverter.ToInt32(header.GetValueOrDefault("conn").Value);
-                                Console.WriteLine("New Message: ");
+                                conn = BitConverter.ToInt32(header["conn"].Value);
                                 if (rosbag.Connections.ContainsKey(conn))
                                 {
-                                    Message message = new Message(header.GetValueOrDefault("conn"), header.GetValueOrDefault("time"), reader, rosbag.Connections.GetValueOrDefault(conn).MessageDefinition);
+                                    var message = new Message(header["conn"], header["time"], reader, rosbag.Connections[conn].MessageDefinition);
                                     rosbag.AddMessage(message);
-                                
                                 }
                                 else
                                 {
-                                    Message message = new Message(header.GetValueOrDefault("conn"), header.GetValueOrDefault("time"));
-                                    int dataLength = reader.ReadInt32();
-                                    byte[] data = reader.ReadBytes(dataLength);
-                                    rosbag.AddUnReadMessage(message, data);
+                                    var message = new Message(header["conn"], header["time"]);
+                                    var dataLength = reader.ReadInt32();
+                                    var data = reader.ReadBytes(dataLength);
+                                    
                                 }
+                                break;
+                            case 5:
+                                //TODO hva med compression bz2
+
+                                (var chunkConnections, var chunkMessages) = ReadChunk(reader);
+                                foreach(var chunkMessage in chunkMessages)
+                                {
+                                    (var message, var data) = chunkMessage;
+                                    if (rosbag.Connections.ContainsKey(message.Conn))
+                                    {
+                                        message.SetData(data, rosbag.Connections[message.Conn].MessageDefinition);
+                                        rosbag.AddMessage(message);
+                                    }
+                                    else
+                                    {
+                                        unReadMessageHandler.AddUnReadMessage(message, data);
+                                    }
+                                }
+                                foreach(var chunkConnection in chunkConnections)
+                                {
+                                    rosbag.AddConnection(chunkConnection);
+                                    unReadMessageHandler.UpdateUnReadMessages(chunkConnection);
+                                }
+
+                                break;
+                            case 7:
+                                var connection = new Connection(header["conn"], header["topic"], reader);
+                                rosbag.AddConnection(connection);
+                                unReadMessageHandler.UpdateUnReadMessages(connection);
+                                Console.Write("Made connection with conn " + header["conn"]);
                                 break;
                             default:
                                 int dataLen = reader.ReadInt32();
@@ -89,11 +83,10 @@ namespace ROSNET.ROSReader
                                 break;
                         }
                     }
-                    if (rosbag.UnReadMessages.Count !=0)
+                    if (unReadMessageHandler.UnReadMessages.Count !=0)
                     {
-                        //TODO
                         Console.WriteLine("UnReadMessages: ");
-                        foreach (KeyValuePair<int, List<Tuple<Message,byte[]>>> kvp in rosbag.UnReadMessages)
+                        foreach (KeyValuePair<int, List<(Message,byte[])>> kvp in unReadMessageHandler.UnReadMessages)
                         {
                             Console.WriteLine(kvp.Key + ": " + kvp.Value.Count);
                         }
@@ -109,7 +102,7 @@ namespace ROSNET.ROSReader
                         }
                         throw new Exception("There are messages without the corresponding connection");
                     }
-                    Console.WriteLine(rosbag.toString());
+                    Console.WriteLine(rosbag.ToString());
                     return rosbag;
                 }
                 
@@ -120,29 +113,30 @@ namespace ROSNET.ROSReader
             }
         }
 
-        private static Tuple<List<Connection>,List<Tuple<Message,byte[]>>> ReadChunk(BinaryReader reader)
+        private static (List<Connection>,List<(Message,byte[])>) ReadChunk(BinaryReader reader)
         {
             int dataLen = reader.ReadInt32();
             long endPos = reader.BaseStream.Position + dataLen;
 
-            List<Connection> connections = new List<Connection>();
-            List<Tuple<Message,byte[]>> messages = new List<Tuple<Message, byte[]>>();
+            var connections = new List<Connection>();
+            var messages = new List<(Message, byte[])>();
 
+            Dictionary<string, FieldValue> header;
             while (reader.BaseStream.Position != endPos)
             {
-                Dictionary<string, FieldValue> header = Header.readHeader(reader);
+                header = Header.readHeader(reader);
 
-                switch (Convert.ToInt32(header["op"].Value[header["op"].Value.Length - 1]))
+                switch (Convert.ToInt32(header["op"].Value.Last()))
                 {
                     case 7:
-                        Connection connection = new Connection(header.GetValueOrDefault("conn"), header.GetValueOrDefault("topic"), reader);
+                        var connection = new Connection(header["conn"], header["topic"], reader);
                         connections.Add(connection);
                         break;
                     case 2:
                         Message message = new Message(header["conn"], header["time"]);
                         var dataLength = reader.ReadInt32();
-                        byte[] data = reader.ReadBytes(dataLength);
-                        messages.Add(new Tuple<Message, byte[]>(message, data));
+                        var data = reader.ReadBytes(dataLength);
+                        messages.Add((message, data));
                         break;
                     default:
                         var dataLe = reader.ReadInt32();
@@ -150,10 +144,10 @@ namespace ROSNET.ROSReader
                         break;
                 }
             }
-            return new Tuple<List<Connection>, List<Tuple<Message, byte[]>>>(connections,messages);
-    }
+            return (connections,messages);
+        }
 
-       
+
 
     }
 }
