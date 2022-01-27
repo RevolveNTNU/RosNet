@@ -6,7 +6,7 @@ using System.Text;
 using ROSNET.Type;
 using ROSNET.Field;
 
-namespace ROSNET.Reader
+namespace ROSNET.ROSReader
 {
     public static class Header
     {

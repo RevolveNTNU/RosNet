@@ -4,20 +4,28 @@ using ROSNET.Type;
 
 namespace ROSNET.Field
 {
+    /// <summary>
+    /// Represents an arrayfield
+    /// </summary>
     public class ArrayFieldValue : FieldValue
     {
         public List<FieldValue> ArrayFields { get; set; }
-        public uint FixedArrayLength { get; }
+        public uint FixedArrayLength { get; } //used if array has fixed length
 
-        public ArrayFieldValue(string name, List<FieldValue> definition) : base(name, PrimitiveType.ARRAY)
+        /// <summary>
+        /// Creates an arrayfieldvalue with name and list of fields in array. Sets datatype to ARRAY.
+        /// </summary>
+        public ArrayFieldValue(string name, List<FieldValue> arrayFields) : base(name, PrimitiveType.ARRAY)
         {
-            this.ArrayFields = definition;
-
+            this.ArrayFields = arrayFields;
         }
 
-        public ArrayFieldValue(string name, List<FieldValue> definition, uint fixedArrayLength) : base(name, PrimitiveType.ARRAY)
+        /// <summary>
+        /// Creates an arrayfieldvalue with name, list of fields in array and fixed length of array. Sets datatype to ARRAY.
+        /// </summary>
+        public ArrayFieldValue(string name, List<FieldValue> arrayFields, uint fixedArrayLength) : base(name, PrimitiveType.ARRAY)
         {
-            this.ArrayFields = definition;
+            this.ArrayFields = arrayFields;
             this.FixedArrayLength = fixedArrayLength;
         }
 
@@ -28,8 +36,9 @@ namespace ROSNET.Field
         }
 
         /// <summary>
-        /// Creates string with values if printValue is true, else string without values
+        /// Creates string with values if printValue is true, else string without values (used for messageDefinition)
         /// </summary>
+        /// <returns> string with values if printValue is true, else returns string without values</returns>
         public override string ToString(bool printValue)
         {
             if (printValue)
@@ -40,6 +49,10 @@ namespace ROSNET.Field
 
         }
 
+        /// <summary>
+        /// Creates string with values
+        /// </summary>
+        /// <returns>string with values</returns>
         public override string ToString ()
         {
             var s = ($"{DataType}[] {Name}: [");

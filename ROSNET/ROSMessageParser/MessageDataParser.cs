@@ -6,8 +6,16 @@ using ROSNET.Type;
 
 namespace ROSNET.ROSMessageParser
 {
+    /// <summary>
+    /// Parses data in message record
+    /// </summary>
     public static class MessageDataParser
     {
+
+        /// <summary>
+        /// Parses messagedata from bytes to fieldvalues using messageDefinition
+        /// </summary>
+        /// <returns>Dictionary contatining the fields in the messageData. Key is name of field and value is the fieldValue</returns>
         public static Dictionary<string, FieldValue> ParseMessageData(byte[] messageData, List<FieldValue> messageDefinition)
         {
             var fieldValueByFieldName = new Dictionary<string, FieldValue>();
@@ -17,10 +25,6 @@ namespace ROSNET.ROSMessageParser
             {
                 if (definitionField is ArrayFieldValue)
                 {
-                    if (posBytes != 37)
-                    {
-                        var a = 1;
-                    }
                     (var arrayField, var newPosBytes) = ParseArrayDefinitionField(definitionField as ArrayFieldValue, messageData, posBytes);
                     posBytes = newPosBytes;
 
@@ -40,6 +44,10 @@ namespace ROSNET.ROSMessageParser
             return fieldValueByFieldName;
         }
 
+        /// <summary>
+        /// Parses an arrayfield in the messagedata on the position posBytes
+        /// </summary>
+        /// <returns> The parsed arrayfieldValue and the new position posBytes</returns>
         public static (ArrayFieldValue, int) ParseArrayDefinitionField (ArrayFieldValue arrayDefinitionField, byte[] messageData, int posBytes )
         {
             uint arrayLength;
@@ -87,6 +95,10 @@ namespace ROSNET.ROSMessageParser
 
         }
 
+        /// <summary>
+        /// Parses a field in the messageData on the position posBytes
+        /// </summary>
+        /// <returns> The parsed fieldvalue and the new position posBytes</returns>
         public static (FieldValue, int) ParseDefinitionField(FieldValue definitionField, byte[] messageData, int posBytes)
         {
             var value = messageData.Skip(posBytes).Take(definitionField.GetByteLength()).ToArray();

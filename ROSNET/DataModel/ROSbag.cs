@@ -4,12 +4,17 @@ using System.IO;
 
 namespace ROSNET.DataModel
 {
+    /// <summary>
+    /// Represents a ROSbag
+    /// </summary>
     public class ROSbag
     {
-        public Dictionary<int, Connection> Connections { get; private set; }
-        public Dictionary<int, List<Message>> Messages { get; private set; }
+        public Dictionary<int, Connection> Connections { get; private set; } //List of connection records in rosbag
+        public Dictionary<int, List<Message>> Messages { get; private set; } //List of message records in rosbag
 
-
+        /// <summary>
+        /// Creates an empty rosbag
+        /// </summary>
         public ROSbag()
         {
             Connections = new Dictionary<int, Connection>();
@@ -35,7 +40,6 @@ namespace ROSNET.DataModel
         /// </summary>
         public void AddMessage(Message message)
         {
-            //nødvendig å sjekke om det er der?
             if (Messages.ContainsKey(message.Conn))
             {
                 Messages[message.Conn].Add(message);
@@ -44,10 +48,6 @@ namespace ROSNET.DataModel
                 Messages.Add(message.Conn, new List<Message>() {message});
             }
         }
-
-        /// <summary>
-        /// Adds an UnReadMessage object to the ROSbag's list of UnReadMessages
-        /// </summary>
         
 
         public override string ToString()

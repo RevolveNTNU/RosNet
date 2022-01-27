@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Linq;
 using ROSNET.Type;
 
 namespace ROSNET.Field
 {
+    /// <summary>
+    /// Represents a fieldvalue
+    /// </summary>
     public class FieldValue
     {
 
@@ -10,6 +14,9 @@ namespace ROSNET.Field
         public PrimitiveType DataType { get; private set; }
         public byte[] Value { get; private set; }
 
+        /// <summary>
+        /// Creates a fieldvalue with name, datatype and value
+        /// </summary>
         public FieldValue(string Name, PrimitiveType DataType, byte[] Value)
         {
             this.Name = Name;
@@ -17,6 +24,9 @@ namespace ROSNET.Field
             this.Value = Value;
         }
 
+        /// <summary>
+        /// Creates a fieldvalue with name and datatype
+        /// </summary>
         public FieldValue(string Name, PrimitiveType DataType)
         {
             this.Name = Name;
@@ -24,7 +34,10 @@ namespace ROSNET.Field
         }
 
 
-
+        /// <summary>
+        /// Finds the byte length of the fieldvalue using the datatype
+        /// </summary>
+        /// <returns>byte length of fieldvalue</returns>
         public virtual int GetByteLength()
         {
             switch (this.DataType)
@@ -53,6 +66,10 @@ namespace ROSNET.Field
             }
         }
 
+        /// <summary>
+        /// Creates string with values if printValue is true, else string without values (used for messageDefinition)
+        /// </summary>
+        /// <returns>String with value if printValue is true, else returns string without value</returns>
         public virtual string ToString(bool printValue)
         {
             if (printValue)
@@ -63,6 +80,10 @@ namespace ROSNET.Field
 
         }
 
+        /// <summary>
+        /// Creates string with values
+        /// </summary>
+        /// <returns>String with values</returns>
         public override string ToString()
         {
             if (this.Value.Length == 0)
@@ -74,6 +95,10 @@ namespace ROSNET.Field
         }
 
         //todo: this doesnt work well
+        /// <summary>
+        /// Creates string of Value using datatype
+        /// </summary>
+        /// <returns>String of Value</returns>
         public string PrettyValue()
         {
             switch (this.DataType)
@@ -81,13 +106,15 @@ namespace ROSNET.Field
                 case PrimitiveType.BOOL:
                     return ("" + BitConverter.ToBoolean(this.Value));
                 case PrimitiveType.CHAR:
-                    return ("" + BitConverter.ToChar(this.Value));
+                    return ((char)this.Value.First()).ToString();
                 case PrimitiveType.INT8:
-                    return ("" + (sbyte)BitConverter.ToChar(this.Value));
-                case PrimitiveType.INT16:
+                    return ((int)this.Value.First()).ToString();
                 case PrimitiveType.BYTE:
+                    return ("" + (int) this.Value.First());
+                case PrimitiveType.INT16:
                     return ("" + BitConverter.ToInt16(this.Value));
                 case PrimitiveType.UINT8:
+                    return ((uint)this.Value.First()).ToString();
                 case PrimitiveType.UINT16:
                     return ("" + BitConverter.ToUInt16(this.Value));
                 case PrimitiveType.INT32:
