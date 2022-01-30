@@ -38,6 +38,7 @@ namespace ROSNET.ROSReader
                     message.Data = MessageDataParser.ParseMessageData(data, kvp.Value.MessageDefinition);
                     rosbag.AddMessage(message);
                 }
+                UnParsedMessages.Remove(kvp.Key);
             }
 
             if (UnParsedMessages.Count != 0)

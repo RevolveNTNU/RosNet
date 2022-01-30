@@ -138,12 +138,25 @@ namespace ROSNET.ROSMessageParser
                         {
                             if (fieldValuesByDefinitionName.TryGetValue(arrayDataTypeString, out var subMessageFieldValues)) //checks if datatype of array is a subdefinition
                             {
-                                var subMessageFieldValuesCopy = new List<FieldValue>();
-                                //creates list of fieldvalues in the subdefinitions and changes their names to "subdefinitionName.nameOfFieldInArray"
-                                subMessageFieldValuesCopy.AddRange(subMessageFieldValues.Select(f => new FieldValue(name + "." + f.Name + "InArray", f.DataType)));
-                                var fieldValue = new ArrayFieldValue(name, subMessageFieldValuesCopy);
-                            
-                                fieldValues.Add(fieldValue);
+                                // adds subDefinitionName to fieldName in fields from subDefinitions
+                                var subFieldValuesCopy = new List<FieldValue>();
+
+                                foreach (var subFieldValue in subMessageFieldValues)
+                                {
+                                    if (subFieldValue is ArrayFieldValue)
+                                    {
+                                        var arrayFieldValue = subFieldValue as ArrayFieldValue;
+                                        subFieldValuesCopy.Add(new ArrayFieldValue(name + "." + arrayFieldValue.Name, arrayFieldValue.ArrayFields));
+                                    }
+                                    else
+                                    {
+                                        subFieldValuesCopy.Add(new FieldValue(name + "." + subFieldValue.Name, subFieldValue.DataType));
+                                    }
+
+                                }
+
+                                var fieldValue = new ArrayFieldValue(name, subFieldValuesCopy);
+
                             }
                             else
                             {
