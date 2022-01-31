@@ -21,6 +21,9 @@ namespace ROSNET.DataModel
         public string CallerID { get; private set; }
         public string Latching { get; private set; }
 
+        //List of messages corresponding to this connection
+        public List<Message> Messages { get; private set; }
+
 
         /// <summary>
         /// Create a connection with conn and topic from connection record header
@@ -29,6 +32,7 @@ namespace ROSNET.DataModel
         {
             Conn = BitConverter.ToInt32(conn.Value);
             Topic = System.Text.Encoding.Default.GetString(topic.Value);
+            Messages = new List<Message>();
         }
 
         /// <summary>
@@ -42,6 +46,14 @@ namespace ROSNET.DataModel
             this.MessageDefinition = messageDefinition;
             this.CallerID = System.Text.Encoding.Default.GetString(callerID);
             this.Latching = System.Text.Encoding.Default.GetString(latching);
+        }
+
+        /// <summary>
+        /// Adds a Message object to the connection's list of messages
+        /// </summary>
+        public void AddMessage(Message message)
+        {
+            Messages.Add(message);
         }
 
         public override string ToString()
@@ -58,6 +70,12 @@ namespace ROSNET.DataModel
             }
             s += "CallerID: " + CallerID + "\n";
             s += "Latching: " + Latching + "\n";
+            s += "Messages connected to this connection: \n";
+
+            foreach (Message message in Messages)
+            {
+                s += message.ToString();
+            }
             return s;
         }
 

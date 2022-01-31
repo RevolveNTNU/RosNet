@@ -67,7 +67,7 @@ namespace ROSNET.Field
         }
 
         /// <summary>
-        /// Creates string with values if printValue is true, else string without values (used for messageDefinition)
+        /// Creates string with value if printValue is true, else string without value (used for messageDefinition)
         /// </summary>
         /// <returns>String with value if printValue is true, else returns string without value</returns>
         public virtual string ToString(bool printValue)
@@ -81,9 +81,9 @@ namespace ROSNET.Field
         }
 
         /// <summary>
-        /// Creates string with values
+        /// Creates string with value
         /// </summary>
-        /// <returns>String with values</returns>
+        /// <returns>String with value</returns>
         public override string ToString()
         {
             if (this.Value.Length == 0)
@@ -94,7 +94,6 @@ namespace ROSNET.Field
 
         }
 
-        //todo: this doesnt work well
         /// <summary>
         /// Creates string of Value using datatype
         /// </summary>

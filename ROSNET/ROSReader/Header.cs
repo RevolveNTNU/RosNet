@@ -3,14 +3,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using ROSNET.Type;
 using ROSNET.Field;
+using ROSNET.Type;
 
 namespace ROSNET.ROSReader
 {
+    /// <summary>
+    /// Helper class for reading headers of records
+    /// </summary>
     public static class Header
     {
-        public static Dictionary<int, string[]> OpReqs = new Dictionary<int, string[]>()
+        //Dictionary containing the names of all header fields in record
+        public static Dictionary<int, string[]> HeaderFieldsByOp = new Dictionary<int, string[]>()
         {
             { 2 , new string[] {"conn", "time"} },
             { 3 , new string[] {"index_pos", "conn_count", "chunk_count"} },
@@ -20,31 +24,39 @@ namespace ROSNET.ROSReader
             { 7 , new string[] {"conn", "topic"} }
         };
 
+        /// <summary>
+        /// Reads a header
+        /// </summary>
+        /// <returns>Dictionary with fieldnames and fieldvalues in header</returns>
         public static Dictionary<string, FieldValue> readHeader(BinaryReader reader)
         {
             int headerLen = reader.ReadInt32();
-            Dictionary<string, FieldValue> fields = new Dictionary<string, FieldValue>();
-            FieldValue fieldValue;
-            bool hasReqs = false;
-            while (!hasReqs)
-            {
-                fieldValue = Header.ReadField(reader);
-                fields.Add(fieldValue.Name, fieldValue);
+            var headerFields = new Dictionary<string, FieldValue>();
 
-                if (fields.ContainsKey("op"))
+            //checks if all fields in header are read
+            bool hasAllFields = false;
+            while (!hasAllFields)
+            {
+                FieldValue fieldValue = Header.ReadField(reader);
+                headerFields.Add(fieldValue.Name, fieldValue);
+
+                if (headerFields.ContainsKey("op"))
                 {
-                    
-                    hasReqs = true;
-                    foreach (string req in OpReqs[Convert.ToInt32(fields["op"].Value.Last())])
+                    hasAllFields = true;
+                    foreach (string headerField in HeaderFieldsByOp[(int)headerFields["op"].Value.First()])
                     {
-                        if (!fields.ContainsKey(req)) hasReqs = false;
+                        if (!headerFields.ContainsKey(headerField)) hasAllFields = false;
                     }
 
                 }
             }
-            return fields;
+            return headerFields;
         }
 
+        /// <summary>
+        /// Reads a field
+        /// </summary>
+        /// <returns>FieldValue containing name, datatype and value of field</returns>
         private static FieldValue ReadField(BinaryReader reader)
         {
             int fieldLen = reader.ReadInt32();
@@ -78,8 +90,8 @@ namespace ROSNET.ROSReader
                     break;
                 case "compression":
                     dataType = PrimitiveType.STRING;
-                    string firstChar = reader.ReadChar().ToString();
-                    if (firstChar.Equals("n"))
+                    char firstChar = reader.ReadChar();
+                    if (firstChar.Equals('n'))
                     {
                         reader.ReadChars(3);
                         fieldValue = Encoding.ASCII.GetBytes("none");
@@ -95,12 +107,15 @@ namespace ROSNET.ROSReader
                     fieldValue = Encoding.ASCII.GetBytes(new string(reader.ReadChars(fieldLen - 6)));
                     break;
                 default:
-                    //TODO: make own exceptions
                     throw new Exception($"{fieldName} not defined in ROSbag-format");
             };
             return new FieldValue(fieldName, dataType, fieldValue);
         }
 
+        /// <summary>
+        /// Reads a field name
+        /// </summary>
+        /// <returns> name of field</returns>
         public static string ReadName(BinaryReader reader)
         {
             char curChar;

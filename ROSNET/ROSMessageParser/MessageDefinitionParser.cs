@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using ROSNET.Type;
 using ROSNET.Field;
+using ROSNET.Type;
 
 namespace ROSNET.ROSMessageParser
 {
@@ -18,17 +18,17 @@ namespace ROSNET.ROSMessageParser
         /// <returns>List of fields in the messagedefinition</returns>
         public static List<FieldValue> ParseMessageDefinition(byte[] messageDefinitionBytes)
         {
-            var messageDefinition = System.Text.Encoding.Default.GetString(messageDefinitionBytes);
+            string messageDefinition = System.Text.Encoding.Default.GetString(messageDefinitionBytes);
 
             //splits the definitions in the messageDefinition
-            var definitions = messageDefinition.Split("================================================================================\n");
-            var mainDefinition = definitions.First();
+            string[] definitions = messageDefinition.Split("================================================================================\n");
+            string mainDefinition = definitions.First();
             var fieldValuesBySubDefinitionName = new Dictionary<string, List<FieldValue>>();
 
             //skip maindefinition and reverse to parse the last subdefinitions first
-            foreach(var definition in definitions.Skip(1).Reverse())
+            foreach(string definition in definitions.Skip(1).Reverse())
             {
-                (var name, var fields) = ParseSubDefinition(definition, fieldValuesBySubDefinitionName);
+                (string name, List<FieldValue> fields) = ParseSubDefinition(definition, fieldValuesBySubDefinitionName);
                 fieldValuesBySubDefinitionName.Add(name, fields);
 
                 //Adds copy of subdefinition to the dictionary with last name of the subdefinition (dictionary contains std_msgs/Header and Header). Some definitions only use last name.
@@ -50,10 +50,10 @@ namespace ROSNET.ROSMessageParser
         private static (string, List<FieldValue>) ParseSubDefinition(string subDefinition, Dictionary<string, List<FieldValue>> fieldValuesByDefinitionName )
         {
             //gets the definitionname from first line and skips "MSG: " before the name
-            var definitionName = subDefinition.Split("\n").First().Split(" ").Last();
+            string definitionName = subDefinition.Split("\n").First().Split(" ").Last();
             var lines = subDefinition.Split("\n").Skip(1);
 
-            var fieldValues = ParseDefinition(lines, fieldValuesByDefinitionName);
+            List<FieldValue> fieldValues = ParseDefinition(lines, fieldValuesByDefinitionName);
 
             return (definitionName, fieldValues);
         }
@@ -64,9 +64,9 @@ namespace ROSNET.ROSMessageParser
         /// <returns>list of fields in mainmessage</returns>
         private static List<FieldValue> ParseMainDefinition(string mainDefinition, Dictionary<string, List<FieldValue>> fieldValuesByDefinitionName)
         {
-            var lines = mainDefinition.Split("\n");
+            string[] lines = mainDefinition.Split("\n");
 
-            var fieldValues = ParseDefinition(lines, fieldValuesByDefinitionName);
+            List<FieldValue> fieldValues = ParseDefinition(lines, fieldValuesByDefinitionName);
 
             return fieldValues;
 
@@ -79,44 +79,44 @@ namespace ROSNET.ROSMessageParser
         /// <returns>list of fields in definition</returns>
         private static List<FieldValue> ParseDefinition(IEnumerable<string> lines, Dictionary<string, List<FieldValue>> fieldValuesByDefinitionName)
         {
-            var fields = new List<String>();
-            Regex commentRegex = new Regex(@"#.*");
-            foreach (var line in lines)
+            var validLines = new List<String>();
+            var commentRegex = new Regex(@"#.*");
+            foreach (string line in lines)
             {
-                var tempLine = commentRegex.Replace(line, "").Trim(); //removes comments
+                string tempLine = commentRegex.Replace(line, "").Trim(); //removes comments
                 if (!string.IsNullOrWhiteSpace(tempLine)) //removes empty lines
                 {
-                    fields.Add(tempLine);
+                    validLines.Add(tempLine);
                 }
             }
 
-            var fieldValues = new List<FieldValue>();
-            Regex arrayRegex = new Regex(@".*\[\]");
-            Regex fixedLengthArrayRegex = new Regex(@".*\[[0-9]+\]");
-            foreach (var field in fields)
+            var definitionFields = new List<FieldValue>();
+            var arrayRegex = new Regex(@".*\[\]");
+            var fixedLengthArrayRegex = new Regex(@".*\[[0-9]+\]");
+            foreach (var line in validLines)
             {
-                var wordsInLine = field.Split(" ").SelectMany(t => t.Split("=")); //splits field into words
+                var wordsInLine = line.Split(" ").SelectMany(t => t.Split("=")); //splits field into words
                 if (wordsInLine.Count() == 2) //checks if the field is not a constant
                 {
-                    var name = wordsInLine.Last();
-                    var dataTypeString = wordsInLine.First();
+                    string name = wordsInLine.Last();
+                    string dataTypeString = wordsInLine.First();
                     if (Enum.TryParse(typeof(PrimitiveType), dataTypeString.ToUpper(), out var dataType)) //checks if datatype is primitive
                     {
                         FieldValue fieldValue;
                         if ((PrimitiveType) dataType == PrimitiveType.STRING)
                         {
-                            //creates new ArrayFieldValue since string is array of chars (uint8) with variable length
+                            //creates new ArrayFieldValue since string is an array of chars (uint8) with variable length
                             fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.CHAR) });
                         } else
                         {
                             fieldValue = new FieldValue(name, (PrimitiveType)dataType);
                         }
-                        fieldValues.Add(fieldValue);
+                        definitionFields.Add(fieldValue);
 
                     }
                     else if (arrayRegex.IsMatch(dataTypeString)) //checks if field is array
                     {
-                        var arrayDataTypeString = dataTypeString.Split("[]").First(); //finds datatype of array
+                        string arrayDataTypeString = dataTypeString.Split("[]").First(); //finds datatype of array
 
                         if (Enum.TryParse(typeof(PrimitiveType), arrayDataTypeString.ToUpper(), out var arrayDataType)) //checks if datatype of array is primitive
                         {
@@ -131,7 +131,7 @@ namespace ROSNET.ROSMessageParser
                                 fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue(name + "InArray", (PrimitiveType)arrayDataType) });
                             }
 
-                            fieldValues.Add(fieldValue);
+                            definitionFields.Add(fieldValue);
 
                         }
                         else
@@ -166,9 +166,9 @@ namespace ROSNET.ROSMessageParser
                     }
                     else if (fixedLengthArrayRegex.IsMatch(dataTypeString)) //check if field is array with fixed length
                     {
-                        Regex lengthRegex = new Regex(@"(?<=\[)([0-9]*?)(?=\])");
-                        var arrayType = dataTypeString.Split("[").First();
-                        var arrayLength = uint.Parse(lengthRegex.Match(dataTypeString).Value);
+                        var lengthRegex = new Regex(@"(?<=\[)([0-9]*?)(?=\])");
+                        string arrayType = dataTypeString.Split("[").First();
+                        uint arrayLength = uint.Parse(lengthRegex.Match(dataTypeString).Value);
 
                         if (Enum.TryParse(typeof(PrimitiveType), arrayType.ToUpper(), out var arrayDataType)) //check if datatype of array is primitive
                         {
@@ -186,7 +186,7 @@ namespace ROSNET.ROSMessageParser
                             }
 
 
-                            fieldValues.Add(fieldValue);
+                            definitionFields.Add(fieldValue);
 
 
                         }
@@ -213,7 +213,7 @@ namespace ROSNET.ROSMessageParser
 
                                 var fieldValue = new ArrayFieldValue(name, subFieldValuesCopy, arrayLength);
 
-                                fieldValues.Add(fieldValue);
+                                definitionFields.Add(fieldValue);
 
                             }
                             else
@@ -243,7 +243,7 @@ namespace ROSNET.ROSMessageParser
                                 
                             }
 
-                            fieldValues.AddRange(subFieldValuesCopy);
+                            definitionFields.AddRange(subFieldValuesCopy);
                         }
                         else
                         {
@@ -257,9 +257,7 @@ namespace ROSNET.ROSMessageParser
                     //parse constants here
                 }
             }
-            return fieldValues;
+            return definitionFields;
         }
-
-
     }
 }

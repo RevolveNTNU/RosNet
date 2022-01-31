@@ -4,55 +4,57 @@ using System.IO;
 using System.Linq;
 using ROSNET.DataModel;
 using ROSNET.Field;
-using ROSNET.ROSMessageParser;
 
 namespace ROSNET.ROSReader
 {
+    /// <summary>
+    /// Reads ROSbag
+    /// </summary>
     public static class ROSbagReader
     {
+        /// <summary>
+        /// Reads a ROSbag-file
+        /// </summary>
+        /// <returns>ROSbag-object</returns>
         public static ROSbag Read(string path)
         {
             if (File.Exists(path))
             {
                 using (BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open)))
                 {
-                    ROSbag rosbag = new ROSbag();
-                    UnParsedMessageHandler unParsedMessageHandler = new UnParsedMessageHandler();
-
+                    var rosbag = new ROSbag();
+                    var unParsedMessageHandler = new UnParsedMessageHandler(); //handles all message data
                     Console.Write(reader.ReadChars(13)); //reads inital line of ROSbag
 
                     while (reader.BaseStream.Position != reader.BaseStream.Length)
                     {
-                        var header = Header.readHeader(reader);
-                        
-                        switch (Convert.ToInt32(header["op"].Value.Last()))
+                        Dictionary<String,FieldValue> header = Header.readHeader(reader);
+
+                        //reads record based on op value in header
+                        switch ((int)header["op"].Value.First())
                         {
-                            case 2:
+                            case 2: //Message
                                 var message = new Message(header["conn"], header["time"]);
-                                var data = DataReader.ReadMessageData(reader);
+                                byte[] data = DataReader.ReadMessageData(reader);
                                 unParsedMessageHandler.AddUnParsedMessage(message, data);
                                 break;
-                            case 5:
-                                //TODO hva med compression bz2
-                                var chunkConnections = DataReader.ReadChunk(reader, unParsedMessageHandler);
+                            case 5: //Chunk
+                                //decompress chunks with compression bz2 here
+                                List<Connection> chunkConnections = DataReader.ReadChunk(reader, ref unParsedMessageHandler);
                                 chunkConnections.Where(c => rosbag.AddConnection(c));
-
                                 break;
-                            case 7:
+                            case 7: //Connection
                                 var connection = new Connection(header["conn"], header["topic"]);
-                                (byte[] originalTopic, byte[] type, byte[] md5sum, List<FieldValue> messageDefinition, byte[] callerID, byte[] latching) = DataReader.ReadConnectionData(reader);
-                                connection.SetData(originalTopic, type, md5sum, messageDefinition, callerID, latching);
+                                DataReader.SetConnectionData(reader, ref connection);
                                 rosbag.AddConnection(connection);
                                 break;
-                            default:
+                            default: //Other record
                                 int dataLength = reader.ReadInt32();
                                 reader.ReadBytes(dataLength);
                                 break;
                         }
                     }
-                    unParsedMessageHandler.ParseMessages(rosbag);
-
-                    
+                    unParsedMessageHandler.ParseMessages(rosbag); //Parses all message data
                     Console.WriteLine(rosbag.ToString());
                     return rosbag;
                 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using ROSNET.Type;
 
 namespace ROSNET.Field
@@ -29,7 +28,6 @@ namespace ROSNET.Field
             this.FixedArrayLength = fixedArrayLength;
         }
 
-        //todo 
         public override int GetByteLength()
         {
             return 0;

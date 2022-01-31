@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 
 namespace ROSNET.DataModel
 {
@@ -10,7 +8,6 @@ namespace ROSNET.DataModel
     public class ROSbag
     {
         public Dictionary<int, Connection> Connections { get; private set; } //List of connection records in rosbag
-        public Dictionary<int, List<Message>> Messages { get; private set; } //List of message records in rosbag
 
         /// <summary>
         /// Creates an empty rosbag
@@ -18,7 +15,6 @@ namespace ROSNET.DataModel
         public ROSbag()
         {
             Connections = new Dictionary<int, Connection>();
-            Messages = new Dictionary<int, List<Message>>();
         }
 
         /// <summary>
@@ -34,20 +30,6 @@ namespace ROSNET.DataModel
             }
             return false;
         }
-
-        /// <summary>
-        /// Adds a Message object to the ROSbag's list of messages
-        /// </summary>
-        public void AddMessage(Message message)
-        {
-            if (Messages.ContainsKey(message.Conn))
-            {
-                Messages[message.Conn].Add(message);
-            } else
-            {
-                Messages.Add(message.Conn, new List<Message>() {message});
-            }
-        }
         
 
         public override string ToString()
@@ -58,13 +40,6 @@ namespace ROSNET.DataModel
             {
                 s += "Connection: " + kvp.Key + "\n";
                 s += kvp.Value.ToString();
-
-                s += "Messages connected to this connection: \n";
-
-                foreach(Message message in Messages.GetValueOrDefault(kvp.Key))
-                {
-                    s += message.ToString();
-                }
             }
             return s;
         }

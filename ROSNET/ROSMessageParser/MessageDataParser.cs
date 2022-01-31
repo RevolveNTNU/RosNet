@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using ROSNET.Field;
-using ROSNET.Type;
 
 namespace ROSNET.ROSMessageParser
 {
@@ -19,23 +18,19 @@ namespace ROSNET.ROSMessageParser
         public static Dictionary<string, FieldValue> ParseMessageData(byte[] messageData, List<FieldValue> messageDefinition)
         {
             var fieldValueByFieldName = new Dictionary<string, FieldValue>();
-            var posBytes = 0;
+            int posBytes = 0;
 
             foreach (var definitionField in messageDefinition)
             {
                 if (definitionField is ArrayFieldValue)
                 {
-                    (var arrayField, var newPosBytes) = ParseArrayDefinitionField(definitionField as ArrayFieldValue, messageData, posBytes);
-                    posBytes = newPosBytes;
-
+                    ArrayFieldValue arrayField= ParseArrayDefinitionField(definitionField as ArrayFieldValue, messageData, ref posBytes);
                     fieldValueByFieldName.Add(arrayField.Name, arrayField);
-
 
                 } else
                 {
-                    (var field, var newPosBytes) = ParseDefinitionField(definitionField, messageData, posBytes);
+                    FieldValue field = ParseDefinitionField(definitionField, messageData, ref posBytes);
                     fieldValueByFieldName.Add(field.Name, field);
-                    posBytes = newPosBytes;
                 }
     
 
@@ -47,13 +42,13 @@ namespace ROSNET.ROSMessageParser
         /// <summary>
         /// Parses an arrayfield in the messagedata on the position posBytes
         /// </summary>
-        /// <returns> The parsed arrayfieldValue and the new position posBytes</returns>
-        public static (ArrayFieldValue, int) ParseArrayDefinitionField (ArrayFieldValue arrayDefinitionField, byte[] messageData, int posBytes )
+        /// <returns> The parsed arrayfieldValue</returns>
+        public static ArrayFieldValue ParseArrayDefinitionField (ArrayFieldValue arrayDefinitionField, byte[] messageData, ref int posBytes )
         {
             uint arrayLength;
             if (arrayDefinitionField.FixedArrayLength == 0)
             {
-                var lengthBytes = messageData.Skip(posBytes).Take(4).ToArray();
+                byte[] lengthBytes = messageData.Skip(posBytes).Take(4).ToArray();
                 arrayLength = BitConverter.ToUInt32(lengthBytes);
                 posBytes += 4;
             }
@@ -62,26 +57,24 @@ namespace ROSNET.ROSMessageParser
                 arrayLength = arrayDefinitionField.FixedArrayLength;
             }
 
-            int j = 0;
+            
+            int j = 0; //position in arrayDefinitionField
             int arrayDefinitionLength = arrayDefinitionField.ArrayFields.Count;
             var arrayFields = new List<FieldValue>();
-            for (uint i = 0; i < arrayLength && posBytes <messageData.Length; i++)
+            for (uint i = 0; i < arrayLength; i++)
             {
                 var definitionFieldValue = arrayDefinitionField.ArrayFields[j];
                 if (definitionFieldValue is ArrayFieldValue)
                 {
-                    (var arrayFieldValue, var newPosBytes) = ParseArrayDefinitionField(definitionFieldValue as ArrayFieldValue, messageData, posBytes);
-                    posBytes = newPosBytes;
+                    ArrayFieldValue arrayFieldValue = ParseArrayDefinitionField(definitionFieldValue as ArrayFieldValue, messageData, ref posBytes);
                 } else
                 {
-                    (var field, var newPosBytes) = ParseDefinitionField(definitionFieldValue, messageData, posBytes);
-                    posBytes = newPosBytes;
+                    FieldValue field = ParseDefinitionField(definitionFieldValue, messageData, ref posBytes);
                     arrayFields.Add(field);
-
 
                     j++;
 
-                    if (j == arrayDefinitionLength)
+                    if (j == arrayDefinitionLength) //starts at beginning of arrayDefinitionField if it reaches the end
                     {
                         j = 0;
                     }
@@ -91,22 +84,22 @@ namespace ROSNET.ROSMessageParser
 
             var arrayField = new ArrayFieldValue(arrayDefinitionField.Name, arrayFields);
 
-            return (arrayField, posBytes);
+            return arrayField;
 
         }
 
         /// <summary>
         /// Parses a field in the messageData on the position posBytes
         /// </summary>
-        /// <returns> The parsed fieldvalue and the new position posBytes</returns>
-        public static (FieldValue, int) ParseDefinitionField(FieldValue definitionField, byte[] messageData, int posBytes)
+        /// <returns> The parsed fieldvalue</returns>
+        public static FieldValue ParseDefinitionField(FieldValue definitionField, byte[] messageData, ref int posBytes)
         {
-            var value = messageData.Skip(posBytes).Take(definitionField.GetByteLength()).ToArray();
+            byte[] value = messageData.Skip(posBytes).Take(definitionField.GetByteLength()).ToArray();
             var field = new FieldValue(definitionField.Name, definitionField.DataType, value);
 
-            var newPosBytes = posBytes + definitionField.GetByteLength();
+            posBytes += definitionField.GetByteLength();
 
-            return (field, newPosBytes);
+            return field;
         }
 
 
