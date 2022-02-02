@@ -29,9 +29,9 @@ namespace ROSNET.Field
         }
 
         /// <summary>
-        /// Finds the byte length of the fieldvalue using the datatype
+        /// Finds the byte length of the array using fields in array
         /// </summary>
-        /// <returns>byte length of fieldvalue</returns>
+        /// <returns>byte length of array</returns>
         public override int GetByteLength()
         {
             int length = 0;
