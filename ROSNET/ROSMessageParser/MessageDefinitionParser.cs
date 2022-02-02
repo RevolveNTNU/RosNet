@@ -106,7 +106,7 @@ namespace ROSNET.ROSMessageParser
                         if ((PrimitiveType) dataType == PrimitiveType.STRING)
                         {
                             //creates new ArrayFieldValue since string is an array of chars (uint8) with variable length
-                            fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.CHAR) });
+                            fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.CHAR) }, PrimitiveType.STRING);
                         } else
                         {
                             fieldValue = new FieldValue(name, (PrimitiveType)dataType);
@@ -124,11 +124,11 @@ namespace ROSNET.ROSMessageParser
                             if ((PrimitiveType)arrayDataType == PrimitiveType.STRING)
                             {
                                 //creates new array of strings (array of chars (uint8)) 
-                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.CHAR) }) });
+                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.CHAR) }, PrimitiveType.STRING) }, (PrimitiveType) arrayDataType);
 
                             }
                             else {
-                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue(name + "InArray", (PrimitiveType)arrayDataType) });
+                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue(name + "InArray", (PrimitiveType)arrayDataType) }, (PrimitiveType) arrayDataType);
                             }
 
                             definitionFields.Add(fieldValue);
@@ -146,7 +146,7 @@ namespace ROSNET.ROSMessageParser
                                     if (subFieldValue is ArrayFieldValue)
                                     {
                                         var arrayFieldValue = subFieldValue as ArrayFieldValue;
-                                        subFieldValuesCopy.Add(new ArrayFieldValue(name + "." + arrayFieldValue.Name, arrayFieldValue.ArrayFields));
+                                        subFieldValuesCopy.Add(new ArrayFieldValue(name + "." + arrayFieldValue.Name, arrayFieldValue.ArrayFields, arrayFieldValue.DataType));
                                     }
                                     else
                                     {
@@ -155,7 +155,7 @@ namespace ROSNET.ROSMessageParser
 
                                 }
 
-                                var fieldValue = new ArrayFieldValue(name, subFieldValuesCopy);
+                                var fieldValue = new ArrayFieldValue(name, subFieldValuesCopy, PrimitiveType.ARRAY);
 
                             }
                             else
@@ -176,13 +176,13 @@ namespace ROSNET.ROSMessageParser
                             if ((PrimitiveType)arrayDataType == PrimitiveType.STRING)
                             {
                                 //creates new array of strings (array of chars (uint8)) with fixed length
-                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.CHAR) }) }, arrayLength);
+                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.CHAR) }, PrimitiveType.STRING), }, (PrimitiveType) arrayDataType, arrayLength);
 
                             }
                             else
                             {
 
-                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue(name + "InArray", (PrimitiveType)arrayDataType) }, arrayLength);
+                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue(name + "InArray", (PrimitiveType)arrayDataType) }, (PrimitiveType) arrayDataType, arrayLength);
                             }
 
 
@@ -202,7 +202,7 @@ namespace ROSNET.ROSMessageParser
                                     if (subFieldValue is ArrayFieldValue)
                                     {
                                         var arrayFieldValue = subFieldValue as ArrayFieldValue;
-                                        subFieldValuesCopy.Add(new ArrayFieldValue(name + "." + arrayFieldValue.Name, arrayFieldValue.ArrayFields));
+                                        subFieldValuesCopy.Add(new ArrayFieldValue(name + "." + arrayFieldValue.Name, arrayFieldValue.ArrayFields, arrayFieldValue.DataType));
                                     }
                                     else
                                     {
@@ -211,7 +211,7 @@ namespace ROSNET.ROSMessageParser
 
                                 }
 
-                                var fieldValue = new ArrayFieldValue(name, subFieldValuesCopy, arrayLength);
+                                var fieldValue = new ArrayFieldValue(name, subFieldValuesCopy, PrimitiveType.ARRAY,arrayLength);
 
                                 definitionFields.Add(fieldValue);
 
@@ -234,7 +234,7 @@ namespace ROSNET.ROSMessageParser
                                 if (subFieldValue is ArrayFieldValue)
                                 {
                                     var arrayFieldValue = subFieldValue as ArrayFieldValue;
-                                    subFieldValuesCopy.Add(new ArrayFieldValue(name + "." + arrayFieldValue.Name, arrayFieldValue.ArrayFields));
+                                    subFieldValuesCopy.Add(new ArrayFieldValue(name + "." + arrayFieldValue.Name, arrayFieldValue.ArrayFields, arrayFieldValue.DataType));
                                 } else
                                 {
                                     subFieldValuesCopy.Add(new FieldValue(name + "." + subFieldValue.Name, subFieldValue.DataType));

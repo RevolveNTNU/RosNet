@@ -38,7 +38,7 @@ namespace ROSNET.DataModel
             s += "Connections:";
             foreach (KeyValuePair<int, Connection> kvp in Connections)
             {
-                s += "Connection: " + kvp.Key + "\n";
+                s += ($"Connection: {kvp.Key} \n");
                 s += kvp.Value.ToString();
             }
             return s;

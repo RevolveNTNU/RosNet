@@ -30,12 +30,12 @@ namespace ROSNET.DataModel
 
         public override string ToString()
         {
-            var s = "Conn: " + Conn + "\n";
-            s += "Time: " + Time + "\n";
-            s += "Data: " + "\n";
+            var s = ($"Conn: {Conn} \n");
+            s += ($"Time: {Time.Item1} : {Time.Item2} \n");
+            s += "Data: \n";
             foreach (KeyValuePair<string, FieldValue> kvp in Data)
             {
-                s += kvp.Value.ToString(true) + "\n";
+                s += ($"{kvp.Value.ToString(true)} \n");
             }
 
             return s;

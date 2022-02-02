@@ -14,7 +14,7 @@ namespace ROSNET.Field
         /// <summary>
         /// Creates an arrayfieldvalue with name and list of fields in array. Sets datatype to ARRAY.
         /// </summary>
-        public ArrayFieldValue(string name, List<FieldValue> arrayFields) : base(name, PrimitiveType.ARRAY)
+        public ArrayFieldValue(string name, List<FieldValue> arrayFields, PrimitiveType primitiveType) : base(name, primitiveType)
         {
             this.ArrayFields = arrayFields;
         }
@@ -22,7 +22,7 @@ namespace ROSNET.Field
         /// <summary>
         /// Creates an arrayfieldvalue with name, list of fields in array and fixed length of array. Sets datatype to ARRAY.
         /// </summary>
-        public ArrayFieldValue(string name, List<FieldValue> arrayFields, uint fixedArrayLength) : base(name, PrimitiveType.ARRAY)
+        public ArrayFieldValue(string name, List<FieldValue> arrayFields, PrimitiveType primitiveType, uint fixedArrayLength) : base(name, primitiveType)
         {
             this.ArrayFields = arrayFields;
             this.FixedArrayLength = fixedArrayLength;
@@ -42,8 +42,13 @@ namespace ROSNET.Field
             if (printValue)
             {
                 return this.ToString();
+            } else if (this.DataType == PrimitiveType.STRING)
+            {
+                return ($"{DataType} {Name}");
+            } else
+            {
+                return ($"{DataType}[] {Name}");
             }
-            return ($"{DataType}[] {Name}");
 
         }
 
@@ -53,14 +58,26 @@ namespace ROSNET.Field
         /// <returns>string with values</returns>
         public override string ToString ()
         {
-            var s = ($"{DataType}[] {Name}: [");
+            string s;
+            if (this.DataType == PrimitiveType.STRING)
+            {
+                s = ($"{DataType} {Name}: ");
+                foreach (var fieldValue in ArrayFields)
+                {
+                    s += fieldValue.PrettyValue();
+                }
+                return s;
+            }
+            
+            s = ($"{DataType}[] {Name}: [");
+            
 
             int i = 0;
             foreach (var fieldValue in ArrayFields)
             {
                if (!(i == 0))
                {
-                  s += ",";
+                  s += ", ";
                }
                if (fieldValue.Value.Length == 0)
                {
@@ -68,10 +85,11 @@ namespace ROSNET.Field
                }
                else
                {
-                  s += ($"{fieldValue.PrettyValue()}");
+                  s += fieldValue.ToString(true);
                }
+                i = 1;
             }
-            i = 1;
+            
 
             s += "]";
 

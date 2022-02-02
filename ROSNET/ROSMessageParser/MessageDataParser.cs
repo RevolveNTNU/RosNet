@@ -82,7 +82,7 @@ namespace ROSNET.ROSMessageParser
 
             }
 
-            var arrayField = new ArrayFieldValue(arrayDefinitionField.Name, arrayFields);
+            var arrayField = new ArrayFieldValue(arrayDefinitionField.Name, arrayFields, arrayDefinitionField.DataType);
 
             return arrayField;
 

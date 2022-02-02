@@ -56,6 +56,7 @@ namespace ROSNET.ROSReader
                         }
                     }
                     unParsedMessageHandler.ParseMessages(rosbag); //Parses all message data
+                    Console.Write(rosbag.ToString());
                     return rosbag;
                 }
                 

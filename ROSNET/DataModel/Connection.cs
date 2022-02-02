@@ -58,23 +58,23 @@ namespace ROSNET.DataModel
 
         public override string ToString()
         {
-            string s = "Conn: " + Conn + "\n";
-            s += "Topic: " + Topic + "\n";
-            s += "OriginalTopic: " + Conn + "\n";
-            s += "Type: " + Type + "\n";
-            s += "Md5sum: " + Md5sum + "\n";
-            s += "MessageDefinition: " + "\n";
+            string s = ($"Conn: {Conn} \n");
+            s += ($"Topic: {Topic} \n");
+            s += ($"OriginalTopic: {OriginalTopic} \n");
+            s += ($"Type: {Type} \n");
+            s += ($"Md5sum: {Md5sum} \n");
+            s += "MessageDefinition: \n";
             foreach (var dataField in MessageDefinition)
             {
-                s += dataField.ToString(false) + "\n";
+                s += ($"{dataField.ToString(false)} \n");
             }
-            s += "CallerID: " + CallerID + "\n";
-            s += "Latching: " + Latching + "\n";
+            s += ($"CallerID: {CallerID} \n");
+            s += ($"Latching: {Latching} \n");
             s += "Messages connected to this connection: \n";
 
             foreach (Message message in Messages)
             {
-                s += message.ToString();
+                s += ($"{message.ToString()} \n");
             }
             return s;
         }
