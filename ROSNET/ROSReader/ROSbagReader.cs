@@ -24,7 +24,6 @@ namespace ROSNET.ROSReader
                 {
                     var rosbag = new ROSbag();
                     var unParsedMessageHandler = new UnParsedMessageHandler(); //handles all message data
-                    Console.Write(reader.ReadChars(13)); //reads inital line of ROSbag
 
                     while (reader.BaseStream.Position != reader.BaseStream.Length)
                     {
@@ -55,7 +54,6 @@ namespace ROSNET.ROSReader
                         }
                     }
                     unParsedMessageHandler.ParseMessages(rosbag); //Parses all message data
-                    Console.WriteLine(rosbag.ToString());
                     return rosbag;
                 }
                 

@@ -52,16 +52,6 @@ namespace ROSNET.ROSReader
 
             if (UnParsedMessageByConn.Count != 0)
             {
-                Console.WriteLine("UnReadMessages: ");
-                foreach (KeyValuePair<int, List<(Message, byte[])>> kvp in UnParsedMessageByConn)
-                {
-                    Console.WriteLine(kvp.Key + ": " + kvp.Value.Count);
-                }
-                Console.WriteLine("Connections: ");
-                foreach (KeyValuePair<int, Connection> kvp in rosbag.Connections)
-                {
-                    Console.WriteLine(kvp.Key + ":" + kvp.Value.Messages.Count);
-                }
                 throw new Exception("There are messages without the corresponding connection");
             }
         }
