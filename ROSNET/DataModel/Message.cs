@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ROSNET.Field;
 
 namespace ROSNET.DataModel
@@ -11,7 +12,7 @@ namespace ROSNET.DataModel
     {
         //Header fields of message record:
         public int Conn { get; }
-        public long Time { get;  }
+        public (uint, uint) Time { get;  }
 
         //Data in message record:
         public Dictionary<string,FieldValue> Data { get; set; }
@@ -22,7 +23,9 @@ namespace ROSNET.DataModel
         public Message(FieldValue conn, FieldValue time)
         {
             this.Conn = BitConverter.ToInt32(conn.Value);
-            this.Time = BitConverter.ToInt64(time.Value);
+            uint secs = BitConverter.ToUInt32(time.Value.Take(4).ToArray());
+            uint nsecs = BitConverter.ToUInt32(time.Value.Skip(4).Take(4).ToArray());
+            this.Time = (secs, nsecs);
         }
 
         public override string ToString()

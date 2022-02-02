@@ -25,6 +25,8 @@ namespace ROSNET.ROSReader
                     var rosbag = new ROSbag();
                     var unParsedMessageHandler = new UnParsedMessageHandler(); //handles all message data
 
+                    reader.ReadChars(13);
+
                     while (reader.BaseStream.Position != reader.BaseStream.Length)
                     {
                         Dictionary<String,FieldValue> header = Header.readHeader(reader);
