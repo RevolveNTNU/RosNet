@@ -28,9 +28,18 @@ namespace ROSNET.Field
             this.FixedArrayLength = fixedArrayLength;
         }
 
+        /// <summary>
+        /// Finds the byte length of the fieldvalue using the datatype
+        /// </summary>
+        /// <returns>byte length of fieldvalue</returns>
         public override int GetByteLength()
         {
-            return 0;
+            int length = 0;
+            foreach(var arrayField in ArrayFields)
+            {
+                length += arrayField.GetByteLength();
+            }
+            return length;
         }
 
         /// <summary>
