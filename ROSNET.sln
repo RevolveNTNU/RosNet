@@ -5,9 +5,9 @@ VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShowCase", "ShowCase\ShowCase.csproj", "{D3D72F01-2DBE-4EED-B217-EA516900B5C4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RosNet", "ROSNET\RosNet.csproj", "{6B1190A6-35DE-45A0-98BA-0EC5C9FBC37B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RosNet", "RosNet\RosNet.csproj", "{6B1190A6-35DE-45A0-98BA-0EC5C9FBC37B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RosNetTest", "ROSNETTest\RosNetTest.csproj", "{6F6A690D-4006-472D-9A15-BAD97F135700}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RosNetTest", "RosNetTest\RosNetTest.csproj", "{6F6A690D-4006-472D-9A15-BAD97F135700}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
