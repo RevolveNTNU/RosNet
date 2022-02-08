@@ -82,7 +82,7 @@ namespace RosNet.RosReader
 
             while (reader.BaseStream.Position != endPos)
             {
-                Dictionary<string, FieldValue> header = Header.readHeader(reader);
+                Dictionary<string, FieldValue> header = Header.ReadHeader(reader);
 
                 switch ((int) header["op"].Value.First())
                 {

@@ -104,7 +104,7 @@ namespace RosNet.RosMessageParser
                         if ((PrimitiveType) dataType == PrimitiveType.String)
                         {
                             //creates new ArrayFieldValue since string is an array of chars (uint8) with variable length
-                            fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.CHAR) }, PrimitiveType.STRING);
+                            fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.Char) }, PrimitiveType.String);
                         } 
                         else
                         {
@@ -123,7 +123,7 @@ namespace RosNet.RosMessageParser
                             if ((PrimitiveType)arrayDataType == PrimitiveType.String)
                             {
                                 //creates new array of strings (array of chars (uint8)) 
-                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.CHAR) }, PrimitiveType.STRING) }, (PrimitiveType) arrayDataType);
+                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.Char) }, PrimitiveType.String) }, (PrimitiveType) arrayDataType);
 
                             }
                             else 
@@ -176,7 +176,7 @@ namespace RosNet.RosMessageParser
                             if ((PrimitiveType)arrayDataType == PrimitiveType.String)
                             {
                                 //creates new array of strings (array of chars (uint8)) with fixed length
-                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.CHAR) }, PrimitiveType.STRING), }, (PrimitiveType) arrayDataType, arrayLength);
+                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.Char) }, PrimitiveType.String), }, (PrimitiveType) arrayDataType, arrayLength);
 
                             }
                             else
@@ -209,7 +209,7 @@ namespace RosNet.RosMessageParser
 
                                 }
 
-                                var fieldValue = new ArrayFieldValue(name, subFieldValuesCopy, PrimitiveType.ARRAY,arrayLength);
+                                var fieldValue = new ArrayFieldValue(name, subFieldValuesCopy, PrimitiveType.Array,arrayLength);
 
                                 definitionFields.Add(fieldValue);
 
