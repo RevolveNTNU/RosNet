@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShowCase", "ShowCase\ShowCa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ROSNET", "ROSNET\ROSNET.csproj", "{6B1190A6-35DE-45A0-98BA-0EC5C9FBC37B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageGenerationCli", "MessageGenerationCli\MessageGenerationCli.csproj", "{A7985819-40D3-4DF7-B5AA-B4FE5CD9C0F6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageGeneration", "MessageGeneration\MessageGeneration.csproj", "{367AEA5B-5DF6-4D7B-B0B3-42D20E513AC1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{6B1190A6-35DE-45A0-98BA-0EC5C9FBC37B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B1190A6-35DE-45A0-98BA-0EC5C9FBC37B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B1190A6-35DE-45A0-98BA-0EC5C9FBC37B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7985819-40D3-4DF7-B5AA-B4FE5CD9C0F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7985819-40D3-4DF7-B5AA-B4FE5CD9C0F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7985819-40D3-4DF7-B5AA-B4FE5CD9C0F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7985819-40D3-4DF7-B5AA-B4FE5CD9C0F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{367AEA5B-5DF6-4D7B-B0B3-42D20E513AC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{367AEA5B-5DF6-4D7B-B0B3-42D20E513AC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{367AEA5B-5DF6-4D7B-B0B3-42D20E513AC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{367AEA5B-5DF6-4D7B-B0B3-42D20E513AC1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
