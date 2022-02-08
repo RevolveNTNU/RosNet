@@ -2,34 +2,34 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ROSNET.DataModel;
-using ROSNET.Field;
+using RosNet.DataModel;
+using RosNet.Field;
 
-namespace ROSNET.ROSReader
+namespace RosNet.RosReader
 {
     /// <summary>
-    /// Reads ROSbag
+    /// Reads a ROSbag
     /// </summary>
-    public static class ROSbagReader
+    public static class RosBagReader
     {
         /// <summary>
         /// Reads a ROSbag-file
         /// </summary>
         /// <returns>ROSbag-object</returns>
-        public static ROSbag Read(string path)
+        public static RosBag Read(string path)
         {
             if (File.Exists(path))
             {
                 using (BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open)))
                 {
-                    var rosbag = new ROSbag();
+                    var rosBag = new RosBag();
                     var unParsedMessageHandler = new UnParsedMessageHandler(); //handles all message data
 
                     reader.ReadChars(13);
 
                     while (reader.BaseStream.Position != reader.BaseStream.Length)
                     {
-                        Dictionary<String,FieldValue> header = Header.readHeader(reader);
+                        Dictionary<String,FieldValue> header = Header.ReadHeader(reader);
 
                         //reads record based on op value in header
                         switch ((int)header["op"].Value.First())
@@ -40,25 +40,24 @@ namespace ROSNET.ROSReader
                                 unParsedMessageHandler.AddUnParsedMessage(message, data);
                                 break;
                             case 5: //Chunk
-                                //decompress chunks with compression bz2 here
+                                //TODO: decompress chunks with compression bz2 here
                                 List<Connection> chunkConnections = DataReader.ReadChunk(reader, ref unParsedMessageHandler);
-                                chunkConnections.Where(c => rosbag.AddConnection(c));
+                                chunkConnections.Where(c => rosBag.AddConnection(c));
                                 break;
                             case 7: //Connection
                                 var connection = new Connection(header["conn"], header["topic"]);
                                 DataReader.SetConnectionData(reader, ref connection);
-                                rosbag.AddConnection(connection);
+                                rosBag.AddConnection(connection);
                                 break;
-                            default: //Other record
+                            default: //Other record types
                                 int dataLength = reader.ReadInt32();
                                 reader.ReadBytes(dataLength);
                                 break;
                         }
                     }
-                    unParsedMessageHandler.ParseMessages(rosbag); //Parses all message data  
-                    return rosbag;
+                    unParsedMessageHandler.ParseMessages(rosBag); //Parses all message data  
+                    return rosBag;
                 }
-                
             }
             else
             {

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using ROSNET.DataModel;
-using ROSNET.ROSMessageParser;
+using RosNet.DataModel;
+using RosNet.RosMessageParser;
 
-namespace ROSNET.ROSReader
+namespace RosNet.RosReader
 {
     /// <summary>
     /// Contains message-records with unparsed data because their corresponding connections are not read yet
@@ -38,14 +38,14 @@ namespace ROSNET.ROSReader
         /// <summary>
         /// Parses data of all messages in list of unparsed messages
         /// </summary>
-        public void ParseMessages(ROSbag rosbag)
+        public void ParseMessages(RosBag rosBag)
         {
-            foreach(KeyValuePair<int, Connection> kvp in rosbag.Connections)
+            foreach(KeyValuePair<int, Connection> kvp in rosBag.Connections)
             {
                 foreach((var message, var data) in UnParsedMessageByConn[kvp.Key])
                 {
                     message.Data = MessageDataParser.ParseMessageData(data, kvp.Value.MessageDefinition);
-                    rosbag.Connections[message.Conn].AddMessage(message);
+                    rosBag.Connections[message.Conn].Messages.Add(message);
                 }
                 UnParsedMessageByConn.Remove(kvp.Key);
             }

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using ROSNET.Field;
-using ROSNET.Type;
+using RosNet.Field;
+using RosNet.Type;
 
-namespace ROSNET.ROSReader
+namespace RosNet.RosReader
 {
     /// <summary>
     /// Helper class for reading headers of records
@@ -28,7 +28,7 @@ namespace ROSNET.ROSReader
         /// Reads a header
         /// </summary>
         /// <returns>Dictionary with fieldnames and fieldvalues in header</returns>
-        public static Dictionary<string, FieldValue> readHeader(BinaryReader reader)
+        public static Dictionary<string, FieldValue> ReadHeader(BinaryReader reader)
         {
             int headerLen = reader.ReadInt32();
             var headerFields = new Dictionary<string, FieldValue>();
@@ -45,9 +45,11 @@ namespace ROSNET.ROSReader
                     hasAllFields = true;
                     foreach (string headerField in HeaderFieldsByOp[(int)headerFields["op"].Value.First()])
                     {
-                        if (!headerFields.ContainsKey(headerField)) hasAllFields = false;
+                        if (!headerFields.ContainsKey(headerField))
+                        {
+                            hasAllFields = false;
+                        }
                     }
-
                 }
             }
             return headerFields;
@@ -71,7 +73,7 @@ namespace ROSNET.ROSReader
                 case "chunk_pos":
                 case "start_time":
                 case "end_time":
-                    dataType = PrimitiveType.INT64;
+                    dataType = PrimitiveType.Int64;
                     fieldValue = reader.ReadBytes(8);
                     break;
                 case "conn_count":
@@ -81,15 +83,15 @@ namespace ROSNET.ROSReader
                 case "ver":
                 case "count":
                 case "offset":
-                    dataType = PrimitiveType.INT32;
+                    dataType = PrimitiveType.Int32;
                     fieldValue = reader.ReadBytes(4);
                     break;
                 case "op":
-                    dataType = PrimitiveType.INT8;
+                    dataType = PrimitiveType.Int8;
                     fieldValue = reader.ReadBytes(1);
                     break;
                 case "compression":
-                    dataType = PrimitiveType.STRING;
+                    dataType = PrimitiveType.String;
                     char firstChar = reader.ReadChar();
                     if (firstChar.Equals('n'))
                     {
@@ -103,12 +105,12 @@ namespace ROSNET.ROSReader
                     }
                     break;
                 case "topic":
-                    dataType = PrimitiveType.STRING;
+                    dataType = PrimitiveType.String;
                     fieldValue = Encoding.ASCII.GetBytes(new string(reader.ReadChars(fieldLen - 6)));
                     break;
                 default:
                     throw new Exception($"{fieldName} not defined in ROSbag-format");
-            };
+            }
             return new FieldValue(fieldName, dataType, fieldValue);
         }
 

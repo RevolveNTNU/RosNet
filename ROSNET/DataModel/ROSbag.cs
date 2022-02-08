@@ -1,18 +1,18 @@
 ﻿using System.Collections.Generic;
 
-namespace ROSNET.DataModel
+namespace RosNet.DataModel
 {
     /// <summary>
     /// Represents a ROSbag
     /// </summary>
-    public class ROSbag
+    public class RosBag
     {
         public Dictionary<int, Connection> Connections { get; private set; } //List of connection records in rosbag
 
         /// <summary>
         /// Creates an empty rosbag
         /// </summary>
-        public ROSbag()
+        public RosBag()
         {
             Connections = new Dictionary<int, Connection>();
         }
@@ -31,7 +31,6 @@ namespace ROSNET.DataModel
             return false;
         }
         
-
         public override string ToString()
         {
             string s = "ROSbag \n";

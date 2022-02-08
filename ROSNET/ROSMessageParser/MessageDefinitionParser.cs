@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using ROSNET.Field;
-using ROSNET.Type;
+using RosNet.Field;
+using RosNet.Type;
 
-namespace ROSNET.ROSMessageParser
+namespace RosNet.RosMessageParser
 {
     /// <summary>
     /// Parses messageDefinitionField in the data of connection record
@@ -69,8 +69,6 @@ namespace ROSNET.ROSMessageParser
             List<FieldValue> fieldValues = ParseDefinition(lines, fieldValuesByDefinitionName);
 
             return fieldValues;
-
-
         }
 
         /// <summary>
@@ -103,11 +101,12 @@ namespace ROSNET.ROSMessageParser
                     if (Enum.TryParse(typeof(PrimitiveType), dataTypeString.ToUpper(), out var dataType)) //checks if datatype is primitive
                     {
                         FieldValue fieldValue;
-                        if ((PrimitiveType) dataType == PrimitiveType.STRING)
+                        if ((PrimitiveType) dataType == PrimitiveType.String)
                         {
                             //creates new ArrayFieldValue since string is an array of chars (uint8) with variable length
                             fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.CHAR) }, PrimitiveType.STRING);
-                        } else
+                        } 
+                        else
                         {
                             fieldValue = new FieldValue(name, (PrimitiveType)dataType);
                         }
@@ -121,13 +120,14 @@ namespace ROSNET.ROSMessageParser
                         if (Enum.TryParse(typeof(PrimitiveType), arrayDataTypeString.ToUpper(), out var arrayDataType)) //checks if datatype of array is primitive
                         {
                             FieldValue fieldValue;
-                            if ((PrimitiveType)arrayDataType == PrimitiveType.STRING)
+                            if ((PrimitiveType)arrayDataType == PrimitiveType.String)
                             {
                                 //creates new array of strings (array of chars (uint8)) 
                                 fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.CHAR) }, PrimitiveType.STRING) }, (PrimitiveType) arrayDataType);
 
                             }
-                            else {
+                            else 
+                            {
                                 fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue(name + "InArray", (PrimitiveType)arrayDataType) }, (PrimitiveType) arrayDataType);
                             }
 
@@ -155,7 +155,7 @@ namespace ROSNET.ROSMessageParser
 
                                 }
 
-                                var fieldValue = new ArrayFieldValue(name, subFieldValuesCopy, PrimitiveType.ARRAY);
+                                var fieldValue = new ArrayFieldValue(name, subFieldValuesCopy, PrimitiveType.Array);
 
                             }
                             else
@@ -173,7 +173,7 @@ namespace ROSNET.ROSMessageParser
                         if (Enum.TryParse(typeof(PrimitiveType), arrayType.ToUpper(), out var arrayDataType)) //check if datatype of array is primitive
                         {
                             FieldValue fieldValue;
-                            if ((PrimitiveType)arrayDataType == PrimitiveType.STRING)
+                            if ((PrimitiveType)arrayDataType == PrimitiveType.String)
                             {
                                 //creates new array of strings (array of chars (uint8)) with fixed length
                                 fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.CHAR) }, PrimitiveType.STRING), }, (PrimitiveType) arrayDataType, arrayLength);
@@ -185,9 +185,7 @@ namespace ROSNET.ROSMessageParser
                                 fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue(name + "InArray", (PrimitiveType)arrayDataType) }, (PrimitiveType) arrayDataType, arrayLength);
                             }
 
-
                             definitionFields.Add(fieldValue);
-
 
                         }
                         else
@@ -235,22 +233,20 @@ namespace ROSNET.ROSMessageParser
                                 {
                                     var arrayFieldValue = subFieldValue as ArrayFieldValue;
                                     subFieldValuesCopy.Add(new ArrayFieldValue(name + "." + arrayFieldValue.Name, arrayFieldValue.ArrayFields, arrayFieldValue.DataType));
-                                } else
+                                } 
+                                else
                                 {
                                     subFieldValuesCopy.Add(new FieldValue(name + "." + subFieldValue.Name, subFieldValue.DataType));
-                                }
-                                    
-                                
+                                } 
                             }
-
                             definitionFields.AddRange(subFieldValuesCopy);
+
                         }
                         else
                         {
                             throw new KeyNotFoundException($"The dataType: {wordsInLine.First()} is not a primitive type or defined in MessageDefinition");
                         }
                     }
-
                 }
                 else
                 {

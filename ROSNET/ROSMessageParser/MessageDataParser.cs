@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ROSNET.Field;
+using RosNet.Field;
 
-namespace ROSNET.ROSMessageParser
+namespace RosNet.RosMessageParser
 {
     /// <summary>
     /// Parses data in message record
@@ -27,15 +27,13 @@ namespace ROSNET.ROSMessageParser
                     ArrayFieldValue arrayField= ParseArrayDefinitionField(definitionField as ArrayFieldValue, messageData, ref posBytes);
                     fieldValueByFieldName.Add(arrayField.Name, arrayField);
 
-                } else
+                } 
+                else
                 {
                     FieldValue field = ParseDefinitionField(definitionField, messageData, ref posBytes);
                     fieldValueByFieldName.Add(field.Name, field);
                 }
-    
-
             }
-
             return fieldValueByFieldName;
         }
 
@@ -67,7 +65,8 @@ namespace ROSNET.ROSMessageParser
                 if (definitionFieldValue is ArrayFieldValue)
                 {
                     ArrayFieldValue arrayFieldValue = ParseArrayDefinitionField(definitionFieldValue as ArrayFieldValue, messageData, ref posBytes);
-                } else
+                }
+                else
                 {
                     FieldValue field = ParseDefinitionField(definitionFieldValue, messageData, ref posBytes);
                     arrayFields.Add(field);
@@ -79,13 +78,8 @@ namespace ROSNET.ROSMessageParser
                         j = 0;
                     }
                 }
-
             }
-
-            var arrayField = new ArrayFieldValue(arrayDefinitionField.Name, arrayFields, arrayDefinitionField.DataType);
-
-            return arrayField;
-
+            return new ArrayFieldValue(arrayDefinitionField.Name, arrayFields, arrayDefinitionField.DataType);
         }
 
         /// <summary>
@@ -101,7 +95,5 @@ namespace ROSNET.ROSMessageParser
 
             return field;
         }
-
-
     }
 }

@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
-using ROSNET.Type;
+using RosNet.Type;
 
-namespace ROSNET.Field
+namespace RosNet.Field
 {
     /// <summary>
     /// Represents a fieldvalue
     /// </summary>
     public class FieldValue
     {
-
         public string Name { get; set; }
         public PrimitiveType DataType { get; private set; }
         public byte[] Value { get; private set; }
@@ -34,7 +33,6 @@ namespace ROSNET.Field
             this.DataType = DataType;
         }
 
-
         /// <summary>
         /// Finds the byte length of the fieldvalue using the datatype
         /// </summary>
@@ -43,25 +41,25 @@ namespace ROSNET.Field
         {
             switch (this.DataType)
             {
-                case PrimitiveType.BOOL:
-                case PrimitiveType.INT8:
-                case PrimitiveType.UINT8:
-                case PrimitiveType.BYTE:
-                case PrimitiveType.CHAR:
+                case PrimitiveType.Bool:
+                case PrimitiveType.Int8:
+                case PrimitiveType.Uint8:
+                case PrimitiveType.Byte:
+                case PrimitiveType.Char:
                     return 1;
-                case PrimitiveType.INT16:
-                case PrimitiveType.UINT16:
+                case PrimitiveType.Int16:
+                case PrimitiveType.Uint16:
                     return 2;
-                case PrimitiveType.INT32:
-                case PrimitiveType.UINT32:
-                case PrimitiveType.FLOAT32:
-                case PrimitiveType.STRING:
+                case PrimitiveType.Int32:
+                case PrimitiveType.Uint32:
+                case PrimitiveType.Float32:
+                case PrimitiveType.String:
                     return 4;
-                case PrimitiveType.INT64:
-                case PrimitiveType.UINT64:
-                case PrimitiveType.FLOAT64:
-                case PrimitiveType.TIME:
-                case PrimitiveType.DURATION:
+                case PrimitiveType.Int64:
+                case PrimitiveType.Uint64:
+                case PrimitiveType.Float64:
+                case PrimitiveType.Time:
+                case PrimitiveType.Duration:
                     return 8;
                 default:
                     return 0;
@@ -93,7 +91,6 @@ namespace ROSNET.Field
                 return ($"{DataType} {Name} noValue");
             }
             return ($"{DataType} {Name} {PrettyValue()}");
-
         }
 
         /// <summary>
@@ -104,48 +101,46 @@ namespace ROSNET.Field
         {
             switch (this.DataType)
             {
-                case PrimitiveType.BOOL:
+                case PrimitiveType.Bool:
                     return ($"{BitConverter.ToBoolean(this.Value)}");
-                case PrimitiveType.INT8:
+                case PrimitiveType.Int8:
                     return ((int)this.Value.First()).ToString();
-                case PrimitiveType.UINT8:
+                case PrimitiveType.Uint8:
                     return ((uint)this.Value.First()).ToString();
-                case PrimitiveType.BYTE:
+                case PrimitiveType.Byte:
                     return ($"{(sbyte) this.Value.First()}");
-                case PrimitiveType.CHAR:
+                case PrimitiveType.Char:
                     return ((char)this.Value.First()).ToString();
-                case PrimitiveType.INT16:
+                case PrimitiveType.Int16:
                     return ($"{BitConverter.ToInt16(this.Value)}");
-                case PrimitiveType.UINT16:
+                case PrimitiveType.Uint16:
                     return ($"{BitConverter.ToUInt16(this.Value)}");
-                case PrimitiveType.INT32:
+                case PrimitiveType.Int32:
                     return ($"{BitConverter.ToInt32(this.Value)}");
-                case PrimitiveType.UINT32:
+                case PrimitiveType.Uint32:
                     return ($"{BitConverter.ToUInt32(this.Value)}");
-                case PrimitiveType.INT64:
+                case PrimitiveType.Int64:
                     return ($"{BitConverter.ToInt64(this.Value)}");
-                case PrimitiveType.UINT64:
+                case PrimitiveType.Uint64:
                     return ($"{BitConverter.ToUInt64(this.Value)}");
-                case PrimitiveType.FLOAT32:
+                case PrimitiveType.Float32:
                     return ($"{BitConverter.ToSingle(this.Value)}");
-                case PrimitiveType.FLOAT64:
+                case PrimitiveType.Float64:
                     return ($"{BitConverter.ToDouble(this.Value)}");
-                case PrimitiveType.STRING:
+                case PrimitiveType.String:
                     return System.Text.Encoding.Default.GetString(this.Value); ;
-                case PrimitiveType.TIME:
+                case PrimitiveType.Time:
                     uint timeSecs = BitConverter.ToUInt32(this.Value.Take(4).ToArray());
                     uint timeNsecs = BitConverter.ToUInt32(this.Value.Skip(4).Take(4).ToArray());
                     return ($"{timeSecs} : {timeNsecs}");
-                case PrimitiveType.DURATION:
+                case PrimitiveType.Duration:
                     int durationSecs = BitConverter.ToInt32(this.Value.Take(4).ToArray());
                     int durationNsecs = BitConverter.ToInt32(this.Value.Skip(4).Take(4).ToArray());
                     return ($"{durationSecs} : {durationNsecs}");
                 default:
                     //TODO exception
-
                     return "";
             }
         }
-
     }
 }

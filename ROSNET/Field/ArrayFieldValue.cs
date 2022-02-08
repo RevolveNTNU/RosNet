@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using ROSNET.Type;
+using RosNet.Type;
 
-namespace ROSNET.Field
+namespace RosNet.Field
 {
     /// <summary>
     /// Represents an arrayfield
@@ -51,10 +51,12 @@ namespace ROSNET.Field
             if (printValue)
             {
                 return this.ToString();
-            } else if (this.DataType == PrimitiveType.STRING)
+            } 
+            else if (this.DataType == PrimitiveType.String)
             {
                 return ($"{DataType} {Name}");
-            } else
+            } 
+            else
             {
                 return ($"{DataType}[] {Name}");
             }
@@ -68,7 +70,7 @@ namespace ROSNET.Field
         public override string ToString ()
         {
             string s;
-            if (this.DataType == PrimitiveType.STRING)
+            if (this.DataType == PrimitiveType.String)
             {
                 s = ($"{DataType} {Name}: ");
                 foreach (var fieldValue in ArrayFields)
@@ -98,12 +100,8 @@ namespace ROSNET.Field
                }
                 i = 1;
             }
-            
-
             s += "]";
-
             return s;
         }
-
     }
 }

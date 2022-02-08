@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ROSNET.DataModel;
-using ROSNET.Field;
-using ROSNET.ROSMessageParser;
+using RosNet.DataModel;
+using RosNet.Field;
+using RosNet.RosMessageParser;
 
-namespace ROSNET.ROSReader
+namespace RosNet.RosReader
 {
     /// <summary>
     /// Helper class for reading data in records
@@ -86,15 +86,15 @@ namespace ROSNET.ROSReader
 
                 switch ((int) header["op"].Value.First())
                 {
-                    case 7:
-                        var connection = new Connection(header["conn"], header["topic"]);
-                        DataReader.SetConnectionData(reader, ref connection);
-                        connections.Add(connection);
-                        break;
                     case 2:
                         var message = new Message(header["conn"], header["time"]);
                         var data = DataReader.ReadMessageData(reader);
                         unParsedMessageHandler.AddUnParsedMessage(message, data);
+                        break;
+                    case 7:
+                        var connection = new Connection(header["conn"], header["topic"]);
+                        DataReader.SetConnectionData(reader, ref connection);
+                        connections.Add(connection);
                         break;
                     default:
                         var dataLen = reader.ReadInt32();
@@ -105,6 +105,4 @@ namespace ROSNET.ROSReader
             return connections;
         }
     }
-
-
 }

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using ROSNET.Field;
+using RosNet.Field;
 
-namespace ROSNET.DataModel
+namespace RosNet.DataModel
 {
     /// <summary>
     /// Represents a ROSbag connection
@@ -48,14 +48,6 @@ namespace ROSNET.DataModel
             this.Latching = System.Text.Encoding.Default.GetString(latching);
         }
 
-        /// <summary>
-        /// Adds a Message object to the connection's list of messages
-        /// </summary>
-        public void AddMessage(Message message)
-        {
-            Messages.Add(message);
-        }
-
         public override string ToString()
         {
             string s = ($"Conn: {Conn} \n");
@@ -78,6 +70,5 @@ namespace ROSNET.DataModel
             }
             return s;
         }
-
     }
 }

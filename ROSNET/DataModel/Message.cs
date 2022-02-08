@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ROSNET.Field;
+using RosNet.Field;
 
-namespace ROSNET.DataModel
+namespace RosNet.DataModel
 {
     /// <summary>
     /// Represents a ROSbag message

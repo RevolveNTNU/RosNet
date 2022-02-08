@@ -1,9 +1,9 @@
 using System.IO;
 using System.Text;
 using Xunit;
-using ROSNET.ROSReader;
+using RosNet.RosReader;
 
-namespace ROSNETTest
+namespace RosNetTest
 {
     public class HeaderTests
     {
