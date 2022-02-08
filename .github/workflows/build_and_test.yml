@@ -35,7 +35,7 @@ jobs:
       if: ${{ always() }}
       with:
         name: test_report
-        path: /home/runner/work/ROSNET/ROSNET/RosNetTest/TestResults/test-results.trx
+        path: /home/runner/work/ROSNET/RosNetTest/TestResults/test-results.trx
     #- uses: actions/upload-artifact@v2
     #  if: ${{ always() }}
     #  with:
@@ -50,5 +50,5 @@ jobs:
       if: ${{ always() }}
       with:
         name: Test Report            # Name of the check run which will be created
-        path: /home/runner/work/ROSNET/ROSNET/RosNetTest/TestResults/test-results.trx    # Path to test results
+        path: /home/runner/work/ROSNET/RosNetTest/TestResults/test-results.trx    # Path to test results
         reporter: dotnet-trx        # Format of test results
