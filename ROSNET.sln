@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShowCase", "ShowCase\ShowCa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RosNet", "RosNet\RosNet.csproj", "{6B1190A6-35DE-45A0-98BA-0EC5C9FBC37B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RosNetTest", "RosNetTest\RosNetTest.csproj", "{6F6A690D-4006-472D-9A15-BAD97F135700}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RosNet.Test", "RosNet.Test\RosNet.Test.csproj", "{6F6A690D-4006-472D-9A15-BAD97F135700}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
