@@ -2,6 +2,8 @@
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
 
+using Microsoft.Extensions.Logging;
+
 using RosNet.MessageGeneration;
 
 static void PrintWarnings(List<string> warnings)
@@ -16,10 +18,10 @@ static void PrintWarnings(List<string> warnings)
     }
 }
 
-var outputOpt = new Option<string>(new[] { "--output", "-o" }, "Specify output path\nIf unspecified, output will be in current working directory, under RosSharpMessages").LegalFileNamesOnly();
+var outputOpt = new Option<string>(new[] { "--output", "-o" }, "Specify output path\nIf unspecified, output will be in current working directory, under RosSharpMessages").LegalFilePathsOnly();
 var nameOpt = new Option<string>(new[] { "--ros-package-name", "-n" }, "Specify the ROS package name for the message\nIf unspecified, package name will be retrieved from path, assuming ROS package structure");
 var verboseOpt = new Option<bool>(new[] { "--verbose", "-v" }, "Outputs extra information");
-var inputArg = new Argument<string>("input-path", "The path to either a singel {message,service,action} file, or package").LegalFileNamesOnly();
+var inputArg = new Argument<string>("input-path", "The path to either a singel {message,service,action} file, or package").LegalFilePathsOnly();
 
 var serviceCmd = new Command("service", "Generate service messages");
 var actionCmd = new Command("action", "Generate action messages");
@@ -38,11 +40,22 @@ rootCommand.AddGlobalOption(verboseOpt);
 rootCommand.AddGlobalOption(outputOpt);
 rootCommand.AddGlobalOption(nameOpt);
 
-var handler = (string inputPath, string? outputPath, string? rosPackageName, bool verbose, CodeGenerator gen) => PrintWarnings(gen.Generate(inputPath, outputPath ?? "", rosPackageName, verbose));
+static void Handler<T>(string inputPath, string? outputPath, string? rosPackageName, bool verbose) where T : CodeGenerator
+{
+    using var loggerFactory = LoggerFactory.Create(builder => builder
+                .AddFilter("Microsoft", LogLevel.Warning)
+                .AddFilter("System", LogLevel.Warning)
+                .AddFilter("MessageGeneration", verbose ? LogLevel.Debug : LogLevel.Information)
+                .AddConsole());
+    // C# Type system fighting hard
+    var c = typeof(T).GetConstructor(new[] { typeof(ILogger<T>) })!;
+    var generator = (T)c.Invoke(new[] { loggerFactory.CreateLogger<T>() });
+    PrintWarnings(generator.Generate(inputPath, outputPath, rosPackageName));
+};
 
-actionCmd.SetHandler((string inputPath, string? outputPath, string? rosPackageName, bool verbose) => handler(inputPath, outputPath, rosPackageName, verbose, new ActionCodeGenerator()), inputArg, outputOpt, nameOpt, verboseOpt);
-serviceCmd.SetHandler((string inputPath, string? outputPath, string? rosPackageName, bool verbose) => handler(inputPath, outputPath, rosPackageName, verbose, new ServiceCodeGenerator()), inputArg, outputOpt, nameOpt, verboseOpt);
-rootCommand.SetHandler((string inputPath, string? outputPath, string? rosPackageName, bool verbose) => handler(inputPath, outputPath, rosPackageName, verbose, new MessageCodeGenerator()), inputArg, outputOpt, nameOpt, verboseOpt);
+actionCmd.SetHandler((string inputPath, string? outputPath, string? rosPackageName, bool verbose) => Handler<ActionCodeGenerator>(inputPath, outputPath, rosPackageName, verbose), inputArg, outputOpt, nameOpt, verboseOpt);
+serviceCmd.SetHandler((string inputPath, string? outputPath, string? rosPackageName, bool verbose) => Handler<ServiceCodeGenerator>(inputPath, outputPath, rosPackageName, verbose), inputArg, outputOpt, nameOpt, verboseOpt);
+rootCommand.SetHandler((string inputPath, string? outputPath, string? rosPackageName, bool verbose) => Handler<MessageCodeGenerator>(inputPath, outputPath, rosPackageName, verbose), inputArg, outputOpt, nameOpt, verboseOpt);
 
 var cmdBuilder = new CommandLineBuilder(rootCommand);
 cmdBuilder.UseDefaults();

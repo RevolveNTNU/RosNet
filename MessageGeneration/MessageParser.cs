@@ -1,5 +1,7 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 
+using static RosNet.MessageGeneration.Utilities;
+
 namespace RosNet.MessageGeneration;
 
 public class MessageParser
@@ -41,9 +43,9 @@ public class MessageParser
 
         this._rosPackageName = rosPackageName;
 
-        this._className = className.Length == 0 ? Utilities.CapitalizeFirstLetter(_inFileName) : className;
+        this._className = className.Length == 0 ? CapitalizeFirstLetter(_inFileName) : className;
 
-        this._rosMsgName = rosMsgName.Length == 0 ? Utilities.CapitalizeFirstLetter(_inFileName) : rosMsgName;
+        this._rosMsgName = rosMsgName.Length == 0 ? CapitalizeFirstLetter(_inFileName) : rosMsgName;
 
 
         this._outPath = outPath;
@@ -195,7 +197,7 @@ public class MessageParser
             {
                 Warn($"By convention, there is only one header for each message. ({_inFilePath}:{_lineNum})");
             }
-            if (peeked.Type == MessageTokenType.Identifier && !peeked.Content.Equals("header", StringComparison.Ordinal))
+            if (peeked.Type == MessageTokenType.Identifier && peeked.Content != "header")
             {
                 Warn($"By convention, a ros message Header will be named 'header'. '{peeked.Content}'. ({_inFilePath}:{_lineNum})");
             }
@@ -248,18 +250,18 @@ public class MessageParser
         }
 
         // Constant Declaration
-        if (peeked?.Type == MessageTokenType.ConstantDeclaration)
+        if (peeked.Type == MessageTokenType.ConstantDeclaration)
         {
             if (!canHaveConstDecl)
             {
-                throw new MessageParserException($"Type {type}' at {_inFilePath}:{_lineNum} cannot have constant declaration");
+                throw new MessageParserException($"Type {type}' cannot have constant declaration", _inFilePath, _lineNum);
             }
             declaration += $"const {type} {identifier} = {ConstantDeclaration(type)}";
             _constants.Add(identifier);
         }
         else
         {
-            declaration += $"{type} {identifier}{Utilities.PROPERTY_EXTENSION}\n";
+            declaration += $"{type} {identifier} {{ get; set; }}\n";
         }
         _body += declaration;
     }

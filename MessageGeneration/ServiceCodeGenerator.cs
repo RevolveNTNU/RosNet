@@ -1,26 +1,33 @@
-﻿namespace RosNet.MessageGeneration;
+﻿using Microsoft.Extensions.Logging;
+
+using static RosNet.MessageGeneration.Utilities;
+
+namespace RosNet.MessageGeneration;
 
 public class ServiceCodeGenerator : CodeGenerator
 {
     private static readonly string[] Types = { "Request", "Response" };
+
+    public ServiceCodeGenerator(ILogger<ServiceCodeGenerator> logger) : base(logger)
+    {
+    }
+
     public static new string FileExtension => ".srv";
     public static new string FileName => "service";
 
-    protected override List<string> GenerateSingle(string inPath, string outPath, string? rosPackageName = "", bool? verbose = false)
+    protected override List<string> GenerateSingle(string inPath, string? outPath, string? rosPackageName = "")
     {
         // If no ROS package name is provided, extract from path
-        rosPackageName ??= inPath.Split(Path.PathSeparator)[^3];
-        outPath = Path.Combine(outPath, Utilities.ResolvePackageName(rosPackageName));
+        rosPackageName ??= inPath.Split(Path.DirectorySeparatorChar)[^3];
+        outPath = Path.Combine(outPath ?? "", ResolvePackageName(rosPackageName));
 
         string inFileName = Path.GetFileNameWithoutExtension(inPath);
 
-        if (verbose ?? false)
-        {
-            Console.WriteLine("Parsing: " + inPath);
-            Console.WriteLine("Output Location: " + outPath);
-        }
 
-        using var tokenizer = new MessageTokenizer(inPath, new HashSet<string>(Utilities.BuiltInTypesMapping.Keys));
+        _logger.LogDebug("Parsing: {file}", inPath);
+        _logger.LogDebug("Output Location: {file}", outPath);
+
+        using var tokenizer = new MessageTokenizer(inPath, new HashSet<string>(BuiltInTypesMapping.Keys));
         var listsOfTokens = tokenizer.Tokenize();
 
         if (listsOfTokens.Count != 2)
@@ -37,7 +44,7 @@ public class ServiceCodeGenerator : CodeGenerator
             // Service is made up of request and response
             string className = inFileName + Types[i];
 
-            MessageParser parser = new(tokens, outPath, rosPackageName, "srv", Utilities.BuiltInTypesMapping, Utilities.BuiltInTypesDefaultInitialValues, className);
+            MessageParser parser = new(tokens, outPath, rosPackageName, "srv", BuiltInTypesMapping, BuiltInTypesDefaultInitialValues, className);
             parser.Parse();
             warnings.AddRange(parser.GetWarnings());
         }

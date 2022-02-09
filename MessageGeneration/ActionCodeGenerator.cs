@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using Microsoft.Extensions.Logging;
+using static RosNet.MessageGeneration.Utilities;
 
 namespace RosNet.MessageGeneration;
 
@@ -8,21 +10,22 @@ public class ActionCodeGenerator : CodeGenerator
     public static new readonly string FileExtension = ".action";
     public static new readonly string FileName = "action";
 
-    protected override List<string> GenerateSingle(string inPath, string outPath, string? rosPackageName, bool? verbose = false)
+    public ActionCodeGenerator(ILogger<ActionCodeGenerator> logger) : base(logger)
     {
-        verbose ??= false;
-        // If no ROS package name is provided, extract from path
-        rosPackageName ??= inPath.Split(Path.PathSeparator)[^3];
+    }
 
-        outPath = Path.Combine(outPath, Utilities.ResolvePackageName(rosPackageName));
+    protected override List<string> GenerateSingle(string inPath, string? outPath, string? rosPackageName)
+    {
+        // If no ROS package name is provided, extract from path
+        rosPackageName ??= inPath.Split(Path.DirectorySeparatorChar)[^3];
+
+        outPath = Path.Combine(outPath ?? "", Utilities.ResolvePackageName(rosPackageName));
 
         var inFileName = Path.GetFileNameWithoutExtension(inPath);
 
-        if ((bool)verbose)
-        {
-            Console.WriteLine("Parsing: " + inPath);
-            Console.WriteLine("Output Location: " + outPath);
-        }
+        _logger.LogDebug("Parsing: {file}", inPath);
+        _logger.LogDebug("Output Location: {file}", outPath);
+
 
         using var tokenizer = new MessageTokenizer(inPath, new HashSet<string>(Utilities.BuiltInTypesMapping.Keys));
         var listsOfTokens = tokenizer.Tokenize();
@@ -60,10 +63,6 @@ public class ActionCodeGenerator : CodeGenerator
 
 public class ActionWrapper
 {
-
-    private const string ONE_TAB = "    ";
-    private const string TWO_TABS = "        ";
-
     private readonly string _inPath;
     private readonly string _inFileName;
 
@@ -107,12 +106,12 @@ public class ActionWrapper
         var paramsOut = new StringBuilder();
         var assignments = new StringBuilder();
 
-        if (msgType.Equals("Goal", StringComparison.Ordinal))
+        if (msgType == "Goal")
         {
             paramsIn.Append("Header header, GoalID goal_id, ");
             paramsOut.Append("header, goal_id");
         }
-        else if (msgType.Equals("Result", StringComparison.Ordinal) || msgType.Equals("Feedback", StringComparison.Ordinal))
+        else if (msgType is "Result" or "Feedback")
         {
             paramsIn.Append("Header header, GoalStatus status, ");
             paramsOut.Append("header, status");
@@ -156,7 +155,7 @@ public class ActionWrapper
         writer.Write(imports);
 
         // Write namespace
-        writer.Write($"namespace RosSharp.RosBridgeClient.MessageTypes.{Utilities.ResolvePackageName(_rosPackageName)}\n{{\n");
+        writer.Write($"namespace RosSharp.RosBridgeClient.MessageTypes.{ResolvePackageName(_rosPackageName)}\n{{\n");
 
         // Write class declaration
         writer.Write($"{ONE_TAB}public class {wrapperName} : Action{type}<{_inFileName}{type}>\n{ONE_TAB}{{\n");
@@ -165,7 +164,7 @@ public class ActionWrapper
         writer.WriteLine($"{TWO_TABS}public const string RosMessageName = \"{_rosPackageName}/{wrapperName}\";");
 
         // Record goal/result/feedback declaration
-        _symbolTable.Add(Utilities.LowerFirstLetter(type), msgName);
+        _symbolTable.Add(char.ToLower(type[0]) + type[1..], msgName);
 
         writer.WriteLine("");
 
@@ -193,13 +192,13 @@ public class ActionWrapper
 
         using StreamWriter writer = new(outPath, false);
         // Write block comment
-        writer.WriteLine(Utilities.BLOCK_COMMENT);
+        writer.WriteLine(BLOCK_COMMENT);
 
         // Write imports
         writer.Write(imports);
 
         // Write namespace
-        writer.Write($"namespace RosSharp.RosBridgeClient.MessageTypes.{Utilities.ResolvePackageName(_rosPackageName)}\n{{\n");
+        writer.Write($"namespace RosSharp.RosBridgeClient.MessageTypes.{ResolvePackageName(_rosPackageName)}\n{{\n");
 
         // Write class declaration
         var genericParams = new string[] {

@@ -149,7 +149,7 @@ public class MessageTokenizer : IDisposable
                     else if (!_reader.EndOfStream)
                     {
                         throw new MessageTokenizerException(
-                            $"Invalid token: {NextTokenStr()}. New line or EOF expected {CurrentFileAndLine()}");
+                            $"Invalid token: {NextTokenStr()}. New line or EOF expected {CurrentFileAndLine}");
                     }
                 }
             }
@@ -163,7 +163,7 @@ public class MessageTokenizer : IDisposable
     /// </summary>
     private void DiscardEmpty()
     {
-        while (_reader.Peek() is ' ' or '\t')
+        while ((char)_reader.Peek() is ' ' or '\t')
         {
             _reader.Read();
         }
@@ -200,7 +200,7 @@ public class MessageTokenizer : IDisposable
     private string NextTokenStr()
     {
         string token = "";
-        while (!(_reader.Peek() is ' ' or '\n' || _reader.EndOfStream))
+        while (!(_reader.EndOfStream || (char)_reader.Peek() is ' ' or '\n'))
         {
             if (_reader.Peek() == '\r')
             {
@@ -252,16 +252,13 @@ public class MessageTokenizer : IDisposable
     private MessageToken NextSeperator()
     {
         string token = ReadUntilNewLineAndTrim();
-        if (token.Equals("---", StringComparison.Ordinal))
-        {
-            _reader.Read();
-            _lineNum++;
-            return new MessageToken(MessageTokenType.Seperator, token, _lineNum - 1);
-        }
-        else
+        if (token != "---")
         {
             throw new MessageTokenizerException($"Unexpected token '{token}'. Did you mean '---' (ROS Service/Action seperator)?");
         }
+        _reader.Read();
+        _lineNum++;
+        return new MessageToken(MessageTokenType.Seperator, token, _lineNum - 1);
     }
 
     /// <summary>
@@ -277,7 +274,7 @@ public class MessageTokenizer : IDisposable
         // If start char is not alphabet, identifier invalid
         if (!char.IsLetter((char)_reader.Peek()))
         {
-            throw new MessageTokenizerException($"Invalid type identifier: {NextTokenStr()} {CurrentFileAndLine()}");
+            throw new MessageTokenizerException($"Invalid type identifier: {NextTokenStr()} {CurrentFileAndLine}");
         }
 
         // Otherwise, consume input until seperator, EOF or '['
@@ -285,7 +282,7 @@ public class MessageTokenizer : IDisposable
         {
             if (!char.IsLetterOrDigit((char)_reader.Peek()) && !_allowedSpecialCharacterForTypeIdentifier.Contains((char)_reader.Peek()))
             {
-                throw new MessageTokenizerException($"Invalid character in type identifier: {(char)_reader.Peek()} {CurrentFileAndLine()}");
+                throw new MessageTokenizerException($"Invalid character in type identifier: {(char)_reader.Peek()} {CurrentFileAndLine}");
             }
             tokenStr += (char)_reader.Read();
         }
@@ -316,7 +313,7 @@ public class MessageTokenizer : IDisposable
             _reader.Read(); // Discard ']'
             if (_reader.Peek() != ' ')
             {
-                throw new MessageTokenizerException($"Invalid character '{(char)_reader.Peek()}' after ']' {CurrentFileAndLine()}");
+                throw new MessageTokenizerException($"Invalid character '{(char)_reader.Peek()}' after ']' {CurrentFileAndLine}");
             }
             return new MessageToken(MessageTokenType.VariableSizeArray, "", _lineNum);
         }
@@ -334,14 +331,14 @@ public class MessageTokenizer : IDisposable
             else
             {
                 // Invalid Array Declaration
-                throw new MessageTokenizerException($"Invalid array declaration: [{arraySizeStr}] {CurrentFileAndLine()}");
+                throw new MessageTokenizerException($"Invalid array declaration: [{arraySizeStr}] {CurrentFileAndLine}");
             }
 
             _reader.Read(); // Discard ']'
 
             if (_reader.Peek() != ' ')
             {
-                throw new MessageTokenizerException($"Invalid character '{(char)_reader.Peek()}' after ']' {CurrentFileAndLine()}");
+                throw new MessageTokenizerException($"Invalid character '{(char)_reader.Peek()}' after ']' {CurrentFileAndLine}");
             }
             return new MessageToken(MessageTokenType.FixedSizeArray, tokenStr, _lineNum);
         }
@@ -357,12 +354,12 @@ public class MessageTokenizer : IDisposable
         // If start char is not alphabet, identifier invalid
         if (!char.IsLetter((char)_reader.Peek()))
         {
-            throw new MessageTokenizerException($"Invalid identifier: {NextTokenStr()} {CurrentFileAndLine()}");
+            throw new MessageTokenizerException($"Invalid identifier: {NextTokenStr()} {CurrentFileAndLine}");
         }
 
         string tokenStr = "";
         // Otherwise, consume input until seperator or EOF
-        while (!(_reader.Peek() is ' ' or '\n' or '=' || _reader.EndOfStream))
+        while (!(_reader.EndOfStream || (char)_reader.Peek() is ' ' or '\n' or '='))
         {
             if (_reader.Peek() == '\r')
             {
@@ -371,7 +368,7 @@ public class MessageTokenizer : IDisposable
             }
             if (!char.IsLetterOrDigit((char)_reader.Peek()) && _reader.Peek() != '_')
             {
-                throw new MessageTokenizerException($"Invalid character in identifier: {(char)_reader.Peek()} {CurrentFileAndLine()}");
+                throw new MessageTokenizerException($"Invalid character in identifier: {(char)_reader.Peek()} {CurrentFileAndLine}");
             }
             tokenStr += (char)_reader.Read();
         }
@@ -398,7 +395,7 @@ public class MessageTokenizer : IDisposable
     /// Returns the current file path and line number
     /// </summary>
     /// <returns> Returns the current file path and line number </returns>
-    private string CurrentFileAndLine() => $"({this._inFilePath}:{_lineNum})";
+    private string CurrentFileAndLine => $"({this._inFilePath}:{_lineNum})";
 
     public void Dispose()
     {
