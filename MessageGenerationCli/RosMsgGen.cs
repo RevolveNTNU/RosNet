@@ -18,7 +18,7 @@ static void PrintWarnings(List<string> warnings)
     }
 }
 
-var outputOpt = new Option<string>(new[] { "--output", "-o" }, "Specify output path\nIf unspecified, output will be in current working directory, under RosSharpMessages").LegalFilePathsOnly();
+var outputOpt = new Option<string>(new[] { "--output", "-o" }, "Specify output path\nIf unspecified, output will be in current working directory, under RosNetMessages").LegalFilePathsOnly();
 var nameOpt = new Option<string>(new[] { "--ros-package-name", "-n" }, "Specify the ROS package name for the message\nIf unspecified, package name will be retrieved from path, assuming ROS package structure");
 var verboseOpt = new Option<bool>(new[] { "--verbose", "-v" }, "Outputs extra information");
 var inputArg = new Argument<string>("input-path", "The path to either a singel {message,service,action} file, or package").LegalFilePathsOnly();

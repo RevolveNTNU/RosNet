@@ -68,7 +68,7 @@ public class MessageParser
         this._outFilePath = Path.Combine(this._outFilePath, this._className + ".cs");
 
         using StreamWriter writer = new(_outFilePath, false);
-        writer.Write(Utilities.BLOCK_COMMENT + "\n");
+        writer.Write(BLOCK_COMMENT + "\n");
 
         // Message -> Lines
         // Lines -> Line Lines | e
@@ -81,18 +81,13 @@ public class MessageParser
         writer.Write(GenerateImports());
 
         // Write namespace
-        writer.Write(
-            "namespace RosSharp.RosBridgeClient.MessageTypes." + Utilities.ResolvePackageName(_rosPackageName) + "\n" +
-            "{\n"
-            );
+        writer.Write($"namespace RosNet.MessageTypes.{ResolvePackageName(_rosPackageName)}\n{{\n");
 
         // Write class declaration
-        writer.Write(
-            $"{Utilities.ONE_TAB}public class {_className} : Message\n{Utilities.ONE_TAB}{{\n"
-            );
+        writer.Write($"{ONE_TAB}public class {_className} : Message\n{ONE_TAB}{{\n");
 
         // Write ROS package name
-        writer.Write($"{Utilities.TWO_TABS}public const string RosMessageName = \"{_rosPackageName}/{_rosMsgName}\";\n\n");
+        writer.Write($"{TWO_TABS}public const string RosMessageName = \"{_rosPackageName}/{_rosMsgName}\";\n\n");
 
         // Write body
         writer.WriteLine(_body);
@@ -106,7 +101,7 @@ public class MessageParser
         }
 
         // Close class
-        writer.WriteLine(Utilities.ONE_TAB + "}");
+        writer.WriteLine(ONE_TAB + "}");
         // Close namespace
         writer.WriteLine("}");
 
@@ -307,7 +302,7 @@ public class MessageParser
         {
             foreach (string s in _imports)
             {
-                importsStr += $"using RosSharp.RosBridgeClient.MessageTypes.{s};\n";
+                importsStr += $"using RosNet.MessageTypes.{s};\n";
             }
             importsStr += "\n";
         }
@@ -316,14 +311,14 @@ public class MessageParser
 
     private string GenerateDefaultValueConstructor()
     {
-        string constructor = $"{Utilities.TWO_TABS}public {_className}()\n";
-        constructor += Utilities.TWO_TABS + "{\n";
+        string constructor = $"{TWO_TABS}public {_className}()\n";
+        constructor += TWO_TABS + "{\n";
 
         foreach (string identifier in _symbolTable.Keys)
         {
             if (!_constants.Contains(identifier))
             {
-                constructor += $"{Utilities.TWO_TABS}{Utilities.ONE_TAB}this.{identifier} = ";
+                constructor += $"{TWO_TABS}{ONE_TAB}this.{identifier} = ";
                 string type = _symbolTable[identifier];
                 if (_builtInTypesDefaultInitialValues.ContainsKey(type))
                 {
@@ -341,7 +336,7 @@ public class MessageParser
             }
         }
 
-        constructor += Utilities.TWO_TABS + "}\n";
+        constructor += TWO_TABS + "}\n";
 
         return constructor;
     }

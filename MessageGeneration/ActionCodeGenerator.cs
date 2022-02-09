@@ -142,8 +142,8 @@ public class ActionWrapper
         string outPath = Path.Combine(this._outPath, $"{wrapperName}.cs");
 
         string imports =
-            "using RosSharp.RosBridgeClient.MessageTypes.Std;\n" +
-            "using RosSharp.RosBridgeClient.MessageTypes.Actionlib;\n\n";
+            "using RosNet.MessageTypes.Std;\n" +
+            "using RosNet.MessageTypes.Actionlib;\n\n";
 
         _symbolTable = new Dictionary<string, string>();
 
@@ -155,7 +155,7 @@ public class ActionWrapper
         writer.Write(imports);
 
         // Write namespace
-        writer.Write($"namespace RosSharp.RosBridgeClient.MessageTypes.{ResolvePackageName(_rosPackageName)}\n{{\n");
+        writer.Write($"namespace RosNet.MessageTypes.{ResolvePackageName(_rosPackageName)}\n{{\n");
 
         // Write class declaration
         writer.Write($"{ONE_TAB}public class {wrapperName} : Action{type}<{_inFileName}{type}>\n{ONE_TAB}{{\n");
@@ -198,7 +198,7 @@ public class ActionWrapper
         writer.Write(imports);
 
         // Write namespace
-        writer.Write($"namespace RosSharp.RosBridgeClient.MessageTypes.{ResolvePackageName(_rosPackageName)}\n{{\n");
+        writer.Write($"namespace RosNet.MessageTypes.{ResolvePackageName(_rosPackageName)}\n{{\n");
 
         // Write class declaration
         var genericParams = new string[] {
