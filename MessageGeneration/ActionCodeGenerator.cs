@@ -24,7 +24,7 @@ public class ActionCodeGenerator : CodeGenerator
             Console.WriteLine("Output Location: " + outPath);
         }
 
-        var tokenizer = new MessageTokenizer(inPath, new HashSet<string>(Utilities.BuiltInTypesMapping.Keys));
+        using var tokenizer = new MessageTokenizer(inPath, new HashSet<string>(Utilities.BuiltInTypesMapping.Keys));
         var listsOfTokens = tokenizer.Tokenize();
 
         if (listsOfTokens.Count != 3)

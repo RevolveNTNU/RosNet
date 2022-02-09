@@ -1,9 +1,11 @@
-﻿namespace RosNet.MessageGeneration;
+﻿using System;
 
-public class MessageTokenizer
+namespace RosNet.MessageGeneration;
+
+public class MessageTokenizer : IDisposable
 {
 
-    private readonly string _inFilePath = "";
+    private readonly string _inFilePath;
     private uint _lineNum = 1;
 
     private readonly StreamReader _reader;
@@ -130,9 +132,6 @@ public class MessageTokenizer
                 }
             }
         }
-
-        _reader.Close();
-        _reader.Dispose();
         return listsOfTokens;
     }
 
@@ -142,7 +141,7 @@ public class MessageTokenizer
     /// </summary>
     private void DiscardEmpty()
     {
-        while (_reader.Peek() == ' ' || _reader.Peek() == '\t')
+        while (_reader.Peek() is ' ' or '\t')
         {
             _reader.Read();
         }
@@ -158,14 +157,14 @@ public class MessageTokenizer
         string content = "";
         while (_reader.Peek() != '\n' && !_reader.EndOfStream)
         {
-            if (_reader.Peek() != '\r')
-            {
-                content += (char)_reader.Read();
-            }
-            else
+            if (_reader.Peek() == '\r')
             {
                 // Discard carriage return
                 _reader.Read();
+            }
+            else
+            {
+                content += (char)_reader.Read();
             }
         }
         return content.Trim();
@@ -179,16 +178,16 @@ public class MessageTokenizer
     private string NextTokenStr()
     {
         string token = "";
-        while (_reader.Peek() != ' ' && _reader.Peek() != '\n' && !_reader.EndOfStream)
+        while (!(_reader.Peek() is ' ' or '\n' || _reader.EndOfStream))
         {
-            if (_reader.Peek() != '\r')
-            {
-                token += (char)_reader.Read();
-            }
-            else
+            if (_reader.Peek() == '\r')
             {
                 // Discard carriage return
                 _reader.Read();
+            }
+            else
+            {
+                token += (char)_reader.Read();
             }
         }
         _reader.Read();
@@ -208,14 +207,14 @@ public class MessageTokenizer
         string comment = "";
         while (_reader.Peek() != '\n' && !_reader.EndOfStream)
         {
-            if (_reader.Peek() != '\r')
-            {
-                comment += (char)_reader.Read();
-            }
-            else
+            if (_reader.Peek() == '\r')
             {
                 // Discard carriage return
                 _reader.Read();
+            }
+            else
+            {
+                comment += (char)_reader.Read();
             }
         }
         _reader.Read();
@@ -269,18 +268,13 @@ public class MessageTokenizer
             tokenStr += (char)_reader.Read();
         }
 
-        if (_builtInTypes.Contains(tokenStr))
+        var tokenType = true switch
         {
-            return new MessageToken(MessageTokenType.BuiltInType, tokenStr, _lineNum);
-        }
-        else if (tokenStr.Equals("Header", StringComparison.Ordinal))
-        {
-            return new MessageToken(MessageTokenType.Header, tokenStr, _lineNum);
-        }
-        else
-        {
-            return new MessageToken(MessageTokenType.DefinedType, tokenStr, _lineNum);
-        }
+            true when _builtInTypes.Contains(tokenStr) => MessageTokenType.BuiltInType,
+            true when tokenStr == "Header" => MessageTokenType.Header,
+            _ => MessageTokenType.DefinedType,
+        };
+        return new MessageToken(tokenType, tokenStr, _lineNum);
     }
 
     /// <summary>
@@ -338,27 +332,24 @@ public class MessageTokenizer
     /// <returns> Next field identifier token in the stream </returns>
     private MessageToken NextIdentifierToken()
     {
-        string tokenStr = "";
-
         // If start char is not alphabet, identifier invalid
         if (!char.IsLetter((char)_reader.Peek()))
         {
             throw new MessageTokenizerException($"Invalid identifier: {NextTokenStr()} {CurrentFileAndLine()}");
         }
 
+        string tokenStr = "";
         // Otherwise, consume input until seperator or EOF
-        while (_reader.Peek() != ' ' && _reader.Peek() != '\n' && _reader.Peek() != '=' && !_reader.EndOfStream)
+        while (!(_reader.Peek() is ' ' or '\n' or '=' || _reader.EndOfStream))
         {
             if (_reader.Peek() == '\r')
             {
                 _reader.Read();
                 continue;
             }
-            if (!Char.IsLetterOrDigit((char)_reader.Peek()) && _reader.Peek() != '_')
+            if (!char.IsLetterOrDigit((char)_reader.Peek()) && _reader.Peek() != '_')
             {
-                {
-                    throw new MessageTokenizerException("Invalid character in identifier: " + (char)_reader.Peek() + " " + CurrentFileAndLine());
-                }
+                throw new MessageTokenizerException($"Invalid character in identifier: {(char)_reader.Peek()} {CurrentFileAndLine()}");
             }
             tokenStr += (char)_reader.Read();
         }
@@ -385,11 +376,13 @@ public class MessageTokenizer
     /// Returns the current file path and line number
     /// </summary>
     /// <returns> Returns the current file path and line number </returns>
-    private string CurrentFileAndLine()
-    {
-        return "(" + this._inFilePath + ":" + _lineNum + ")";
-    }
+    private string CurrentFileAndLine() => $"({this._inFilePath}:{_lineNum})";
 
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        ((IDisposable)_reader).Dispose();
+    }
 }
 
 public class MessageTokenizerException : Exception

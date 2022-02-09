@@ -23,7 +23,7 @@ public class MessageCodeGenerator : CodeGenerator
                 Console.WriteLine("Output Location: " + outPath);
             }
 
-            MessageTokenizer tokenizer = new(inPath, new HashSet<string>(Utilities.BuiltInTypesMapping.Keys));
+            using var tokenizer = new MessageTokenizer(inPath, new HashSet<string>(Utilities.BuiltInTypesMapping.Keys));
             List<List<MessageToken>> listOfTokens = tokenizer.Tokenize();
 
             if (listOfTokens.Count != 1)
