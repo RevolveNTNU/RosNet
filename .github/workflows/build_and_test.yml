@@ -23,32 +23,32 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
-    - name : coverlet
-      uses: b3b00/coverlet-action@1.1.0
-      with:
-        testProject: 'ROSNETTest/ROSNETTest.csproj'
-        output: 'lcov.info'
-        outputFormat: 'lcov'
-        excludes: '[program]*,[test]test.*'
+    #- name : coverlet
+    #  uses: b3b00/coverlet-action@1.1.0
+    #  with:
+    #    testProject: 'ROSNETTest/ROSNETTest.csproj'
+    #    output: 'lcov.info'
+    #    outputFormat: 'lcov'
+    #    excludes: '[program]*,[test]test.*'
 
     - uses: actions/upload-artifact@v2
       if: ${{ always() }}
       with:
         name: test_report
-        path: /home/runner/work/ROSNET/ROSNET/ROSNETTest/TestResults/test-results.trx
-    - uses: actions/upload-artifact@v2
-      if: ${{ always() }}
-      with:
-        name: coverage_report
-        path: /home/runner/work/ROSNET/ROSNET/ROSNETTest/lcov.info
-    - uses: coverallsapp/github-action@v1.1.1
-      with:
-        github-token: ${{secrets.GITHUB_TOKEN }} 
-        path-to-lcov: /home/runner/work/ROSNET/ROSNET/ROSNETTest/lcov.info
+        path: RosNet.Test/TestResults/test-results.trx
+    #- uses: actions/upload-artifact@v2
+    #  if: ${{ always() }}
+    #  with:
+    #    name: coverage_report
+    #    path: /home/runner/work/ROSNET/ROSNET/R|OSNETTest/lcov.info
+    #- uses: coverallsapp/github-action@v1.1.1
+    #  with:
+    #    github-token: ${{secrets.GITHUB_TOKEN }} 
+    #    path-to-lcov: /home/runner/work/ROSNET/ROSNET/ROSNETTest/lcov.info
     - name: Test Reporter
       uses: dorny/test-reporter@v1.4.3
       if: ${{ always() }}
       with:
         name: Test Report            # Name of the check run which will be created
-        path: /home/runner/work/ROSNET/ROSNET/ROSNETTest/TestResults/test-results.trx    # Path to test results
+        path: RosNet.Test/TestResults/test-results.trx    # Path to test results
         reporter: dotnet-trx        # Format of test results
