@@ -1,4 +1,7 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis;
+using System.Globalization;
+using System.IO;
 
 namespace RosNet.MessageGeneration;
 
@@ -70,7 +73,7 @@ public class MessageParser
 
         // Message -> Lines
         // Lines -> Line Lines | e
-        while (!IsEmpty())
+        while (_tokens.Count != 0)
         {
             Line();
         }
@@ -116,66 +119,58 @@ public class MessageParser
     private void Line()
     {
         MessageToken? peeked = this.Peek();
-        if (PeekType(MessageTokenType.Comment))
+        if (peeked == null)
+        {
+            throw new MessageParserException("Unexpected end of input", _inFileName, _lineNum);
+        }
+        else if (peeked.Type == MessageTokenType.Comment)
         {
             Comment();
         }
-        else if (PeekType(MessageTokenType.BuiltInType) || PeekType(MessageTokenType.DefinedType) || PeekType(MessageTokenType.Header))
+        else if (peeked.Type is MessageTokenType.BuiltInType or MessageTokenType.DefinedType or MessageTokenType.Header)
         {
             Declaration();
         }
         else
         {
-            // Mumble mumble
-            if (peeked == null)
-            {
-                throw new MessageParserException(
-                    $"Unexpected end of input ' at {_inFilePath}:{_lineNum}");
-            }
-            else
-            {
-                throw new MessageParserException(
-                    $"Unexpected token '{peeked.Content}' at {_inFilePath}:{_lineNum}. Expecting a comment or field declaration.");
-            }
+            throw new MessageParserException($"Unexpected token '{peeked.Content}'. Expecting a comment or field declaration.", _inFilePath, _lineNum);
         }
     }
 
     // Comment -> # sigma* \n
-    private void Comment()
-    {
-        _body += $"{Utilities.TWO_TABS}// {MatchByType(MessageTokenType.Comment)}\n";
-    }
+    private void Comment() => _body += $"{Utilities.TWO_TABS}// {MatchByType(MessageTokenType.Comment)}\n";
 
     // Declaration -> BuiltInType Identifier | BuiltInType Identifier ConstantDeclaration | BuiltInType ArrayDeclaration Identifier
     // Declaration -> DefinedType Identifier | DefinedType ArrayDeclaration Identifier
     // Declaration -> Header Identifier
     private void Declaration()
     {
-        string declaration = "";
         // Type
-        MessageToken? peeked = Peek();
-        bool canHaveConstDecl = false;
-        declaration += Utilities.TWO_TABS + "public ";
+        var peeked = Peek() ?? throw new MessageParserException("Unexpected end of file.", _inFilePath, _lineNum);
+
+        var declaration = $"{Utilities.TWO_TABS}public ";
+        var canHaveConstDecl = false;
         string type;
-        if (PeekType(MessageTokenType.BuiltInType))
+
+        if (peeked.Type == MessageTokenType.BuiltInType)
         {
             type = _builtInTypeMapping[MatchByType(MessageTokenType.BuiltInType)];
-            if (!type.Equals("Time", StringComparison.Ordinal) && !type.Equals("Duration", StringComparison.Ordinal))
+            if (type.ToLower() is "time" or "duration")
+            {
+                // Need to import Std, as these types are defined by us, unlike most primitives
+                _imports.Add("Std");
+            }
+            else
             {
                 // Time and Duration can't have constant declaration
                 // See <wiki.ros.org/msg>
                 canHaveConstDecl = true;
             }
-            else
-            {
-                // Need to import Standard
-                _imports.Add("Std");
-            }
         }
-        else if (PeekType(MessageTokenType.DefinedType))
+        else if (peeked.Type == MessageTokenType.DefinedType)
         {
             type = MatchByType(MessageTokenType.DefinedType);
-            string[] hierarchy = type.Split(new char[] { '/', '\\' });
+            string[] hierarchy = type.Split('/');
             // Assume type can only be either:
             // Type
             // package/Type
@@ -186,92 +181,84 @@ public class MessageParser
                 case 2:
                     if (hierarchy[0].Length == 0 || hierarchy[1].Length == 0)
                     {
-                        throw new MessageParserException(
-                        $"Invalid field type '{type}'. + ({_inFilePath}:{_lineNum})");
+                        goto default;
                     }
                     string package = Utilities.ResolvePackageName(hierarchy[0]);
                     _imports.Add(package);
                     type = hierarchy[1];
                     break;
                 default:
-                    throw new MessageParserException($"Invalid field type '{type}'. + ({_inFilePath}:{_lineNum})");
+                    throw new MessageParserException($"Invalid field type '{type}'.", _inFilePath, _lineNum);
             }
         }
         else
         {
             type = MatchByType(MessageTokenType.Header);
-            if (PeekType(MessageTokenType.FixedSizeArray) || PeekType(MessageTokenType.VariableSizeArray))
+            if (peeked.Type is MessageTokenType.FixedSizeArray or MessageTokenType.VariableSizeArray)
             {
-                Warn($"By convention, there is only one header for each message.({_inFilePath}:{_lineNum})");
+                Warn($"By convention, there is only one header for each message. ({_inFilePath}:{_lineNum})");
             }
-            // FIXME: can peeked be null?
-            if (PeekType(MessageTokenType.Identifier) && !peeked!.Content.Equals("header", StringComparison.Ordinal))
+            if (peeked.Type == MessageTokenType.Identifier && !peeked.Content.Equals("header", StringComparison.Ordinal))
             {
-                this.Warn($"By convention, a ros message Header will be named 'header'. '{peeked.Content}'. ({_inFilePath}:{_lineNum})");
+                Warn($"By convention, a ros message Header will be named 'header'. '{peeked.Content}'. ({_inFilePath}:{_lineNum})");
             }
             _imports.Add("Std");
         }
 
         // Array Declaration
-        int arraySize = -1;
-        if (PeekType(MessageTokenType.FixedSizeArray))
+        int? arraySize = null;
+        if (peeked.Type is MessageTokenType.FixedSizeArray or MessageTokenType.VariableSizeArray)
         {
             type += "[]";
             canHaveConstDecl = false;
-            arraySize = int.Parse(MatchByType(MessageTokenType.FixedSizeArray));
-        }
-        if (PeekType(MessageTokenType.VariableSizeArray))
-        {
-            type += "[]";
-            canHaveConstDecl = false;
-            MatchByType(MessageTokenType.VariableSizeArray);
-            arraySize = 0;
+            arraySize = peeked.Type == MessageTokenType.FixedSizeArray ? int.Parse(MatchByType(MessageTokenType.FixedSizeArray)) : 0;
+            if (peeked.Type == MessageTokenType.VariableSizeArray)
+            {
+                MatchByType(MessageTokenType.VariableSizeArray);
+            }
         }
 
         // Identifier
         string identifier = MatchByType(MessageTokenType.Identifier);
         // Check for duplicate declaration
-        if (_symbolTable.ContainsKey(identifier))
-        {
-            throw new MessageParserException($"Field '{identifier}' at {_inFilePath}:{_lineNum} already declared!");
-        }
         // Check if identifier is a ROS message built-in type
-        if (_builtInTypeMapping.ContainsKey(identifier) && identifier.Equals("time", StringComparison.Ordinal) && identifier.Equals("duration", StringComparison.Ordinal))
+        if (_builtInTypeMapping.ContainsKey(identifier) || identifier.ToLower() is "time" or "duration")
         {
-            throw new MessageParserException(
-                $"Invalid field identifier '{identifier}' at {_inFilePath}:{_lineNum}. '{identifier}' is a ROS message built-in type.");
+            throw new MessageParserException($"Invalid field identifier '{identifier}'. '{identifier}' is a ROS message built-in type.", _inFilePath, _lineNum);
         }
-
 
         // Check if identifier is a C# keyword
-        if (SyntaxFacts.IsValidIdentifier(identifier))
+        if (!SyntaxFacts.IsValidIdentifier(identifier))
         {
-            Warn($"'{identifier}' is not a valid C# Identifier. We have appended \"_\" at the front to avoid C# compile-time issues.({_inFilePath}:{_lineNum})");
             declaration = $"{Utilities.TWO_TABS}[JsonProperty(\"{identifier}\")]\n{declaration}";
             identifier = "_" + identifier;
+            if (!SyntaxFacts.IsValidIdentifier(identifier))
+            {
+                throw new MessageParserException($"Invalid field identifier '{identifier}'. '{identifier} is an invalid C# identifier, even with a prepended \"_\".", _inFilePath, _lineNum);
+            }
+            Warn($"'{identifier}' is not a valid C# Identifier. We have prepended \"_\" to avoid C# compile-time issues. ({_inFilePath}:{_lineNum})");
         }
 
-        _symbolTable.Add(identifier, type);
+        if (!_symbolTable.TryAdd(identifier, type))
+        {
+            throw new MessageParserException($"Field '{identifier}' already declared!", _inFileName, _lineNum);
+        }
 
         // Array declaration table
-        if (arraySize > -1)
+        if (arraySize is int s)
         {
-            _arraySizes.Add(identifier, arraySize);
+            _arraySizes.Add(identifier, s);
         }
 
         // Constant Declaration
-        if (PeekType(MessageTokenType.ConstantDeclaration))
+        if (peeked?.Type == MessageTokenType.ConstantDeclaration)
         {
-            if (canHaveConstDecl)
+            if (!canHaveConstDecl)
             {
-                declaration += $"const {type} {identifier} = {ConstantDeclaration(type)}";
-                _constants.Add(identifier);
+                throw new MessageParserException($"Type {type}' at {_inFilePath}:{_lineNum} cannot have constant declaration");
             }
-            else
-            {
-                throw new MessageParserException(
-                    $"Type {type}' at {_inFilePath}:{_lineNum} cannot have constant declaration");
-            }
+            declaration += $"const {type} {identifier} = {ConstantDeclaration(type)}";
+            _constants.Add(identifier);
         }
         else
         {
@@ -285,56 +272,33 @@ public class MessageParser
     // Note that a comment cannot be present in a string constant definition line
     private string ConstantDeclaration(string type)
     {
-        string declaration = MatchByType(MessageTokenType.ConstantDeclaration);
-        if (type.Equals("string", StringComparison.Ordinal))
+        var declaration = MatchByType(MessageTokenType.ConstantDeclaration);
+        if (type == "string")
         {
-            return "\"" + declaration.Trim() + "\";\n";
+            return $"\"{declaration.Trim()}\";\n";
         }
-        else
+        var content = declaration.Split('#', 2);
+        var val = content[0].Trim();
+        var comment = content.Length > 1 ? $" // {content[1]}" : "";
+
+        var ret = type switch
         {
-            string ret = "";
-            string comment = "";
-            // Parse constant value using exisiting C# routines
-            // Parse by invoking method
-            // First check if a comment exists
-            string val;
-            if (declaration.Contains('#'))
-            {
-                string[] contents = declaration.Split('#');
-                val = contents[0].Trim();
-                comment = string.Join("#", contents, 1, contents.Length - 1);
-            }
-            else
-            {
-                val = declaration.Trim();
-            }
-            // Parse value
-            ret += type switch
-            {
-                "bool" when val.Equals("True", StringComparison.Ordinal) || (byte.TryParse(val, out byte a) && a != 0) => "true",
-                "bool" when val.Equals("False", StringComparison.Ordinal) || (byte.TryParse(val, out byte a) && a == 0) => "false",
-                "sbyte" when sbyte.TryParse(val, out _) => val,
-                "byte" when byte.TryParse(val, out _) => val,
-                "short" when short.TryParse(val, out _) => val,
-                "ushort" when ushort.TryParse(val, out _) => val,
-                "int" when int.TryParse(val, out _) => val,
-                "uint" when uint.TryParse(val, out _) => val,
-                "long" when long.TryParse(val, out _) => val,
-                "ulong" when ulong.TryParse(val, out _) => val,
-                "float" when float.TryParse(val, out _) => val,
-                "double" when double.TryParse(val, out _) => val,
-                _ => throw new MessageParserException($"Type mismatch: Expecting {type}, but value '{val}' at {this._inFilePath}:{this._lineNum} is not {type}."),
-            };
-            ret += ";";
+            "bool" when (bool.TryParse(val, out bool b) && b) || (byte.TryParse(val, out byte a) && a != 0) => "true",
+            "bool" when (bool.TryParse(val, out bool b) && !b) || (byte.TryParse(val, out byte a) && a == 0) => "false",
+            "sbyte" when sbyte.TryParse(val, out _) => val,
+            "byte" when byte.TryParse(val, out _) => val,
+            "short" when short.TryParse(val, out _) => val,
+            "ushort" when ushort.TryParse(val, out _) => val,
+            "int" when int.TryParse(val, out _) => val,
+            "uint" when uint.TryParse(val, out _) => val,
+            "long" when long.TryParse(val, out _) => val,
+            "ulong" when ulong.TryParse(val, out _) => val,
+            "float" when float.TryParse(val, out _) => val,
+            "double" when double.TryParse(val, out _) => val,
+            _ => throw new MessageParserException($"Type mismatch: Expected {type}, but value '{val}' is not {type}.", _inFilePath, _lineNum),
+        };
 
-            // Take care of comment
-            if (comment.Length != 0)
-            {
-                ret += $" // {comment}";
-            }
-
-            return $"{ret}\n";
-        }
+        return $"{ret};{comment}\n";
     }
 
     private string GenerateImports()
@@ -353,9 +317,7 @@ public class MessageParser
 
     private string GenerateDefaultValueConstructor()
     {
-        string constructor = "";
-
-        constructor += $"{Utilities.TWO_TABS}public {_className}()\n";
+        string constructor = $"{Utilities.TWO_TABS}public {_className}()\n";
         constructor += Utilities.TWO_TABS + "{\n";
 
         foreach (string identifier in _symbolTable.Keys)
@@ -370,7 +332,7 @@ public class MessageParser
                 }
                 else if (_arraySizes.ContainsKey(identifier))
                 {
-                    constructor += $"new {type.Remove(type.Length - 1)}{_arraySizes[identifier]}]";
+                    constructor += $"new {type[..^1]}{_arraySizes[identifier]}]";
                 }
                 else
                 {
@@ -418,35 +380,40 @@ public class MessageParser
     private string MatchByType(MessageTokenType type)
     {
         MessageToken token = _tokens[0];
-        if (token.Type.Equals(type))
-        {
-            _tokens.RemoveAt(0);
-            // Update line num
-            if (!IsEmpty())
-            {
-                _lineNum = _tokens[0].LineNum;
-            }
-            return token.Content;
-        }
-        else
+        if (token.Type != type)
         {
             throw new MessageParserException(
-                $"Unexpected token '{token.Content}' at {_inFilePath}:{token.LineNum}. Expecting a token of type {Enum.GetName(typeof(MessageTokenType), token.Type)}");
+                $"Unexpected token '{token.Content}'. Expected a token of type {Enum.GetName(typeof(MessageTokenType), token.Type)}", _inFilePath, token.LineNum);
         }
+
+        _tokens.RemoveAt(0);
+        // Update line num
+        if (_tokens.Count != 0)
+        {
+            _lineNum = _tokens[0].LineNum;
+        }
+        return token.Content;
+
     }
 
-    private MessageToken? Peek() => IsEmpty() ? null : _tokens[0];
-
-    private bool PeekType(MessageTokenType type) => !this.IsEmpty() && _tokens[0].Type.Equals(type);
+    private MessageToken? Peek() => _tokens.Count == 0 ? null : _tokens[0];
 
     private void Warn(string msg) => _warnings.Add(msg);
 
     public List<string> GetWarnings() => _warnings;
-
-    private bool IsEmpty() => _tokens.Count == 0;
 }
 
-public class MessageParserException : Exception
+public class MessageParserException : System.Exception
 {
-    public MessageParserException(string msg) : base(msg) { }
+    public readonly uint? LineNum = null;
+    public readonly string? FilePath;
+    public override string? Source => FilePath ?? base.Source;
+    public MessageParserException(string message, string? filePath = null, uint? lineNum = null) : base(message)
+    {
+        FilePath = filePath;
+        LineNum = lineNum;
+    }
+    public MessageParserException(string message, System.Exception inner) : base(message, inner) { }
+
+    public override string ToString() => $"{base.ToString()} ({FilePath}:{LineNum})";
 }
