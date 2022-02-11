@@ -15,7 +15,9 @@ jobs:
       - name: Setup dotnet
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 3.1.x
+          dotnet-version: |
+            3.1.x
+            6.0.x
           
       - name: Restore dependencies
         run: dotnet restore
@@ -29,7 +31,7 @@ jobs:
           # Ensure file is written in UTF8
           echo "::set-output name=version::$version"
       - name: Create NuGet package  
-        run: dotnet pack -v normal -c Release --include-source -p:Version=${{steps.get-version.outputs.version}} -o nupkg ROSNET/ROSNET.*proj
+        run: dotnet pack -v normal -c Release --include-source -p:Version=${{steps.get-version.outputs.version}} -o nupkg RosNet/RosNet.csproj
 
       - name: Push package to NuGet
-        run: dotnet nuget push /home/runner/work/ROSNET/ROSNET/nupkg/ROSNET.${{steps.get-version.outputs.version}}.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push nupkg/RosNet.${{steps.get-version.outputs.version}}.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json --skip-duplicate

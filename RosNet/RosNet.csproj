@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>RosNet</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="DataModel\" />
+    <None Remove="Enum\" />
+    <None Remove="RosMessageParser\" />
+    <None Remove="Field\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Type\" />
+    <Folder Include="RosMessageParser\" />
+    <Folder Include="Field\" />
+  </ItemGroup>
+    
+  <ItemGroup>
+    <!-- Give the test project access to "internal" types and type members -->
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+        <_Parameter1>RosNetTest</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>  
+  
+    
+</Project>
