@@ -4,9 +4,9 @@ using RosNet.DataModel;
 
 namespace RosNet.Test
 {
-    internal class DataModelTests
+    public class DataModelTests
     {
-        [fact]
+        [Fact]
         public void TestToDateTime()
         {
             // Epoch time corresponding to
