@@ -12,7 +12,7 @@ namespace RosNet.DataModel
     {
         //Header fields of message record:
         public int Conn { get; }
-        public RosTime Time { get;  }
+        public Time TimeStamp { get;  }
 
         //Data in message record:
         public Dictionary<string,FieldValue> Data { get; set; }
@@ -25,13 +25,13 @@ namespace RosNet.DataModel
             this.Conn = BitConverter.ToInt32(conn.Value);
             uint secs = BitConverter.ToUInt32(time.Value.Take(4).ToArray());
             uint nsecs = BitConverter.ToUInt32(time.Value.Skip(4).Take(4).ToArray());
-            this.Time = new RosTime(secs, nsecs);
+            this.Time = new Time(secs, nsecs);
         }
 
         public override string ToString()
         {
             var s = ($"Conn: {Conn} \n");
-            s += ($"Time: {Time.Secs} : {Time.NSecs} \n");
+            s += ($"Time: {TimeStamp.GetDateTime().ToString("u")} \n");
             s += "Data: \n";
             foreach (KeyValuePair<string, FieldValue> kvp in Data)
             {
