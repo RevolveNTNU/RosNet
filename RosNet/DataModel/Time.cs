@@ -23,7 +23,7 @@ namespace RosNet.DataModel
         /// Turns Seconds and Nanoseconds into a DateTime object
         /// </summary>
         /// <returns> A DateTime object corresponding to the Rostime's time </returns>
-        public DateTime GetDateTime()
+        public DateTime ToDateTime()
         {
             // Ros timestamps are usually saved as epoch time
             double secs = this.Secs + this.NSecs * Math.Pow(10, -9);

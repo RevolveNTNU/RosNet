@@ -31,7 +31,7 @@ namespace RosNet.DataModel
         public override string ToString()
         {
             var s = ($"Conn: {Conn} \n");
-            s += ($"Time: {TimeStamp.GetDateTime().ToString("o")} \n");
+            s += ($"Time: {TimeStamp.ToDateTime().ToString("o")} \n");
             s += "Data: \n";
             foreach (KeyValuePair<string, FieldValue> kvp in Data)
             {
