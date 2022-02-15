@@ -25,7 +25,7 @@ namespace RosNet.DataModel
             this.Conn = BitConverter.ToInt32(conn.Value);
             uint secs = BitConverter.ToUInt32(time.Value.Take(4).ToArray());
             uint nsecs = BitConverter.ToUInt32(time.Value.Skip(4).Take(4).ToArray());
-            this.Time = new Time(secs, nsecs);
+            this.TimeStamp = new Time(secs, nsecs);
         }
 
         public override string ToString()
