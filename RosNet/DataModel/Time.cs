@@ -25,11 +25,9 @@ namespace RosNet.DataModel
         /// <returns> A DateTime object corresponding to the Rostime's time </returns>
         public DateTime GetDateTime()
         {
-            // A DateTime tick is defined as 100 nanoseconds
-            long ticks = 0;
-            ticks += this.Secs * 10_000_000;
-            ticks += this.NSecs / 100;
-            return new DateTime(ticks);
+            // Ros timestamps are usually saved as epoch time
+            double secs = this.Secs + this.NSecs * Math.Pow(10, -9);
+            return DateTime.UnixEpoch.AddSeconds(secs);
         }
     }
 }
