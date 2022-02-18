@@ -1,9 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>RosNet</RootNamespace>
-  </PropertyGroup>
+  <PropertyGroup></PropertyGroup>
 
   <ItemGroup>
     <None Remove="DataModel\" />
@@ -16,13 +13,11 @@
     <Folder Include="RosMessageParser\" />
     <Folder Include="Field\" />
   </ItemGroup>
-    
+
   <ItemGroup>
     <!-- Give the test project access to "internal" types and type members -->
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
         <_Parameter1>RosNet.Test</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>  
-  
-    
 </Project>
