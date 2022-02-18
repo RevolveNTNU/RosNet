@@ -38,7 +38,7 @@ namespace RosNet.DataModel
         /// <summary>
         /// Sets data in connection
         /// </summary>
-        public void SetData(byte[] originalTopic, byte[] type, byte[] md5sum, List<FieldValue> messageDefinition, byte[] callerID, byte[] latching)
+        internal void SetData(byte[] originalTopic, byte[] type, byte[] md5sum, List<FieldValue> messageDefinition, byte[] callerID, byte[] latching)
         {
             this.OriginalTopic = System.Text.Encoding.Default.GetString(originalTopic);
             this.Type = System.Text.Encoding.Default.GetString(type);
