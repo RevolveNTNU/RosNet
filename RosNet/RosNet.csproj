@@ -16,6 +16,6 @@
 
   <ItemGroup>
     <!-- Give the test project access to "internal" types and type members -->
-    <InternalsVisibleTo Include="RostNet.Tets" />
+    <InternalsVisibleTo Include="RostNet.Test" />
   </ItemGroup>
 </Project>
