@@ -15,7 +15,7 @@ namespace RosNet.Test
             uint epochNano = 123456700;
             Time test = new Time(epochSec, epochNano);
             // 1 tick is 100 nano seconds
-            Assert.Equal(test.ToDateTime(), new DateTime(2022, 02, 15, 14, 35, 8).AddTicks(epochNano / 100));
+            Assert.Equal(test.ToDateTime(), new DateTime(2022, 02, 15, 14, 35, 8).AddSeconds(epochNano * Math.Pow(10, -9)));
         }
     }
 }
