@@ -30,7 +30,7 @@ namespace RosNet.Test
             RosBag rosBag = RosBagReader.Read(path);
             Dictionary<Time, FieldValue> timeSeries = rosBag.GetTimeSeries("/amk/rpm", "FL_vel");
 
-            Assert.Equal(7071, BitConverter.ToInt32(timeSeries[(1629366496, 951464957)].Value));
+            Assert.Equal(7071, BitConverter.ToInt32(timeSeries[new Time(1629366496, 951464957)].Value));
         }
     }
 }
