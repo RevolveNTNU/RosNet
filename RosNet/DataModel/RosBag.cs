@@ -67,9 +67,9 @@ namespace RosNet.DataModel
         /// Makes a dictionary of timestamps and fieldvalues of field with fieldname fieldName
         /// </summary>
         /// <returns>Dictionary with time and corresponding fieldvalue</returns>
-        public Dictionary<(uint,uint),FieldValue> GetTimeSeries(string topic, string fieldName)
+        public Dictionary<Time, FieldValue> GetTimeSeries(string topic, string fieldName)
         {
-            var timeSeries = new Dictionary<(uint,uint), FieldValue>();
+            var timeSeries = new Dictionary<Time, FieldValue>();
 
             //todo:finn bedre løsning
             foreach (Connection conn in Connections.Values)
@@ -86,7 +86,7 @@ namespace RosNet.DataModel
 
                 foreach (Message message in conn.Messages)
                 {
-                    timeSeries.Add(message.Time, message.Data[fieldName]);
+                    timeSeries.Add(message.TimeStamp, message.Data[fieldName]);
                 }
             }
 
