@@ -15,7 +15,7 @@ namespace RosNet.RosReader
         /// <summary>
         /// Reads a connection and sets the data
         /// </summary>
-        public static void SetConnectionData(BinaryReader reader, ref Connection connection)
+        internal static void SetConnectionData(BinaryReader reader, ref Connection connection)
         {
             int dataLen = reader.ReadInt32();
             long endPos = reader.BaseStream.Position + dataLen;
@@ -62,7 +62,7 @@ namespace RosNet.RosReader
         /// Reads message data
         /// </summary>
         /// <returns>message data in bytes</returns>
-        public static byte[] ReadMessageData(BinaryReader reader)
+        internal static byte[] ReadMessageData(BinaryReader reader)
         {
             var dataLength = reader.ReadInt32();
             var data = reader.ReadBytes(dataLength);
@@ -73,7 +73,7 @@ namespace RosNet.RosReader
         /// Reads chunk and adds all messages and message data to unParsedMessageHandler
         /// </summary>
         /// <returns>List of connections in chunk</returns>
-        public static List<Connection> ReadChunk(BinaryReader reader, ref UnParsedMessageHandler unParsedMessageHandler)
+        internal static List<Connection> ReadChunk(BinaryReader reader, ref UnParsedMessageHandler unParsedMessageHandler)
         {
             int dataLength = reader.ReadInt32();
             long endPos = reader.BaseStream.Position + dataLength;

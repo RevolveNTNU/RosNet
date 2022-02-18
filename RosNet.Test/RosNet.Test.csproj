@@ -24,5 +24,10 @@
   <ItemGroup>
     <ProjectReference Include="..\RosNet\RosNet.csproj" />
   </ItemGroup>
-
+  <ItemGroup>
+    <None Remove="TestBags\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="TestBags\" />
+  </ItemGroup>
 </Project>

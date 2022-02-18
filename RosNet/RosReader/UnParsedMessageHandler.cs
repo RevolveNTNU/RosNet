@@ -23,7 +23,7 @@ namespace RosNet.RosReader
         /// <summary>
         /// Adds a Message object and data to dictionary of unparsed messages
         /// </summary>
-        public void AddUnParsedMessage(Message message, byte[] data)
+        internal void AddUnParsedMessage(Message message, byte[] data)
         {
             if (UnParsedMessageByConn.ContainsKey(message.Conn))
             {
@@ -38,7 +38,7 @@ namespace RosNet.RosReader
         /// <summary>
         /// Parses data of all messages in list of unparsed messages
         /// </summary>
-        public void ParseMessages(RosBag rosBag)
+        internal void ParseMessages(RosBag rosBag)
         {
             foreach(KeyValuePair<int, Connection> kvp in rosBag.Connections)
             {

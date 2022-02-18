@@ -14,7 +14,7 @@ namespace RosNet.RosReader
     public static class Header
     {
         //Dictionary containing the names of all header fields in record
-        public static Dictionary<int, string[]> HeaderFieldsByOp = new Dictionary<int, string[]>()
+        internal static Dictionary<int, string[]> HeaderFieldsByOp = new Dictionary<int, string[]>()
         {
             { 2 , new string[] {"conn", "time"} },
             { 3 , new string[] {"index_pos", "conn_count", "chunk_count"} },
@@ -28,7 +28,7 @@ namespace RosNet.RosReader
         /// Reads a header
         /// </summary>
         /// <returns>Dictionary with fieldnames and fieldvalues in header</returns>
-        public static Dictionary<string, FieldValue> ReadHeader(BinaryReader reader)
+        internal static Dictionary<string, FieldValue> ReadHeader(BinaryReader reader)
         {
             int headerLen = reader.ReadInt32();
             var headerFields = new Dictionary<string, FieldValue>();
@@ -59,7 +59,7 @@ namespace RosNet.RosReader
         /// Reads a field
         /// </summary>
         /// <returns>FieldValue containing name, datatype and value of field</returns>
-        private static FieldValue ReadField(BinaryReader reader)
+        internal static FieldValue ReadField(BinaryReader reader)
         {
             int fieldLen = reader.ReadInt32();
             string fieldName = ReadName(reader);
@@ -118,7 +118,7 @@ namespace RosNet.RosReader
         /// Reads a field name
         /// </summary>
         /// <returns> name of field</returns>
-        public static string ReadName(BinaryReader reader)
+        internal static string ReadName(BinaryReader reader)
         {
             char curChar;
             string fieldName = "";

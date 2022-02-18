@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using RosNet.Field;
+
 namespace RosNet.DataModel
 {
     /// <summary>
@@ -21,7 +23,7 @@ namespace RosNet.DataModel
         /// Adds a Connection object to the ROSbag's list of connections
         /// </summary>
         /// <returns>true if connection was successfully added</returns>
-        public bool AddConnection(Connection conn)
+        internal bool AddConnection(Connection conn)
         {
             if (!Connections.ContainsKey(conn.Conn))
             {
@@ -43,6 +45,53 @@ namespace RosNet.DataModel
             return s;
         }
 
+        /// <summary>
+        /// Makes a dictionary of all the topics and fieldnames in rosbag
+        /// </summary>
+        /// <returns>Dictionary with topics and corresponding fieldnames</returns>
+        public Dictionary<string, List<string>> GetConnectionFields()
+        {
+            var fieldsByTopic = new Dictionary<string, List<string>>();
+            foreach (Connection conn in Connections.Values)
+            {
+                fieldsByTopic.Add(conn.Topic, new List<string>());
+                foreach (FieldValue field in conn.MessageDefinition)
+                {
+                    fieldsByTopic[conn.Topic].Add(field.Name);
+                }
+            }
+            return fieldsByTopic;
+        }
 
+        /// <summary>
+        /// Makes a dictionary of timestamps and fieldvalues of field with fieldname fieldName
+        /// </summary>
+        /// <returns>Dictionary with time and corresponding fieldvalue</returns>
+        public Dictionary<(uint,uint),FieldValue> GetTimeSeries(string topic, string fieldName)
+        {
+            var timeSeries = new Dictionary<(uint,uint), FieldValue>();
+
+            //todo:finn bedre løsning
+            foreach (Connection conn in Connections.Values)
+            {
+                if (!conn.Topic.Equals(topic))
+                {
+                    continue;
+                }
+
+                if (!conn.MessageDefinition.Exists(field => field.Name.Equals(fieldName)))
+                {
+                    continue;
+                }
+
+                foreach (Message message in conn.Messages)
+                {
+                    timeSeries.Add(message.Time, message.Data[fieldName]);
+                }
+            }
+
+            //todo: raise exception if timeseries is empty
+            return timeSeries;
+        }
     }
 }
