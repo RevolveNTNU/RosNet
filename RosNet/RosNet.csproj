@@ -20,7 +20,7 @@
   <ItemGroup>
     <!-- Give the test project access to "internal" types and type members -->
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-        <_Parameter1>RosNetTest</_Parameter1>
+        <_Parameter1>RosNet.Test</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>  
   
