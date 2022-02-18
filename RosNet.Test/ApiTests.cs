@@ -28,7 +28,7 @@ namespace RosNet.Test
         {
             string path = Directory.GetCurrentDirectory() + "/TestBags/acc19-11.bag";
             RosBag rosBag = RosBagReader.Read(path);
-            Dictionary<(uint, uint), FieldValue> timeSeries = rosBag.GetTimeSeries("/amk/rpm", "FL_vel");
+            Dictionary<Time, FieldValue> timeSeries = rosBag.GetTimeSeries("/amk/rpm", "FL_vel");
 
             Assert.Equal(7071, BitConverter.ToInt32(timeSeries[(1629366496, 951464957)].Value));
         }
