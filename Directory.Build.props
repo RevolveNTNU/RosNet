@@ -1,0 +1,12 @@
+<Project>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AnalysisMode>Recommended</AnalysisMode>
+        <!--avoids having to deal with .ToString(), .ToUpper(), int.Parse() etc.
+            behaving diffenrently due to culture, we are only operating on ASCII anyways  -->
+        <InvariantGlobalization>true</InvariantGlobalization>
+        <Deterministic>true</Deterministic>
+    </PropertyGroup>
+</Project>
