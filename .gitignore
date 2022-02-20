@@ -3,7 +3,6 @@ logs/
 # "bags" used to store testbags
 bags/
 build/
-bin/
 lib/
 msg_gen/
 srv_gen/
