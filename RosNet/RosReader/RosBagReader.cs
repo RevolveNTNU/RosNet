@@ -41,8 +41,14 @@ namespace RosNet.RosReader
                                 unParsedMessageHandler.AddUnParsedMessage(message, data);
                                 break;
                             case 5: //Chunk
-                                //TODO: decompress chunks with compression bz2 here
-                                List<Connection> chunkConnections = DataReader.ReadChunk(reader, ref unParsedMessageHandler);
+                                var chunkConnections = new List<Connection>();
+                                if (header["compression"].Value.Length == 3)
+                                {
+                                    chunkConnections = DataReader.ReadCompressedChunk(reader, ref unParsedMessageHandler);
+                                } else
+                                {
+                                    chunkConnections = DataReader.ReadUnCompressedChunk(reader, ref unParsedMessageHandler);
+                                }
                                 chunkConnections.Where(c => rosBag.AddConnection(c));
                                 break;
                             case 7: //Connection
