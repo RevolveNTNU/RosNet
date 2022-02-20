@@ -5,15 +5,26 @@ using RosNet.DataModel;
 using RosNet.RosReader;
 using System.Collections.Generic;
 using RosNet.Field;
+using System.Reflection;
 
 namespace RosNet.Test
 {
     public class ApiTests
     {
+
+        public static string GetTestPath(string relativePath)
+        {
+            var codeBaseUrl = new Uri(Assembly.GetExecutingAssembly().Location);
+            var codeBasePath = Uri.UnescapeDataString(codeBaseUrl.AbsolutePath);
+            var dirPath = Path.GetDirectoryName(codeBasePath);
+            return Path.Combine(dirPath, "TestBags", relativePath);
+        }
+
+
         [Fact]
         public void TestGetConnectionFields()
         {
-            string path = Directory.GetCurrentDirectory() + "/TestBags/2021-05-26-23-16-27.bag";
+            string path = GetTestPath("TestBag.bag");
             RosBag rosBag = RosBagReader.Read(path);
             Dictionary<string, List<string>> fields = rosBag.GetConnectionFields();
 
@@ -26,7 +37,7 @@ namespace RosNet.Test
         [Fact]
         public void TestGetTimeSeries()
         {
-            string path = Directory.GetCurrentDirectory() + "/TestBags/2021-05-26-23-16-27.bag";
+            string path = GetTestPath("TestBag.bag");
             RosBag rosBag = RosBagReader.Read(path);
             Dictionary<Time, FieldValue> timeSeries = rosBag.GetTimeSeries("/amk/rpm", "FL_vel");
 

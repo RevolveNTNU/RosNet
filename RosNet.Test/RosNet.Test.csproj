@@ -23,4 +23,11 @@
     <ProjectReference Include="..\RosNet\RosNet.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- For refering to files from XUNIT tests -->
+  <None 
+     Include="TestBags\**" 
+     CopyToOutputDirectory="PreserveNewest" 
+     LinkBase="TestBags\" />
+</ItemGroup>
 </Project>

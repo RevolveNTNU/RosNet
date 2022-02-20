@@ -20,6 +20,7 @@ namespace RosNet.RosReader
         {
             if (File.Exists(path))
             {
+                Console.Write(path);
                 using (BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open)))
                 {
                     var rosBag = new RosBag();
@@ -61,7 +62,7 @@ namespace RosNet.RosReader
             }
             else
             {
-                throw new FileNotFoundException("File does not exist");
+                throw new FileNotFoundException($"File with path {path} does not exist");
             }
         }
     }
