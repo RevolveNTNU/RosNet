@@ -6,6 +6,8 @@ using System.Text;
 using RosNet.DataModel;
 using RosNet.Field;
 using RosNet.Type;
+using RosNet.RosMessageParser;
+using ICSharpCode.SharpZipLib.BZip2;
 
 namespace RosNet.RosReader
 {
@@ -43,7 +45,7 @@ namespace RosNet.RosReader
 
                     while (reader.BaseStream.Position != reader.BaseStream.Length)
                     {
-                        Dictionary<String,FieldValue> header = Header.ReadHeader(reader);
+                        Dictionary<String,FieldValue> header = ReadHeader(reader);
 
                         //reads record based on op value in header
                         switch ((int)header["op"].Value.First())
@@ -102,7 +104,7 @@ namespace RosNet.RosReader
             while (reader.BaseStream.Position != endPos)
             {
                 int fieldLen = reader.ReadInt32();
-                string fieldName = Header.ReadName(reader);
+                string fieldName = ReadName(reader);
                 byte[] fieldValue = reader.ReadBytes(fieldLen - fieldName.Length - 1);
 
                 switch (fieldName)
@@ -149,7 +151,7 @@ namespace RosNet.RosReader
         private static List<Connection> ReadUnCompressedChunk(BinaryReader reader, ref UnParsedMessageHandler unParsedMessageHandler)
         {
             int dataLength = reader.ReadInt32();
-            List<Connection> connections = DataReader.ReadChunk(reader, ref unParsedMessageHandler, dataLength);
+            List<Connection> connections = ReadChunk(reader, ref unParsedMessageHandler, dataLength);
 
             return connections;
 
@@ -176,7 +178,7 @@ namespace RosNet.RosReader
             var connections = new List<Connection>();
             using (BinaryReader tempReader = new BinaryReader(new MemoryStream(unCompressedData)))
             {
-                connections = DataReader.ReadChunk(tempReader, ref unParsedMessageHandler, unCompressedData.Length);
+                connections = ReadChunk(tempReader, ref unParsedMessageHandler, unCompressedData.Length);
             }
 
             return connections;
@@ -199,18 +201,18 @@ namespace RosNet.RosReader
                 {
                     Console.Write("hey");
                 }
-                Dictionary<string, FieldValue> header = Header.ReadHeader(reader);
+                Dictionary<string, FieldValue> header = ReadHeader(reader);
 
                 switch ((int)header["op"].Value.First())
                 {
                     case 2:
                         var message = new Message(header["conn"], header["time"]);
-                        var data = DataReader.ReadMessageData(reader);
+                        var data = ReadMessageData(reader);
                         unParsedMessageHandler.AddUnParsedMessage(message, data);
                         break;
                     case 7:
                         var connection = new Connection(header["conn"], header["topic"]);
-                        DataReader.SetConnectionData(reader, ref connection);
+                        SetConnectionData(reader, ref connection);
                         connections.Add(connection);
                         break;
                     default:

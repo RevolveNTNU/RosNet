@@ -57,7 +57,7 @@ namespace RosNet.DataModel
             s += "MessageDefinition: \n";
             foreach (var dataField in MessageDefinition)
             {
-                s += ($"{dataField.ToString(false)} \n");
+                s += ($"{dataField.ToString()} \n");
             }
             s += ($"CallerID: {CallerID} \n");
             s += ($"Latching: {Latching} \n");

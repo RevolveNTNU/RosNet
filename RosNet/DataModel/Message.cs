@@ -35,7 +35,7 @@ namespace RosNet.DataModel
             s += "Data: \n";
             foreach (KeyValuePair<string, FieldValue> kvp in Data)
             {
-                s += ($"{kvp.Value.ToString(true)} \n");
+                s += ($"{kvp.Value.ToString()} \n");
             }
 
             return s;
