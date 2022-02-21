@@ -10,7 +10,7 @@ namespace RosNet.RosMessageParser
     /// <summary>
     /// Parses messageDefinitionField in the data of connection record
     /// </summary>
-    public static class MessageDefinitionParser
+    internal static class MessageDefinitionParser
     {
         /// <summary>
         /// Parses the messageDefinition from bytes to list of fieldvalues

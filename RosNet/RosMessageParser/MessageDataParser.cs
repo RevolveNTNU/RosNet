@@ -8,7 +8,7 @@ namespace RosNet.RosMessageParser
     /// <summary>
     /// Parses data in message record
     /// </summary>
-    public static class MessageDataParser
+    internal static class MessageDataParser
     {
 
         /// <summary>
