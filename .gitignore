@@ -4,6 +4,7 @@ logs/
 bags/
 build/
 lib/
+bin/
 msg_gen/
 srv_gen/
 msg/*Action.msg

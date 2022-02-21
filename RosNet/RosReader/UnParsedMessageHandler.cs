@@ -46,10 +46,6 @@ namespace RosNet.RosReader
                 
                 foreach((var message, var data) in UnParsedMessageByConn[kvp.Key])
                 {
-                    if (kvp.Key == 6 && i>5)
-                    {
-                        Console.Write("hey");
-                    }
                     message.Data = MessageDataParser.ParseMessageData(data, kvp.Value.MessageDefinition);
                     rosBag.Connections[message.Conn].Messages.Add(message);
                     i++;
