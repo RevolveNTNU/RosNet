@@ -101,10 +101,10 @@ namespace RosNet.RosMessageParser
                     if (Enum.TryParse(typeof(PrimitiveType), dataTypeString.ToUpper(), out var dataType)) //checks if datatype is primitive
                     {
                         FieldValue fieldValue;
-                        if ((PrimitiveType) dataType == PrimitiveType.String)
+                        if ((PrimitiveType) dataType == PrimitiveType.STRING)
                         {
                             //creates new ArrayFieldValue since string is an array of chars (uint8) with variable length
-                            fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.Char) }, PrimitiveType.String);
+                            fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.CHAR) }, PrimitiveType.STRING);
                         } 
                         else
                         {
@@ -120,10 +120,10 @@ namespace RosNet.RosMessageParser
                         if (Enum.TryParse(typeof(PrimitiveType), arrayDataTypeString.ToUpper(), out var arrayDataType)) //checks if datatype of array is primitive
                         {
                             FieldValue fieldValue;
-                            if ((PrimitiveType)arrayDataType == PrimitiveType.String)
+                            if ((PrimitiveType)arrayDataType == PrimitiveType.STRING)
                             {
                                 //creates new array of strings (array of chars (uint8)) 
-                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.Char) }, PrimitiveType.String) }, (PrimitiveType) arrayDataType);
+                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.CHAR) }, PrimitiveType.STRING) }, (PrimitiveType) arrayDataType);
 
                             }
                             else 
@@ -155,7 +155,7 @@ namespace RosNet.RosMessageParser
 
                                 }
 
-                                var fieldValue = new ArrayFieldValue(name, subFieldValuesCopy, PrimitiveType.Array);
+                                var fieldValue = new ArrayFieldValue(name, subFieldValuesCopy, PrimitiveType.ARRAY);
 
                             }
                             else
@@ -173,10 +173,10 @@ namespace RosNet.RosMessageParser
                         if (Enum.TryParse(typeof(PrimitiveType), arrayType.ToUpper(), out var arrayDataType)) //check if datatype of array is primitive
                         {
                             FieldValue fieldValue;
-                            if ((PrimitiveType)arrayDataType == PrimitiveType.String)
+                            if ((PrimitiveType)arrayDataType == PrimitiveType.STRING)
                             {
                                 //creates new array of strings (array of chars (uint8)) with fixed length
-                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.Char) }, PrimitiveType.String), }, (PrimitiveType) arrayDataType, arrayLength);
+                                fieldValue = new ArrayFieldValue(name, new List<FieldValue> { new ArrayFieldValue(name, new List<FieldValue> { new FieldValue("LetterInString", PrimitiveType.CHAR) }, PrimitiveType.STRING), }, (PrimitiveType) arrayDataType, arrayLength);
 
                             }
                             else
@@ -209,7 +209,7 @@ namespace RosNet.RosMessageParser
 
                                 }
 
-                                var fieldValue = new ArrayFieldValue(name, subFieldValuesCopy, PrimitiveType.Array,arrayLength);
+                                var fieldValue = new ArrayFieldValue(name, subFieldValuesCopy, PrimitiveType.ARRAY,arrayLength);
 
                                 definitionFields.Add(fieldValue);
 

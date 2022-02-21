@@ -41,25 +41,25 @@ namespace RosNet.Field
         {
             switch (this.DataType)
             {
-                case PrimitiveType.Bool:
-                case PrimitiveType.Int8:
-                case PrimitiveType.Uint8:
-                case PrimitiveType.Byte:
-                case PrimitiveType.Char:
+                case PrimitiveType.BOOL:
+                case PrimitiveType.INT8:
+                case PrimitiveType.UINT8:
+                case PrimitiveType.BYTE:
+                case PrimitiveType.CHAR:
                     return 1;
-                case PrimitiveType.Int16:
-                case PrimitiveType.Uint16:
+                case PrimitiveType.INT16:
+                case PrimitiveType.UINT16:
                     return 2;
-                case PrimitiveType.Int32:
-                case PrimitiveType.Uint32:
-                case PrimitiveType.Float32:
-                case PrimitiveType.String:
+                case PrimitiveType.INT32:
+                case PrimitiveType.UINT32:
+                case PrimitiveType.FLOAT32:
+                case PrimitiveType.STRING:
                     return 4;
-                case PrimitiveType.Int64:
-                case PrimitiveType.Uint64:
-                case PrimitiveType.Float64:
-                case PrimitiveType.Time:
-                case PrimitiveType.Duration:
+                case PrimitiveType.INT64:
+                case PrimitiveType.UINT64:
+                case PrimitiveType.FLOAT64:
+                case PrimitiveType.TIME:
+                case PrimitiveType.DURATION:
                     return 8;
                 default:
                     return 0;
@@ -87,39 +87,39 @@ namespace RosNet.Field
         {
             switch (this.DataType)
             {
-                case PrimitiveType.Bool:
+                case PrimitiveType.BOOL:
                     return ($"{BitConverter.ToBoolean(this.Value)}");
-                case PrimitiveType.Int8:
+                case PrimitiveType.INT8:
                     return ((int)this.Value.First()).ToString();
-                case PrimitiveType.Uint8:
+                case PrimitiveType.UINT8:
                     return ((uint)this.Value.First()).ToString();
-                case PrimitiveType.Byte:
+                case PrimitiveType.BYTE:
                     return ($"{(sbyte) this.Value.First()}");
-                case PrimitiveType.Char:
+                case PrimitiveType.CHAR:
                     return ((char)this.Value.First()).ToString();
-                case PrimitiveType.Int16:
+                case PrimitiveType.INT16:
                     return ($"{BitConverter.ToInt16(this.Value)}");
-                case PrimitiveType.Uint16:
+                case PrimitiveType.UINT16:
                     return ($"{BitConverter.ToUInt16(this.Value)}");
-                case PrimitiveType.Int32:
+                case PrimitiveType.INT32:
                     return ($"{BitConverter.ToInt32(this.Value)}");
-                case PrimitiveType.Uint32:
+                case PrimitiveType.UINT32:
                     return ($"{BitConverter.ToUInt32(this.Value)}");
-                case PrimitiveType.Int64:
+                case PrimitiveType.INT64:
                     return ($"{BitConverter.ToInt64(this.Value)}");
-                case PrimitiveType.Uint64:
+                case PrimitiveType.UINT64:
                     return ($"{BitConverter.ToUInt64(this.Value)}");
-                case PrimitiveType.Float32:
+                case PrimitiveType.FLOAT32:
                     return ($"{BitConverter.ToSingle(this.Value)}");
-                case PrimitiveType.Float64:
+                case PrimitiveType.FLOAT64:
                     return ($"{BitConverter.ToDouble(this.Value)}");
-                case PrimitiveType.String:
+                case PrimitiveType.STRING:
                     return System.Text.Encoding.Default.GetString(this.Value); ;
-                case PrimitiveType.Time:
+                case PrimitiveType.TIME:
                     uint timeSecs = BitConverter.ToUInt32(this.Value.Take(4).ToArray());
                     uint timeNsecs = BitConverter.ToUInt32(this.Value.Skip(4).Take(4).ToArray());
                     return ($"{timeSecs} : {timeNsecs}");
-                case PrimitiveType.Duration:
+                case PrimitiveType.DURATION:
                     int durationSecs = BitConverter.ToInt32(this.Value.Take(4).ToArray());
                     int durationNsecs = BitConverter.ToInt32(this.Value.Skip(4).Take(4).ToArray());
                     return ($"{durationSecs} : {durationNsecs}");

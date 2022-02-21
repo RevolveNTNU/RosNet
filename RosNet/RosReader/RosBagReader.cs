@@ -274,7 +274,7 @@ namespace RosNet.RosReader
                 case "chunk_pos":
                 case "start_time":
                 case "end_time":
-                    dataType = PrimitiveType.Int64;
+                    dataType = PrimitiveType.INT64;
                     fieldValue = reader.ReadBytes(8);
                     break;
                 case "conn_count":
@@ -284,15 +284,15 @@ namespace RosNet.RosReader
                 case "ver":
                 case "count":
                 case "offset":
-                    dataType = PrimitiveType.Int32;
+                    dataType = PrimitiveType.INT32;
                     fieldValue = reader.ReadBytes(4);
                     break;
                 case "op":
-                    dataType = PrimitiveType.Int8;
+                    dataType = PrimitiveType.INT8;
                     fieldValue = reader.ReadBytes(1);
                     break;
                 case "compression":
-                    dataType = PrimitiveType.String;
+                    dataType = PrimitiveType.STRING;
                     char firstChar = reader.ReadChar();
                     if (firstChar.Equals('n'))
                     {
@@ -306,7 +306,7 @@ namespace RosNet.RosReader
                     }
                     break;
                 case "topic":
-                    dataType = PrimitiveType.String;
+                    dataType = PrimitiveType.STRING;
                     fieldValue = Encoding.ASCII.GetBytes(new string(reader.ReadChars(fieldLen - 6)));
                     break;
                 default:

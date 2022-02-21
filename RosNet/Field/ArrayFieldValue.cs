@@ -49,7 +49,7 @@ namespace RosNet.Field
         public override string ToString ()
         {
             string s;
-            if (this.DataType == PrimitiveType.String)
+            if (this.DataType == PrimitiveType.STRING)
             {
                 s = ($"{DataType} {Name}: ");
                 foreach (var fieldValue in ArrayFields)
