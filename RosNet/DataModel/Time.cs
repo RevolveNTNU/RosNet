@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RosNet.DataModel
 {
-    public class Time :ITime
+    public class Time : ITime
     {
         // Time data stored as they come in
         public uint Secs { get; }
