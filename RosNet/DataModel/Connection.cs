@@ -17,13 +17,12 @@ namespace RosNet.DataModel
         public string OriginalTopic { get; private set; }
         public string Type { get; private set; }
         public string Md5sum { get; private set; }
-        public List<FieldValue> MessageDefinition { get; private set;  } //defines how to read the message data of messages corresponding with this connection
+        public List<FieldValue> MessageDefinition { get; private set; } //defines how to read the message data of messages corresponding with this connection
         public string CallerID { get; private set; }
         public string Latching { get; private set; }
 
         //List of messages corresponding to this connection
         public List<Message> Messages { get; private set; }
-
 
         /// <summary>
         /// Create a connection with conn and topic from connection record header
