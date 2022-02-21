@@ -6,7 +6,7 @@ namespace RosNet.Field
     /// <summary>
     /// Represents an arrayfield
     /// </summary>
-    public class ArrayFieldValue : FieldValue
+    public class ArrayFieldValue : FieldValue, IArrayFieldValue
     {
         public List<FieldValue> ArrayFields { get; set; }
         public uint FixedArrayLength { get; } //used if array has fixed length
@@ -49,7 +49,7 @@ namespace RosNet.Field
         public override string ToString ()
         {
             string s;
-            if (this.DataType == PrimitiveType.STRING)
+            if (this.DataType == PrimitiveType.String)
             {
                 s = ($"{DataType} {Name}: ");
                 foreach (var fieldValue in ArrayFields)

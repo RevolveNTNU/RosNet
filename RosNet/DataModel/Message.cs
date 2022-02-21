@@ -8,14 +8,14 @@ namespace RosNet.DataModel
     /// <summary>
     /// Represents a ROSbag message
     /// </summary>
-    public class Message
+    public class Message : IMessage
     {
         //Header fields of message record:
         public int Conn { get; }
         public Time TimeStamp { get;  }
 
         //Data in message record:
-        public Dictionary<string,FieldValue> Data { get; set; }
+        public Dictionary<string,FieldValue> Data { get; internal set; }
 
         /// <summary>
         /// Create a message with conn and time from message record header
