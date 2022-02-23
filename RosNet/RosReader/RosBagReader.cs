@@ -17,14 +17,14 @@ namespace RosNet.RosReader
     public static class RosBagReader
     {
         //Dictionary containing the names of all header fields in record
-        private static readonly Dictionary<int, string[]> HeaderFieldsByOp = new Dictionary<int, string[]>()
+        private static readonly Dictionary<OpCode, string[]> HeaderFieldsByOp = new Dictionary<OpCode, string[]>()
         {
-            { 2 , new string[] {"conn", "time"} },
-            { 3 , new string[] {"index_pos", "conn_count", "chunk_count"} },
-            { 4 , new string[] {"ver", "conn", "count"} },
-            { 5 , new string[] {"compression", "size"} },
-            { 6 , new string[] {"ver", "chunk_pos", "start_time", "end_time", "count"} },
-            { 7 , new string[] {"conn", "topic"} }
+            { OpCode.MessageData, new string[] {"conn", "time"} },
+            { OpCode.BagHeader,   new string[] {"index_pos", "conn_count", "chunk_count"} },
+            { OpCode.IndexData,   new string[] {"ver", "conn", "count"} },
+            { OpCode.Chunk,       new string[] {"compression", "size"} },
+            { OpCode.ChunkInfo,   new string[] {"ver", "chunk_pos", "start_time", "end_time", "count"} },
+            { OpCode.Connection,  new string[] {"conn", "topic"} }
         };
 
         /// <summary>
@@ -47,14 +47,14 @@ namespace RosNet.RosReader
                         Dictionary<String,FieldValue> header = ReadHeader(reader);
 
                         //reads record based on op value in header
-                        switch ((int)header["op"].Value.First())
+                        switch ((OpCode)header["op"].Value.First())
                         {
-                            case 2: //Message
+                            case OpCode.MessageData:
                                 var message = new Message(header["conn"], header["time"]);
                                 byte[] data = ReadMessageData(reader);
                                 unParsedMessageHandler.AddUnParsedMessage(message, data);
                                 break;
-                            case 5: //Chunk
+                            case OpCode.Chunk:
                                 var chunkConnections = new List<Connection>();
                                 if (header["compression"].Value.Length == 3)
                                 {
@@ -65,7 +65,7 @@ namespace RosNet.RosReader
                                 }
                                 chunkConnections.Where(c => rosBag.AddConnection(c));
                                 break;
-                            case 7: //Connection
+                            case OpCode.Connection:
                                 var connection = new Connection(header["conn"], header["topic"]);
                                 SetConnectionData(reader, ref connection);
                                 rosBag.AddConnection(connection);
@@ -196,20 +196,16 @@ namespace RosNet.RosReader
 
             while (reader.BaseStream.Position != endPos)
             {
-                if (reader.BaseStream.Position > 550000)
-                {
-                    Console.Write("hey");
-                }
                 Dictionary<string, FieldValue> header = ReadHeader(reader);
 
-                switch ((int)header["op"].Value.First())
+                switch ((OpCode)header["op"].Value.First())
                 {
-                    case 2:
+                    case OpCode.MessageData:
                         var message = new Message(header["conn"], header["time"]);
                         var data = ReadMessageData(reader);
                         unParsedMessageHandler.AddUnParsedMessage(message, data);
                         break;
-                    case 7:
+                    case OpCode.Connection:
                         var connection = new Connection(header["conn"], header["topic"]);
                         SetConnectionData(reader, ref connection);
                         connections.Add(connection);
@@ -243,7 +239,7 @@ namespace RosNet.RosReader
                 if (headerFields.ContainsKey("op"))
                 {
                     hasAllFields = true;
-                    foreach (string headerField in HeaderFieldsByOp[(int)headerFields["op"].Value.First()])
+                    foreach (string headerField in HeaderFieldsByOp[(OpCode)headerFields["op"].Value.First()])
                     {
                         if (!headerFields.ContainsKey(headerField))
                         {
