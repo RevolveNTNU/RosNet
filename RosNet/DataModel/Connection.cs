@@ -7,7 +7,7 @@ namespace RosNet.DataModel
     /// <summary>
     /// Represents a ROSbag connection
     /// </summary>
-    public class Connection
+    public class Connection : IConnection
     {
         //Header fields in Connection record:
         public int Conn { get; } //unique ID for each connection
@@ -17,13 +17,12 @@ namespace RosNet.DataModel
         public string OriginalTopic { get; private set; }
         public string Type { get; private set; }
         public string Md5sum { get; private set; }
-        public List<FieldValue> MessageDefinition { get; private set;  } //defines how to read the message data of messages corresponding with this connection
+        public List<FieldValue> MessageDefinition { get; private set; } //defines how to read the message data of messages corresponding with this connection
         public string CallerID { get; private set; }
         public string Latching { get; private set; }
 
         //List of messages corresponding to this connection
         public List<Message> Messages { get; private set; }
-
 
         /// <summary>
         /// Create a connection with conn and topic from connection record header
@@ -58,7 +57,7 @@ namespace RosNet.DataModel
             s += "MessageDefinition: \n";
             foreach (var dataField in MessageDefinition)
             {
-                s += ($"{dataField.ToString(false)} \n");
+                s += ($"{dataField.ToString()} \n");
             }
             s += ($"CallerID: {CallerID} \n");
             s += ($"Latching: {Latching} \n");

@@ -8,7 +8,7 @@ namespace RosNet.Field
     /// <summary>
     /// Represents a fieldvalue
     /// </summary>
-    public class FieldValue
+    public class FieldValue : IFieldValue
     {
         public string Name { get; set; }
         public PrimitiveType DataType { get; private set; }
@@ -64,20 +64,6 @@ namespace RosNet.Field
                 default:
                     return 0;
             }
-        }
-
-        /// <summary>
-        /// Creates string with value if printValue is true, else string without value (used for messageDefinition)
-        /// </summary>
-        /// <returns>String with value if printValue is true, else returns string without value</returns>
-        public virtual string ToString(bool printValue)
-        {
-            if (printValue)
-            {
-                return this.ToString(); 
-            }
-            return ($"{DataType} {Name}");
-
         }
 
         /// <summary>

@@ -7,7 +7,7 @@ namespace RosNet.DataModel
     /// <summary>
     /// Represents a ROSbag
     /// </summary>
-    public class RosBag
+    public class RosBag : IRosBag
     {
         public Dictionary<int, Connection> Connections { get; private set; } //List of connection records in rosbag
 
