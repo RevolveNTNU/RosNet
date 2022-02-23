@@ -93,7 +93,7 @@ namespace RosNet.RosMessageParser
             var fixedLengthArrayRegex = new Regex(@".*\[[0-9]+\]");
             foreach (var line in validLines)
             {
-                var wordsInLine = line.Split(" ").SelectMany(t => t.Split("=")); //splits field into words
+                var wordsInLine = line.Split(" ").SelectMany(t => t.Split("=")).Where(t => !string.IsNullOrWhiteSpace(t)); //splits field into words
                 if (wordsInLine.Count() == 2) //checks if the field is not a constant
                 {
                     string name = wordsInLine.Last();

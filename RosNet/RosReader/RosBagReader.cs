@@ -20,7 +20,6 @@ namespace RosNet.RosReader
         {
             if (File.Exists(path))
             {
-                Console.Write(path);
                 using (BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open)))
                 {
                     var rosBag = new RosBag();

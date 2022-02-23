@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RosNet.DataModel
 {
-    public class Time
+    public class Time : IComparable
     {
         // Time data stored as they come in
         public uint Secs { get; }
@@ -28,6 +28,30 @@ namespace RosNet.DataModel
             // Ros timestamps are usually saved as epoch time
             double secs = this.Secs + this.NSecs * Math.Pow(10, -9);
             return DateTime.UnixEpoch.AddSeconds(secs);
+        }
+
+        /// <summary>
+        /// Compares two time objects by comparing sec and nano sec
+        /// </summary>
+        public int CompareTo(object? other)
+        {
+            if (other == null)
+                return 1;
+
+            Time otherTime = other as Time;
+
+            if (otherTime == null)
+                throw new ArgumentException("Other is not of type Time");
+
+            if (this.Secs - otherTime.Secs != 0)
+            {
+                return (int)(this.Secs - otherTime.Secs);
+            }
+            else if (this.NSecs - otherTime.NSecs != 0)
+            {
+                return (int)(this.NSecs - otherTime.NSecs);
+            }
+            return 0;
         }
     }
 }

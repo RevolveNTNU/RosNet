@@ -30,7 +30,7 @@ namespace RosNet.Test
 
             Assert.Equal(7, fields.Count);
             Assert.True(fields.ContainsKey("/vectornav/IMU"));
-            Assert.Equal(9, fields["/sbs/steering_wheel"].Count);
+            Assert.Equal(8, fields["/sbs/steering_wheel"].Count);
 
         }
 
@@ -39,9 +39,10 @@ namespace RosNet.Test
         {
             string path = GetTestPath("TestBag.bag");
             RosBag rosBag = RosBagReader.Read(path);
-            Dictionary<Time, FieldValue> timeSeries = rosBag.GetTimeSeries("/amk/rpm", "FL_vel");
+            List<(Time, FieldValue)> timeSeries = rosBag.GetTimeSeries("/amk/motor_moment", "FL_motor_moment");
 
-            Assert.Equal(-0.001396, BitConverter.ToInt32(timeSeries[new Time(1622063787, 689419290)].Value));
+            Assert.Equal((uint) 1622063787, timeSeries.First().Item1.Secs);
+            Assert.Equal(0, BitConverter.ToInt32(timeSeries.First().Item2.Value));
         }
     }
 }

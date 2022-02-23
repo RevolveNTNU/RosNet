@@ -40,7 +40,6 @@ namespace RosNet.RosReader
         /// </summary>
         internal void ParseMessages(RosBag rosBag)
         {
-            int i = 0;
             foreach (KeyValuePair<int, Connection> kvp in rosBag.Connections)
             {
                 
@@ -48,10 +47,8 @@ namespace RosNet.RosReader
                 {
                     message.Data = MessageDataParser.ParseMessageData(data, kvp.Value.MessageDefinition);
                     rosBag.Connections[message.Conn].Messages.Add(message);
-                    i++;
                 }
                 UnParsedMessageByConn.Remove(kvp.Key);
-                i = 0;
             }
 
             if (UnParsedMessageByConn.Count != 0)

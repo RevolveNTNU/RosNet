@@ -123,10 +123,6 @@ namespace RosNet.RosReader
 
             while (reader.BaseStream.Position != endPos)
             {
-                if (reader.BaseStream.Position > 550000)
-                {
-                    Console.Write("hey");
-                }
                 Dictionary<string, FieldValue> header = Header.ReadHeader(reader);
 
                 switch ((int)header["op"].Value.First())
