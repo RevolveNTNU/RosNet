@@ -43,7 +43,7 @@ namespace RosNet.DataModel
             if (otherTime == null)
                 throw new ArgumentException("Other is not of type Time");
 
-            return this.Secs != otherTime.Secs ? this.Secs.CompareTo(otherTime.Secs) : this.NSecs.CompareTo(otherTime.NSecs)
+            return this.Secs != otherTime.Secs ? this.Secs.CompareTo(otherTime.Secs) : this.NSecs.CompareTo(otherTime.NSecs);
         }
     }
 }
