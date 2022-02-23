@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using RosNet.Field;
 
@@ -15,7 +16,7 @@ namespace RosNet.DataModel
         public Time TimeStamp { get;  }
 
         //Data in message record:
-        public Dictionary<string,FieldValue> Data { get; internal set; }
+        public ReadOnlyDictionary<string,FieldValue> Data { get; internal set; }
 
         /// <summary>
         /// Create a message with conn and time from message record header

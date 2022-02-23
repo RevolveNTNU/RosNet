@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+
 using RosNet.DataModel;
+using RosNet.Field;
 using RosNet.RosMessageParser;
 
 namespace RosNet.RosReader
@@ -45,7 +48,7 @@ namespace RosNet.RosReader
                 
                 foreach((var message, var data) in UnParsedMessageByConn[kvp.Key])
                 {
-                    message.Data = MessageDataParser.ParseMessageData(data, kvp.Value.MessageDefinition);
+                    message.Data = new ReadOnlyDictionary<string, FieldValue>(MessageDataParser.ParseMessageData(data, kvp.Value.MessageDefinition));
                     rosBag.Connections[message.Conn].Messages.Add(message);
                 }
                 UnParsedMessageByConn.Remove(kvp.Key);

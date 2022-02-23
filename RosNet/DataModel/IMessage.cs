@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace RosNet.DataModel
         public Time TimeStamp { get; }
 
         //Data in message record:
-        public Dictionary<string, FieldValue> Data { get; }
+        public ReadOnlyDictionary<string, FieldValue> Data { get; }
 
         public string ToString();
     }
