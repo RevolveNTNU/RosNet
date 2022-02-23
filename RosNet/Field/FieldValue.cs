@@ -83,50 +83,26 @@ namespace RosNet.Field
         /// Creates string of Value using datatype
         /// </summary>
         /// <returns>String of Value</returns>
-        public string PrettyValue()
+        public string PrettyValue() => this.DataType switch
         {
-            switch (this.DataType)
-            {
-                case PrimitiveType.BOOL:
-                    return ($"{BitConverter.ToBoolean(this.Value)}");
-                case PrimitiveType.INT8:
-                    return ((int)this.Value.First()).ToString();
-                case PrimitiveType.UINT8:
-                    return ((uint)this.Value.First()).ToString();
-                case PrimitiveType.BYTE:
-                    return ($"{(sbyte) this.Value.First()}");
-                case PrimitiveType.CHAR:
-                    return ((char)this.Value.First()).ToString();
-                case PrimitiveType.INT16:
-                    return ($"{BitConverter.ToInt16(this.Value)}");
-                case PrimitiveType.UINT16:
-                    return ($"{BitConverter.ToUInt16(this.Value)}");
-                case PrimitiveType.INT32:
-                    return ($"{BitConverter.ToInt32(this.Value)}");
-                case PrimitiveType.UINT32:
-                    return ($"{BitConverter.ToUInt32(this.Value)}");
-                case PrimitiveType.INT64:
-                    return ($"{BitConverter.ToInt64(this.Value)}");
-                case PrimitiveType.UINT64:
-                    return ($"{BitConverter.ToUInt64(this.Value)}");
-                case PrimitiveType.FLOAT32:
-                    return ($"{BitConverter.ToSingle(this.Value)}");
-                case PrimitiveType.FLOAT64:
-                    return ($"{BitConverter.ToDouble(this.Value)}");
-                case PrimitiveType.STRING:
-                    return System.Text.Encoding.Default.GetString(this.Value); ;
-                case PrimitiveType.TIME:
-                    uint timeSecs = BitConverter.ToUInt32(this.Value.Take(4).ToArray());
-                    uint timeNsecs = BitConverter.ToUInt32(this.Value.Skip(4).Take(4).ToArray());
-                    return ($"{timeSecs} : {timeNsecs}");
-                case PrimitiveType.DURATION:
-                    int durationSecs = BitConverter.ToInt32(this.Value.Take(4).ToArray());
-                    int durationNsecs = BitConverter.ToInt32(this.Value.Skip(4).Take(4).ToArray());
-                    return ($"{durationSecs} : {durationNsecs}");
-                default:
-                    //TODO exception
-                    return "";
-            }
-        }
+            PrimitiveType.BOOL => ($"{BitConverter.ToBoolean(this.Value)}"),
+            PrimitiveType.INT8 => ((int)this.Value.First()).ToString(),
+            PrimitiveType.UINT8 => ((uint)this.Value.First()).ToString(),
+            PrimitiveType.BYTE => ($"{(sbyte)this.Value.First()}"),
+            PrimitiveType.CHAR => ((char)this.Value.First()).ToString(),
+            PrimitiveType.INT16 => ($"{BitConverter.ToInt16(this.Value)}"),
+            PrimitiveType.UINT16 => ($"{BitConverter.ToUInt16(this.Value)}"),
+            PrimitiveType.INT32 => ($"{BitConverter.ToInt32(this.Value)}"),
+            PrimitiveType.UINT32 => ($"{BitConverter.ToUInt32(this.Value)}"),
+            PrimitiveType.INT64 => ($"{BitConverter.ToInt64(this.Value)}"),
+            PrimitiveType.UINT64 => ($"{BitConverter.ToUInt64(this.Value)}"),
+            PrimitiveType.FLOAT32 => ($"{BitConverter.ToSingle(this.Value)}"),
+            PrimitiveType.FLOAT64 => ($"{BitConverter.ToDouble(this.Value)}"),
+            PrimitiveType.STRING => System.Text.Encoding.Default.GetString(this.Value),
+            PrimitiveType.TIME => ($"{BitConverter.ToUInt32(this.Value.Take(4).ToArray())} : {BitConverter.ToUInt32(this.Value.Skip(4).Take(4).ToArray())}"),
+            PrimitiveType.DURATION => ($"{BitConverter.ToInt32(this.Value.Take(4).ToArray())} : {BitConverter.ToInt32(this.Value.Skip(4).Take(4).ToArray())}"),
+            _ => throw new Exception("Datatype is not a primitive type") //todo make exception
+
+        };
     }
 }
