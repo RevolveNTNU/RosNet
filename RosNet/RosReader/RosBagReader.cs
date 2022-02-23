@@ -58,16 +58,16 @@ namespace RosNet.RosReader
                                 var chunkConnections = new List<Connection>();
                                 if (header["compression"].Value.Length == 3)
                                 {
-                                    chunkConnections = ReadCompressedChunk(reader, ref unParsedMessageHandler);
+                                    chunkConnections = ReadCompressedChunk(reader, unParsedMessageHandler);
                                 } else
                                 {
-                                    chunkConnections = ReadUnCompressedChunk(reader, ref unParsedMessageHandler);
+                                    chunkConnections = ReadUnCompressedChunk(reader, unParsedMessageHandler);
                                 }
                                 chunkConnections.Where(c => rosBag.AddConnection(c));
                                 break;
                             case OpCode.Connection:
                                 var connection = new Connection(header["conn"], header["topic"]);
-                                SetConnectionData(reader, ref connection);
+                                SetConnectionData(reader, connection);
                                 rosBag.AddConnection(connection);
                                 break;
                             default: //Other record types
@@ -89,7 +89,7 @@ namespace RosNet.RosReader
         /// <summary>
         /// Reads a connection and sets the data
         /// </summary>
-        private static void SetConnectionData(BinaryReader reader, ref Connection connection)
+        private static void SetConnectionData(BinaryReader reader, Connection connection)
         {
             int dataLen = reader.ReadInt32();
             long endPos = reader.BaseStream.Position + dataLen;
@@ -147,10 +147,10 @@ namespace RosNet.RosReader
         /// Reads chunk and adds all messages and message data to unParsedMessageHandler
         /// </summary>
         /// <returns>List of connections in chunk</returns>
-        private static List<Connection> ReadUnCompressedChunk(BinaryReader reader, ref UnParsedMessageHandler unParsedMessageHandler)
+        private static List<Connection> ReadUnCompressedChunk(BinaryReader reader, UnParsedMessageHandler unParsedMessageHandler)
         {
             int dataLength = reader.ReadInt32();
-            List<Connection> connections = ReadChunk(reader, ref unParsedMessageHandler, dataLength);
+            List<Connection> connections = ReadChunk(reader, unParsedMessageHandler, dataLength);
 
             return connections;
 
@@ -160,7 +160,7 @@ namespace RosNet.RosReader
         /// Decompresses and reads chunk and adds all messages and message data to unParsedMessageHandler
         /// </summary>
         /// <returns>List of connections in chunk</returns>
-        private static List<Connection> ReadCompressedChunk(BinaryReader reader, ref UnParsedMessageHandler unParsedMessageHandler)
+        private static List<Connection> ReadCompressedChunk(BinaryReader reader, UnParsedMessageHandler unParsedMessageHandler)
         {
             int compressedDataLength = reader.ReadInt32();
             byte[] data = reader.ReadBytes(compressedDataLength);
@@ -177,7 +177,7 @@ namespace RosNet.RosReader
             var connections = new List<Connection>();
             using (BinaryReader tempReader = new BinaryReader(new MemoryStream(unCompressedData)))
             {
-                connections = ReadChunk(tempReader, ref unParsedMessageHandler, unCompressedData.Length);
+                connections = ReadChunk(tempReader, unParsedMessageHandler, unCompressedData.Length);
             }
 
             return connections;
@@ -188,7 +188,7 @@ namespace RosNet.RosReader
         /// Reads chunk and adds all messages and message data to unParsedMessageHandler
         /// </summary>
         /// <returns>List of connections in chunk</returns>
-        private static List<Connection> ReadChunk(BinaryReader reader, ref UnParsedMessageHandler unParsedMessageHandler, int dataLength)
+        private static List<Connection> ReadChunk(BinaryReader reader, UnParsedMessageHandler unParsedMessageHandler, int dataLength)
         {
             long endPos = reader.BaseStream.Position + dataLength;
 
@@ -207,7 +207,7 @@ namespace RosNet.RosReader
                         break;
                     case OpCode.Connection:
                         var connection = new Connection(header["conn"], header["topic"]);
-                        SetConnectionData(reader, ref connection);
+                        SetConnectionData(reader, connection);
                         connections.Add(connection);
                         break;
                     default:
