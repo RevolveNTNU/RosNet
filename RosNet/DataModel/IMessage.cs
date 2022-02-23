@@ -7,17 +7,16 @@ using System.Threading.Tasks;
 
 using RosNet.Field;
 
-namespace RosNet.DataModel
+namespace RosNet.DataModel;
+
+internal interface IMessage
 {
-    internal interface IMessage
-    {
-        //Header fields of message record:
-        public int Conn { get; }
-        public Time TimeStamp { get; }
+    //Header fields of message record:
+    public int Conn { get; }
+    public Time TimeStamp { get; }
 
-        //Data in message record:
-        public ReadOnlyDictionary<string, FieldValue> Data { get; }
+    //Data in message record:
+    public ReadOnlyDictionary<string, FieldValue> Data { get; }
 
-        public string ToString();
-    }
+    public string ToString();
 }
