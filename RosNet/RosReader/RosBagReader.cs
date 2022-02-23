@@ -103,7 +103,7 @@ public static class RosBagReader
         while (reader.BaseStream.Position != endPos)
         {
             int fieldLen = reader.ReadInt32();
-            string fieldName = ReadName(reader);
+            string fieldName = ReadName(reader, fieldLen);
             byte[] fieldValue = reader.ReadBytes(fieldLen - fieldName.Length - 1);
 
             switch (fieldName)
@@ -166,8 +166,8 @@ public static class RosBagReader
         byte[] data = reader.ReadBytes(compressedDataLength);
         byte[] unCompressedData = Array.Empty<byte>();
         using MemoryStream source = new MemoryStream(data);
-        using MemoryStream target = new MemoryStream();
-        BZip2.Decompress(source, target, true);
+        using MemoryStream target = new MemoryStream(compressedDataLength);
+        BZip2.Decompress(source, target, false);
         unCompressedData = target.ToArray();
 
         var connections = new List<Connection>();
@@ -223,27 +223,29 @@ public static class RosBagReader
     private static Dictionary<string, FieldValue> ReadHeader(BinaryReader reader)
     {
         int headerLen = reader.ReadInt32();
+        long headerEnd = reader.BaseStream.Position + headerLen;
         var headerFields = new Dictionary<string, FieldValue>();
 
         //checks if all fields in header are read
-        bool hasAllFields = false;
-        while (!hasAllFields)
+        while (reader.BaseStream.Position < headerEnd)
         {
             FieldValue fieldValue = ReadField(reader);
             headerFields.Add(fieldValue.Name, fieldValue);
+        }
 
-            if (headerFields.ContainsKey("op"))
+        if (!headerFields.ContainsKey("op"))
+            //TODO: More descriptive exception
+            throw new Exception("Header is missing op definition");
+
+        foreach (string headerField in HeaderFieldsByOp[(OpCode)headerFields["op"].Value.First()])
+        {
+            if (!headerFields.ContainsKey(headerField))
             {
-                hasAllFields = true;
-                foreach (string headerField in HeaderFieldsByOp[(OpCode)headerFields["op"].Value.First()])
-                {
-                    if (!headerFields.ContainsKey(headerField))
-                    {
-                        hasAllFields = false;
-                    }
-                }
+                //TODO: Better exception
+                throw new Exception($"Missing header field {headerField}");
             }
         }
+
         return headerFields;
     }
 
@@ -254,7 +256,7 @@ public static class RosBagReader
     private static FieldValue ReadField(BinaryReader reader)
     {
         int fieldLen = reader.ReadInt32();
-        string fieldName = ReadName(reader);
+        string fieldName = ReadName(reader, fieldLen);
 
         PrimitiveType dataType;
         byte[] fieldValue;
@@ -307,11 +309,12 @@ public static class RosBagReader
     }
 
     /// <summary>
-    /// Reads a field name
+    /// Reads until first "=", returning what was read, discarding "="
     /// </summary>
-    /// <returns> name of field</returns>
-    private static string ReadName(BinaryReader reader)
+    /// <returns> name of field </returns>
+    private static string ReadName(BinaryReader reader, int fieldLen)
     {
+        long fieldEndPos = reader.BaseStream.Position + fieldLen;
         char curChar;
         string fieldName = "";
         do
@@ -321,6 +324,10 @@ public static class RosBagReader
             {
                 fieldName += curChar;
             }
+
+            if (reader.BaseStream.Position == fieldEndPos)
+                //TODO: More descriptive exception
+                throw new Exception($"Field \"{fieldName}\" exceeds the field length of {fieldLen}");
         }
         while (curChar != '=');
 
