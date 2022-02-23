@@ -24,6 +24,6 @@ namespace RosNet.DataModel
         /// Makes a dictionary of timestamps and fieldvalues of field with fieldname fieldName
         /// </summary>
         /// <returns>Dictionary with time and corresponding fieldvalue</returns>
-        public Dictionary<Time, FieldValue> GetTimeSeries(string topic, string fieldName);
+        public List<(Time, FieldValue)> GetTimeSeries(string topic, string fieldName);
     }
 }
