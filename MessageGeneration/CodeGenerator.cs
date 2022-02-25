@@ -100,7 +100,7 @@ namespace RosNet.MessageTypes.{2}
         var trailing = f.TrailingComments.Any() ? $"        /* {f.TrailingComments} */\n" : "\n";
         var decl = f switch
         {
-            ConstField { Type: var t, Name: var n, ConstantDeclaration: var d } => $"        public const {t} {n} = {d};",
+            Constant { Type: var t, Name: var n, Value: var d } => $"        public const {t} {n} = {d};",
             Field { Type: var t, Name: var n } => $"        public {t} {n} {{ get; set; }}",
         };
         return leading + decl + trailing;
@@ -123,7 +123,7 @@ namespace RosNet.MessageTypes.{2}
 ";
 
         // https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/default#default-literal
-        var fieldInit = message.Fields.Where(f => f is not ConstField).Aggregate("", (sum, f) =>
+        var fieldInit = message.Fields.Where(f => f is not Constant).Aggregate("", (sum, f) =>
         {
             var initialization = f switch
             {
@@ -144,9 +144,9 @@ namespace RosNet.MessageTypes.{2}
             {2}
         }
 ";
-        var parameters = message.Fields.Where(f => f is not ConstField).Aggregate("", (sum, f) => $"{f.Type} {f.Name}");
+        var parameters = message.Fields.Where(f => f is not Constant).Aggregate("", (sum, f) => $"{f.Type} {f.Name}");
         var paramsString = string.Join(", ", parameters);
-        var assignments = message.Fields.Where(f => f is not ConstField).Aggregate("", (sum, f) => $"{TwoTabs}{OneTab}this.{f.Name} = {f.Name};");
+        var assignments = message.Fields.Where(f => f is not Constant).Aggregate("", (sum, f) => $"{TwoTabs}{OneTab}this.{f.Name} = {f.Name};");
         var fieldAssignmentString = string.Join('\n', assignments);
 
         return string.Format(template, message.RosMessageName, paramsString, fieldAssignmentString);

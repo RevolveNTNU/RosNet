@@ -30,9 +30,8 @@ public class MessageCodeGenerator : CodeGenerator
             Logger.LogDebug("Parsing: {File}", inputPath);
             Logger.LogDebug("Output Location: {File}", outputPath);
             var f = File.ReadAllText(inputPath);
-            var listOfTokens = MessageTokenizer.Tokenize(f);
 
-            var parsed = MessageParser.Parse(listOfTokens.Single(), rosMessageName, rosPackageName);
+            var parsed = MessageParser.ParseFile(f, rosMessageName, rosPackageName);
             var code = GenerateCode(parsed);
 
             Directory.CreateDirectory(outputPath);

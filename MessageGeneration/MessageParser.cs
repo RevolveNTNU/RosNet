@@ -6,29 +6,42 @@ using static RosNet.MessageGeneration.Utilities;
 
 namespace RosNet.MessageGeneration;
 
-internal class MessageParser
+
+/// <summary>Parse ROS-message definitions</summary>
+public static class MessageParser
 {
-    static IEnumerable<string> ConstCapableTypes => BuiltInTypesMapping.Values.Where(t => t is not ("Time" or "Duration"));
+    private static IEnumerable<string> ConstCapableTypes => BuiltInTypesMapping.Values.Where(t => t is not ("Time" or "Duration"));
 
-    internal static ParseResult Parse(in IEnumerable<ICommented<FieldDeclaration>> tokens, in string rosMessageName, in string rosPackageName) => new(Parse(tokens), rosMessageName, rosPackageName);
+    /// <summary>Assumes there is only one file in the file.</summary>
+    internal static ParseResult ParseFile(in string file, in string rosMessageName, in string rosPackageName) => new(ParseFile(file).Single(), rosMessageName, rosPackageName);
 
-    internal static IEnumerable<IEnumerable<Field>> Parse(in string file) => MessageTokenizer.Tokenize(file).Select((tokens) => Parse(tokens));
-    internal static IEnumerable<Field> Parse(in IEnumerable<ICommented<FieldDeclaration>> tokens)
+    /// <summary>Parse a file into a list of sub-files with lists of fields and constants.</summary>
+    public static IEnumerable<IEnumerable<Field>> ParseFile(in string file) => Tokenize(file).Select((tokens) => ParseFields(tokens));
+
+    private static IEnumerable<Field> ParseFields(in IEnumerable<ICommented<FieldDeclaration>> tokens)
     {
-        if (!tokens.Any())
+        var declaredFields = new HashSet<string>();
+        var isConst = (ICommented<FieldDeclaration> t) => t.Value is ConstantDeclaration;
+
+        var initialConsts = tokens.TakeWhile(isConst).Select((token) => ParseField(token, declaredFields));
+        var rest = tokens.SkipWhile(isConst);
+
+        if (!rest.Any()) 
         {
-            return Enumerable.Empty<Field>();
-        }
-        // If the first field of your .msg is `Header header`, it resolves to std_msgs/Header
-        // from https://wiki.ros.org/msg
-        var first = ParseField(tokens.First(), new());
-        if (first is { Type: "Header", Name: "header", Package: null })
-        {
-            first = first with { Package = "std_msgs" };
+            return initialConsts;
         }
 
-        var declaredFields = new HashSet<string>() { first.Name };
-        return Enumerable.Repeat(first, 1).Concat(tokens.Skip(1).Select((token) => ParseField(token, declaredFields)));
+        // Enumerable.Repeat(first, 1).Concat(tokens.Skip(1).Select((token) => ParseField(token, declaredFields)));
+        // If the first _field_ (not const!) of your .msg is `Header header`, it resolves to std_msgs/Header
+        // from https://wiki.ros.org/msg
+        var firstField = ParseField(rest.First(), declaredFields);
+        if (firstField is { Type: "Header", Name: "header", Package: null })
+        {
+            firstField = firstField with { Package = "std_msgs" };
+        }
+
+        return initialConsts.Concat(Enumerable.Repeat(firstField, 1)).Concat(rest.Skip(1).Select((token) => ParseField(token, declaredFields)));
+    
     }
 
     private static Field ParseField(in ICommented<FieldDeclaration> token, in HashSet<string> declaredFieldNames)
@@ -52,7 +65,7 @@ internal class MessageParser
         };
     }
 
-    private static ConstField GenerateConstField(in Identifier identifier, in Type type, in string declaration)
+    private static Constant GenerateConstField(in Identifier identifier, in Type type, in string declaration)
     {
         var content = declaration.Split('#', 2);
         var val = content.First().Trim();
@@ -74,27 +87,163 @@ internal class MessageParser
             "double" when double.TryParse(val, out _) => val,
             _ => throw new MessageParserException($"Type mismatch: Expected {type.Name}, but value '{val}' is not {type.Name}.", type.StartPos),
         };
-        return new ConstField(identifier.Name, type.Name, constDecl, Enumerable.Empty<string>(), trailingComments);
+        return new Constant(identifier.Name, type.Name, constDecl, Enumerable.Empty<string>(), trailingComments);
+    }
+
+    private static Parser<IEnumerable<IEnumerable<ICommented<FieldDeclaration>>>> RosParser()
+    {
+        var commentParser = new CommentParser { Single = "#", NewLine = Environment.NewLine, MultiOpen = null, MultiClose = null };
+        var nonNewLineWhiteSpaceParser = Parse.WhiteSpace.Except(Parse.LineTerminator);
+        var rosIdentifierParser = Parse.Identifier(Parse.Letter, Parse.LetterOrDigit.Or(Parse.Char('_'))).Select(n => new Identifier(n)).Named("Identifier");
+        var rosPackageParser = (from package in rosIdentifierParser
+                                from slash in Parse.Char('/')
+                                select package.Name).Named("PackageName");
+
+        Parser<uint?> arrayLengthParser = Parse.Digit.XMany().Text().Contained(Parse.Char('['), Parse.Char(']')).Select(length => length.Length != 0 ? (uint?)uint.Parse(length) : null).Named("Array Declaration");
+
+        var rosTypeParser = (from package in rosPackageParser.Optional()
+                             from name in rosIdentifierParser
+                             from arrayLength in arrayLengthParser.XOptional()
+                             select arrayLength.IsEmpty ? new Type(name.Name, package.GetOrElse(null))
+                                                         : new ArrayType(name.Name, package.GetOrElse(null), arrayLength.GetOrElse(null))).Named("Type");
+        var constantDeclarationParser = (from eq in Parse.Char('=')
+                                         from value in Parse.AnyChar.Until(Parse.LineTerminator).Text()
+                                         select value).Named("Constant Declaration");
+        var fieldParser = (from type in rosTypeParser.Positioned()
+                           from ws in nonNewLineWhiteSpaceParser.AtLeastOnce()
+                           from identifier in rosIdentifierParser.Positioned()
+                           from c in constantDeclarationParser.XOptional()
+                           select c.IsDefined
+                           ? new ConstantDeclaration(type, identifier, c.Get())
+                           : new FieldDeclaration(type, identifier)).Named("Field");
+        return (from fields in fieldParser.Positioned().Commented(commentParser).Many()
+                from _ in Parse.WhiteSpace.Many()
+                select fields)
+                .XDelimitedBy(Parse.String("---").Commented(commentParser).Named("Separator"))
+                .End();
+    }
+
+    private static readonly Parser<IEnumerable<IEnumerable<ICommented<FieldDeclaration>>>> RosMessageParser = RosParser();
+
+    /// <summary>
+    /// Tokenizes the stream input
+    /// </summary>
+    /// <returns> A list of Nodes read from the stream </returns>
+    private static IEnumerable<IEnumerable<ICommented<FieldDeclaration>>> Tokenize(in string file)
+    {
+        try
+        {
+            return RosMessageParser.Parse(file);
+        }
+        catch (ParseException e)
+        {
+            throw new MessageParserException("Failed to parse input", e); ;
+        }
+    }
+
+    /// A node in the Message file, can be a line, type, separator, identifier, etc.
+    private record Node(int Length, Position? StartPos) : IPositionAware<Node>
+    {
+        /// <inheritdoc cref="IPositionAware{T}" />
+        public Node SetPos(Position? startPos, int length) => this with { Length = length, StartPos = startPos };
+    }
+
+    /// <summary>
+    /// The full name of a ROS message type
+    /// </summary>
+    private record Type(string Name, string? Package = null, int Length = 0, Position? StartPos = null) : Node(Length, StartPos), IPositionAware<Type>
+    {
+        /// <summary>
+        /// The full name of a ROS message type
+        /// </summary>
+        /// <example>std_msgs/Header</example>
+        public string FullName => $"{(Package != null ? $"{Package}/" : "")}{Name}";
+
+        /// <inheritdoc/>
+        public new Type SetPos(Position startPos, int length) => (Type)base.SetPos(startPos, length);
+    }
+
+    private record ArrayType(string Name, string? Package, uint? ArrayLength, int Length = 0, Position? StartPos = null) : Type(Name, Package, Length, StartPos), IPositionAware<ArrayType>
+    {
+        public new ArrayType SetPos(Position startPos, int length) => (ArrayType)base.SetPos(startPos, length);
+    }
+
+    /// <summary>
+    /// The name of a field in a ROS message
+    /// </summary>
+    /// <example>header</example>
+    /// <example>Foo</example>
+    private record Identifier(string Name, int Length = 0, Position? StartPos = null) : Node(Length, StartPos), IPositionAware<Identifier>
+    {
+        /// <inheritdoc/>
+        public new Identifier SetPos(Position startPos, int length) => (Identifier)base.SetPos(startPos, length);
+    }
+
+    /// <summary>
+    /// A full field declaration 
+    /// </summary>
+    /// <example>uint32 seq</example>
+    /// <example>Header header</example>
+    private record FieldDeclaration(Type Type, Identifier Identifier, int Length = 0, Position? StartPos = null) : Node(Length, StartPos), IPositionAware<FieldDeclaration>
+    {
+        /// <inheritdoc/>
+        public new FieldDeclaration SetPos(Position startPos, int length) => (FieldDeclaration)base.SetPos(startPos, length);
+    }
+
+    /// <summary>
+    /// A constant declaration 
+    /// </summary>
+    /// <example>int32 X=123</example>
+    /// <example>int32 Y=-123</example>
+    /// <example>string FOO=foo</example>
+    /// <example>string EXAMPLE="#comments" are ignored, and leading and trailing whitespace removed</example>
+    /// <remarks>
+    ///     Unlike the other tokens (which are usually wrapped in a <see>IComment{T}</see>), the <c>Value</c> here contains the comment! As spec makes it kinda wonky to split now.
+    /// </remarks>
+    private record ConstantDeclaration(Type Type, Identifier Identifier, string Value, int Length = 0, Position? StartPos = null) : FieldDeclaration(Type, Identifier, Length, StartPos), IPositionAware<ConstantDeclaration>
+    {
+        public new ConstantDeclaration SetPos(Position startPos, int length) => (ConstantDeclaration)base.SetPos(startPos, length);
     }
 }
 
+
 internal record ParseResult(IEnumerable<Field> Fields, string RosMessageName, string RosPackageName);
 
-internal record Field(
+/// <summary>
+/// A full field declaration 
+/// </summary>
+/// <example>uint32 seq</example>
+/// <example>Header header</example>
+public record Field(
     string Name,
     string Type,
     IEnumerable<string> LeadingComments,
     IEnumerable<string> TrailingComments,
     string? Package = null);
 
-internal record ConstField(
+/// <summary>
+/// A constant declaration 
+/// </summary>
+/// <example>int32 X=123</example>
+/// <example>int32 Y=-123</example>
+/// <example>string FOO=foo</example>
+/// <example>string EXAMPLE="#comments" are ignored, and leading and trailing whitespace removed</example>
+/// <remarks>
+///     Unlike the other tokens (which are usually wrapped in a <see>IComment{T}</see>), the <c>Value</c> here contains the comment! As spec makes it kinda wonky to split now.
+/// </remarks>
+public record Constant(
     string Name,
     string Type,
-    string ConstantDeclaration,
+    string Value,
     IEnumerable<string> LeadingComments,
     IEnumerable<string> TrailingComments) : Field(Name, Type, LeadingComments, TrailingComments, null);
 
-internal record ArrayField(
+/// <summary>
+/// An arrayfield declaration.
+/// </summary>
+/// <example>uint32[3] seq</example>
+/// <example>string[] logs</example>
+public record ArrayField(
     string Name,
     string Type,
     IEnumerable<string> LeadingComments,
@@ -102,6 +251,7 @@ internal record ArrayField(
     string? Package = null,
     uint? ArraySize = null) : Field(Name, Type, LeadingComments, TrailingComments, Package)
 {
+    /// <summary>The type defintion of this field</summary>
     public new string Type => base.Type + "[]";
 }
 

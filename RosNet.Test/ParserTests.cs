@@ -22,8 +22,8 @@ public class ParserTests
     {
         var split = type.Split('/', 2);
         var package = split.Length == 2 ? split.First() : null;
-        return value != null 
-                ? new ConstField(identifier, split.Last(), value, Enumerable.Empty<string>(), Enumerable.Empty<string>()) 
+        return value != null
+                ? new Constant(identifier, split.Last(), value, Enumerable.Empty<string>(), Enumerable.Empty<string>())
                 : new MessageGeneration.Field(identifier, split.Last(), Enumerable.Empty<string>(), Enumerable.Empty<string>(), package);
     }
 
@@ -88,6 +88,18 @@ public class ParserTests
                 Field("string", "frame_id"),
             },
         } },
+        new object[] { "headerAfterConst.msg", new Messages {
+            new() {
+                Field("sbyte", "DEBUG", "1"),
+                Field("sbyte", "INFO", "2"),
+                Field("sbyte", "WARN", "4"),
+                Field("sbyte", "ERROR", "8"),
+                Field("sbyte", "FATAL", "16"),
+                Field("std_msgs/Header", "header"),
+                Field("sbyte", "level"),
+                ArrayField("string", "topics", null),
+            },
+        } },
     };
 
     [Theory]
@@ -96,8 +108,7 @@ public class ParserTests
     {
         var test = File.ReadAllText(GetTestPath(messageFile));
 
-        // explicitly ignore comments
-        var result = MessageParser.Parse(test);
+        var result = MessageParser.ParseFile(test);
 
         Assert.Equal(expected, result, new MessageComparer());
     }
@@ -115,7 +126,7 @@ public class ParserTests
         var msg = File.ReadAllText(GetTestPath(badFile));
 
         // ToList required to evaluate the `IEnumerable`
-        var test = () => MessageParser.Parse(msg).ToList();
+        var test = () => MessageParser.ParseFile(msg).Select(Enumerable.ToList).ToList();
 
         Assert.Throws<MessageParserException>(test);
     }
@@ -132,8 +143,8 @@ internal class FieldComparer : IEqualityComparer<MessageGeneration.Field>
         var yt = y?.Type + y?.Package;
         return (x, y) switch
         {
-            (ConstField { ConstantDeclaration: var xv }, ConstField { ConstantDeclaration: var yv }) => xt == yt && xv == yv && xn == yn,
-            (ConstField, MessageGeneration.Field) or (MessageGeneration.Field, ConstField) => false,
+            (Constant { Value: var xv }, Constant { Value: var yv }) => xt == yt && xv == yv && xn == yn,
+            (Constant, MessageGeneration.Field) or (MessageGeneration.Field, Constant) => false,
             (
                 ArrayField { ArraySize: var xas },
                 ArrayField { ArraySize: var yas }

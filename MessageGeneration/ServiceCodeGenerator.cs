@@ -38,18 +38,18 @@ public class ServiceCodeGenerator : CodeGenerator
         Logger.LogDebug("Parsing: {File}", inputPath);
         Logger.LogDebug("Output Location: {File}", outputPath);
         var f = File.ReadAllText(inputPath);
-        var tokens = MessageTokenizer.Tokenize(f);
+        var files = MessageParser.ParseFile(f);
 
-        if (tokens.Count() != 2)
+        if (files.Count() != 2)
         {
             throw new MessageParserException("Unexpected number of sections. Service should have 2 sections.");
         }
 
         Directory.CreateDirectory(outputPath);
 
-        foreach (var (token, type) in tokens.Zip(Types))
+        foreach (var (tokens, type) in files.Zip(Types))
         {
-            var parsed = MessageParser.Parse(token, rosMessageName + type, rosPackageName);
+            var parsed = new ParseResult(tokens, rosMessageName + type, rosPackageName);
             var code = GenerateCode(parsed);
 
             var fileOutputPath = Path.Combine(outputPath, FileExtension, Path.ChangeExtension(parsed.RosMessageName, FileExtension));
