@@ -116,7 +116,7 @@ public class MessageParserException : Exception
     private Position? _position;
 
     /// <summary>The Position of the error in the file itself</summary>
-    public Position? Position { get => _position ?? (InnerException as ParseException)?.Position; set => _position = value; }
+    public Position? Position { get => _position ?? (InnerException as ParseException)?.Position; private set => _position = value; }
 
     /// <inheritdoc />
     public MessageParserException(string message, Position? pos = null, string? filePath = null) : base(message)

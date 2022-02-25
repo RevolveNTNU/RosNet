@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 
-using static RosNet.MessageGeneration.MessageParser;
 using static RosNet.MessageGeneration.Utilities;
 
 namespace RosNet.MessageGeneration;

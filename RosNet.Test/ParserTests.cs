@@ -8,7 +8,7 @@ using Xunit;
 namespace RosNet.Test;
 
 using Messages = List<List<MessageGeneration.Field>>;
-public class TokenizerTests
+public class ParserTests
 {
     public static string GetTestPath(string relativePath)
     {
@@ -92,7 +92,7 @@ public class TokenizerTests
 
     [Theory]
     [MemberData(nameof(TokenizerTestData))]
-    internal void TestTokenizerWorksAsExpected(string messageFile, IEnumerable<IEnumerable<MessageGeneration.Field>> expected)
+    internal void TestParserWorksAsExpected(string messageFile, IEnumerable<IEnumerable<MessageGeneration.Field>> expected)
     {
         var test = File.ReadAllText(GetTestPath(messageFile));
 
