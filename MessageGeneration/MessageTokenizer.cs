@@ -1,410 +1,123 @@
-﻿namespace RosNet.MessageGeneration;
+﻿using Sprache;
 
-public record MessageToken(MessageTokenType Type, string Content, uint LineNum)
+namespace RosNet.MessageGeneration;
+
+using RosFiles = IEnumerable<IEnumerable<ICommented<FieldDeclaration>>>;
+
+/// A node in the Message file, can be a line, type, separator, identifier, etc.
+public record Node(int Length, Position? StartPos) : IPositionAware<Node>
 {
-    public override string ToString()
-    {
-        return $"{Type}: {Content} ({LineNum})";
-    }
+    /// <inheritdoc cref="IPositionAware{T}" />
+    public Node SetPos(Position? startPos, int length) => this with { Length = length, StartPos = startPos };
 }
 
-public enum MessageTokenType
+/// <summary>
+/// The full name of a ROS message type
+/// </summary>
+public record Type(string Name, string? Package = null, int Length = 0, Position? StartPos = null) : Node(Length, StartPos), IPositionAware<Type>
 {
-    Undefined,
-    FilePath,
-    Comment,
-    BuiltInType,
-    DefinedType,
-    Header,
-    FixedSizeArray,
-    VariableSizeArray,
-    Identifier,
-    ConstantDeclaration,
-    Seperator
+    /// <summary>
+    /// The full name of a ROS message type
+    /// </summary>
+    /// <example>std_msgs/Header</example>
+    public string FullName => $"{(Package != null ? $"{Package}/" : "")}{Name}";
+
+    /// <inheritdoc/>
+    public new Type SetPos(Position startPos, int length) => (Type)base.SetPos(startPos, length);
 }
 
-
-public class MessageTokenizer : IDisposable
+internal record ArrayType(string Name, string? Package, uint? ArrayLength, int Length = 0, Position? StartPos = null) : Type(Name, Package, Length, StartPos), IPositionAware<ArrayType>
 {
+    public new ArrayType SetPos(Position startPos, int length) => (ArrayType)base.SetPos(startPos, length);
+}
 
-    private readonly string _inFilePath;
-    private uint _lineNum = 1;
+/// <summary>
+/// The name of a field in a ROS message
+/// </summary>
+/// <example>header</example>
+/// <example>Foo</example>
+public record Identifier(string Name, int Length = 0, Position? StartPos = null) : Node(Length, StartPos), IPositionAware<Identifier>
+{
+    /// <inheritdoc/>
+    public new Identifier SetPos(Position startPos, int length) => (Identifier)base.SetPos(startPos, length);
+}
 
-    private readonly StreamReader _reader;
+/// <summary>
+/// A full field declaration 
+/// </summary>
+/// <example>uint32 seq</example>
+/// <example>Header header</example>
+public record FieldDeclaration(Type Type, Identifier Identifier, int Length = 0, Position? StartPos = null) : Node(Length, StartPos), IPositionAware<FieldDeclaration>
+{
+    /// <inheritdoc/>
+    public new FieldDeclaration SetPos(Position startPos, int length) => (FieldDeclaration)base.SetPos(startPos, length);
+}
 
-    private readonly HashSet<string> _builtInTypes;
+/// <summary>
+/// A full field declaration 
+/// </summary>
+/// <example>int32 X=123</example>
+/// <example>int32 Y=-123</example>
+/// <example>string FOO=foo</example>
+/// <example>string EXAMPLE="#comments" are ignored, and leading and trailing whitespace removed</example>
+/// <remarks>
+///     Unlike the other tokens (which are usually wrapped in a <see>IComment{T}</see>), the <c>Value</c> here contains the comment! As spec makes it kinda wonky to split now.
+/// </remarks>
+internal record ConstantDeclaration(Type Type, Identifier Identifier, string Value, int Length = 0, Position? StartPos = null) : FieldDeclaration(Type, Identifier, Length, StartPos), IPositionAware<ConstantDeclaration>
+{
+    public new ConstantDeclaration SetPos(Position startPos, int length) => (ConstantDeclaration)base.SetPos(startPos, length);
+}
 
-    private readonly HashSet<char> _allowedSpecialCharacterForTypeIdentifier = new()
-    { '_', '/' };
-
-    public MessageTokenizer(string inFilePath, HashSet<string> builtInTypes)
+internal static class MessageTokenizer
+{
+    private static Parser<RosFiles> RosParser()
     {
-        this._inFilePath = inFilePath;
-        this._reader = new StreamReader(inFilePath);
-        this._builtInTypes = builtInTypes;
+        var commentParser = new CommentParser { Single = "#", NewLine = Environment.NewLine, MultiOpen = null, MultiClose = null };
+        var nonNewLineWhiteSpaceParser = Parse.WhiteSpace.Except(Parse.LineTerminator);
+        var rosIdentifierParser = Parse.Identifier(Parse.Letter, Parse.LetterOrDigit.Or(Parse.Char('_'))).Select(n => new Identifier(n)).Named("Identifier");
+        var rosPackageParser = (from package in rosIdentifierParser
+                                from slash in Parse.Char('/')
+                                select package.Name).Named("PackageName");
+
+        Parser<uint?> arrayLengthParser = Parse.Digit.XMany().Text().Contained(Parse.Char('['), Parse.Char(']')).Select(length => length.Length != 0 ? (uint?)uint.Parse(length) : null).Named("Array Declaration");
+
+        var rosTypeParser = (from package in rosPackageParser.Optional()
+                             from name in rosIdentifierParser
+                             from arrayLength in arrayLengthParser.XOptional()
+                             select arrayLength.IsEmpty ? new Type(name.Name, package.GetOrElse(null))
+                                                         : new ArrayType(name.Name, package.GetOrElse(null), arrayLength.GetOrElse(null))).Named("Type");
+        var constantDeclarationParser = (from eq in Parse.Char('=')
+                                         from value in Parse.AnyChar.Until(Parse.LineTerminator).Text()
+                                         select value).Named("Constant Declaration");
+        var fieldParser = (from type in rosTypeParser.Positioned()
+                           from ws in nonNewLineWhiteSpaceParser.AtLeastOnce()
+                           from identifier in rosIdentifierParser.Positioned()
+                           from c in constantDeclarationParser.XOptional()
+                           select c.IsDefined
+                           ? new ConstantDeclaration(type, identifier, c.Get())
+                           : new FieldDeclaration(type, identifier)).Named("Field");
+        return (from fields in fieldParser.Positioned().Commented(commentParser).Many()
+                from _ in Parse.WhiteSpace.Many()
+                select fields)
+                .XDelimitedBy(Parse.String("---").Commented(commentParser).Named("Separator"))
+                .End();
     }
+
+    internal static readonly Parser<RosFiles> RosMessageParser = RosParser();
 
     /// <summary>
     /// Tokenizes the stream input
     /// </summary>
-    /// <returns> A list of MessageTokens read from the stream </returns>
-    public List<List<MessageToken>> Tokenize()
+    /// <returns> A list of Nodes read from the stream </returns>
+    public static RosFiles Tokenize(in string file)
     {
-        List<List<MessageToken>> listsOfTokens = new();
-
-        listsOfTokens.Add(new List<MessageToken>());
-        int listIndex = 0;
-
-        // Information about the original file
-        listsOfTokens[0].Add(new MessageToken(MessageTokenType.FilePath, _inFilePath, 0));
-
-        while (!_reader.EndOfStream)
+        try
         {
-            DiscardEmpty();
-            if (_reader.EndOfStream)
-            {
-                break;
-            }
-            if (_reader.Peek() == '\n')
-            {
-                // If line is empty, move on
-                _reader.Read();
-                _lineNum++;
-                continue;
-            }
-            else if (_reader.Peek() == '\r')
-            {
-                // CRLF new line for Windows
-                _reader.Read();
-                if (_reader.Peek() == '\n')
-                {
-                    _reader.Read();
-                    _lineNum++;
-                }
-                continue;
-            }
-            else if (_reader.Peek() == '#')
-            {
-                // A line that starts with a '#' is a comment
-                listsOfTokens[listIndex].Add(NextCommentToken());
-            }
-            else if (_reader.Peek() == '-')
-            {
-                // Seperator ---
-                NextSeperator();
-                listsOfTokens.Add(new List<MessageToken>());
-                listIndex++;
-                listsOfTokens[listIndex].Add(new MessageToken(MessageTokenType.FilePath, _inFilePath, 0));
-            }
-            else
-            {
-                // Otherwise a declaration
-                // Note that a string constant line cannot have comment
-
-                // Line always start with a type
-                // Type can be built-in, defined, list, or Header
-                listsOfTokens[listIndex].Add(NextTypeIdentifierToken());
-
-                // If peek shows '[', the type is a list/array
-                if (_reader.Peek() == '[')
-                {
-                    listsOfTokens[listIndex].Add(NextArrayDeclaration());
-                }
-                DiscardEmpty();
-
-                // Then, field identifier
-                listsOfTokens[listIndex].Add(NextIdentifierToken());
-                DiscardEmpty();
-
-                // A constant may be declared
-                if (_reader.Peek() == '=')
-                {
-                    listsOfTokens[listIndex].Add(NextConstantDeclaration());
-                }
-
-                // Optionally, the line may have a comment line
-                if (_reader.Peek() == '#')
-                {
-                    listsOfTokens[listIndex].Add(NextCommentToken());
-                }
-                else
-                {
-                    // The line ends with spaces to be discarded and a '\n'
-                    DiscardEmpty();
-                    if (_reader.Peek() == '\n')
-                    {
-                        _reader.Read();
-                        _lineNum++;
-                    }
-                    else if (_reader.Peek() == '\r')
-                    {
-                        // CRLF new line for Windows
-                        _reader.Read();
-                        if (_reader.Peek() == '\n')
-                        {
-                            _reader.Read();
-                            _lineNum++;
-                        }
-                    }
-                    else if (!_reader.EndOfStream)
-                    {
-                        throw new MessageTokenizerException(
-                            $"Invalid token: {NextTokenStr()}. New line or EOF expected {CurrentFileAndLine}");
-                    }
-                }
-            }
+            return RosMessageParser.Parse(file);
         }
-        return listsOfTokens;
-    }
-
-    /// <summary>
-    /// Read and discards empty spaces
-    /// Empty spaces include ' ' and '\t'
-    /// </summary>
-    private void DiscardEmpty()
-    {
-        while ((char)_reader.Peek() is ' ' or '\t')
+        catch (ParseException e)
         {
-            _reader.Read();
+            throw new MessageParserException("Failed to parse input", e);;
         }
     }
-
-    /// <summary>
-    /// Read until '\n' and return all content before '\n'
-    /// Removes start and end trailing spaces
-    /// </summary>
-    /// <returns> All content before '\n' </returns>
-    private string ReadUntilNewLineAndTrim()
-    {
-        string content = "";
-        while (_reader.Peek() != '\n' && !_reader.EndOfStream)
-        {
-            if (_reader.Peek() == '\r')
-            {
-                // Discard carriage return
-                _reader.Read();
-            }
-            else
-            {
-                content += (char)_reader.Read();
-            }
-        }
-        return content.Trim();
-    }
-
-    /// <summary>
-    /// Returns the next token string
-    /// Tokens are seperated by whitespace (" " or "\n")
-    /// </summary>
-    /// <returns> Next token string in the stream </returns>
-    private string NextTokenStr()
-    {
-        string token = "";
-        while (!(_reader.EndOfStream || (char)_reader.Peek() is ' ' or '\n'))
-        {
-            if (_reader.Peek() == '\r')
-            {
-                // Discard carriage return
-                _reader.Read();
-            }
-            else
-            {
-                token += (char)_reader.Read();
-            }
-        }
-        _reader.Read();
-        return token;
-    }
-
-    /// <summary>
-    /// Returns the next comment token
-    /// A comment is defined as "# sigma* \n"
-    /// Assumes a '#' has been peeked
-    /// </summary>
-    /// <returns> Next comment token in the stream </returns>
-    private MessageToken NextCommentToken()
-    {
-        _reader.Read(); // Discard '#'
-
-        string comment = "";
-        while (_reader.Peek() != '\n' && !_reader.EndOfStream)
-        {
-            if (_reader.Peek() == '\r')
-            {
-                // Discard carriage return
-                _reader.Read();
-            }
-            else
-            {
-                comment += (char)_reader.Read();
-            }
-        }
-        _reader.Read();
-        _lineNum++;
-        return new MessageToken(MessageTokenType.Comment, comment, _lineNum - 1);
-    }
-
-    /// <summary>
-    /// Returns the next ROS Service/Action seperator
-    /// Only allows "---" on its own line
-    /// </summary>
-    /// <returns> Next seperator token in the stream </returns>
-    private MessageToken NextSeperator()
-    {
-        string token = ReadUntilNewLineAndTrim();
-        if (token != "---")
-        {
-            throw new MessageTokenizerException($"Unexpected token '{token}'. Did you mean '---' (ROS Service/Action seperator)?");
-        }
-        _reader.Read();
-        _lineNum++;
-        return new MessageToken(MessageTokenType.Seperator, token, _lineNum - 1);
-    }
-
-    /// <summary>
-    /// Returns the next type identifier token
-    /// Type identifiers start with an alphabet and can contain _ and /
-    /// Array notation is considered a seperate token
-    /// </summary>
-    /// <returns> Next type identifer token in the stream </returns>
-    private MessageToken NextTypeIdentifierToken()
-    {
-        string tokenStr = "";
-
-        // If start char is not alphabet, identifier invalid
-        if (!char.IsLetter((char)_reader.Peek()))
-        {
-            throw new MessageTokenizerException($"Invalid type identifier: {NextTokenStr()} {CurrentFileAndLine}");
-        }
-
-        // Otherwise, consume input until seperator, EOF or '['
-        while (_reader.Peek() != ' ' && _reader.Peek() != '[' && !_reader.EndOfStream)
-        {
-            if (!char.IsLetterOrDigit((char)_reader.Peek()) && !_allowedSpecialCharacterForTypeIdentifier.Contains((char)_reader.Peek()))
-            {
-                throw new MessageTokenizerException($"Invalid character in type identifier: {(char)_reader.Peek()} {CurrentFileAndLine}");
-            }
-            tokenStr += (char)_reader.Read();
-        }
-
-        var tokenType = true switch
-        {
-            true when _builtInTypes.Contains(tokenStr) => MessageTokenType.BuiltInType,
-            true when tokenStr == "Header" => MessageTokenType.Header,
-            _ => MessageTokenType.DefinedType,
-        };
-        return new MessageToken(tokenType, tokenStr, _lineNum);
-    }
-
-    /// <summary>
-    /// Returns the next array declaration
-    /// Array declarations are defined as [] or [number]
-    /// Assumes that '[' has been peeked
-    /// </summary>
-    /// <returns> Next array declaration token in the stream </returns>
-    private MessageToken NextArrayDeclaration()
-    {
-        string tokenStr = "";
-
-        _reader.Read(); // Discard '['
-
-        if (_reader.Peek() == ']')
-        {
-            _reader.Read(); // Discard ']'
-            if (_reader.Peek() != ' ')
-            {
-                throw new MessageTokenizerException($"Invalid character '{(char)_reader.Peek()}' after ']' {CurrentFileAndLine}");
-            }
-            return new MessageToken(MessageTokenType.VariableSizeArray, "", _lineNum);
-        }
-        else
-        {
-            string arraySizeStr = "";
-            while (_reader.Peek() != ']')
-            {
-                arraySizeStr += (char)_reader.Read();
-            }
-            if (uint.TryParse(arraySizeStr, out uint arraySize))
-            {
-                tokenStr += arraySize;
-            }
-            else
-            {
-                // Invalid Array Declaration
-                throw new MessageTokenizerException($"Invalid array declaration: [{arraySizeStr}] {CurrentFileAndLine}");
-            }
-
-            _reader.Read(); // Discard ']'
-
-            if (_reader.Peek() != ' ')
-            {
-                throw new MessageTokenizerException($"Invalid character '{(char)_reader.Peek()}' after ']' {CurrentFileAndLine}");
-            }
-            return new MessageToken(MessageTokenType.FixedSizeArray, tokenStr, _lineNum);
-        }
-    }
-
-    /// <summary>
-    /// Returns the next field identifier token
-    /// Field identifiers can only start with an alphabet
-    /// </summary>
-    /// <returns> Next field identifier token in the stream </returns>
-    private MessageToken NextIdentifierToken()
-    {
-        // If start char is not alphabet, identifier invalid
-        if (!char.IsLetter((char)_reader.Peek()))
-        {
-            throw new MessageTokenizerException($"Invalid identifier: {NextTokenStr()} {CurrentFileAndLine}");
-        }
-
-        string tokenStr = "";
-        // Otherwise, consume input until seperator or EOF
-        while (!(_reader.EndOfStream || (char)_reader.Peek() is ' ' or '\n' or '='))
-        {
-            if (_reader.Peek() == '\r')
-            {
-                _reader.Read();
-                continue;
-            }
-            if (!char.IsLetterOrDigit((char)_reader.Peek()) && _reader.Peek() != '_')
-            {
-                throw new MessageTokenizerException($"Invalid character in identifier: {(char)_reader.Peek()} {CurrentFileAndLine}");
-            }
-            tokenStr += (char)_reader.Read();
-        }
-
-        return new MessageToken(MessageTokenType.Identifier, tokenStr, _lineNum);
-    }
-
-    /// <summary>
-    /// Returns the next constant declaration
-    /// Will decide declaration type
-    /// Assumes that '=' has been peeked
-    /// </summary>
-    /// <returns></returns>
-    private MessageToken NextConstantDeclaration()
-    {
-        _reader.Read();
-
-        string val = ReadUntilNewLineAndTrim();
-
-        return new MessageToken(MessageTokenType.ConstantDeclaration, val, _lineNum);
-    }
-
-    /// <summary>
-    /// Returns the current file path and line number
-    /// </summary>
-    /// <returns> Returns the current file path and line number </returns>
-    private string CurrentFileAndLine => $"({this._inFilePath}:{_lineNum})";
-
-    public void Dispose()
-    {
-        GC.SuppressFinalize(this);
-        ((IDisposable)_reader).Dispose();
-    }
-}
-
-public class MessageTokenizerException : Exception
-{
-    public MessageTokenizerException(string msg) : base(msg) { }
 }

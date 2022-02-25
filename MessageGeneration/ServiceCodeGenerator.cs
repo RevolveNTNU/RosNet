@@ -4,50 +4,56 @@ using static RosNet.MessageGeneration.Utilities;
 
 namespace RosNet.MessageGeneration;
 
+/// <summary>Generate C# classes for ROS Services</summary>
 public class ServiceCodeGenerator : CodeGenerator
 {
     private static readonly string[] Types = { "Request", "Response" };
 
+    /// <summary>Create a <c>ServiceCodeGenerator</c> instance</summary>
     public ServiceCodeGenerator(ILogger<ServiceCodeGenerator> logger) : base(logger)
     {
     }
 
-    public static new string FileExtension => ".srv";
+    /// <inheritdoc cref="CodeGenerator.FileExtension"/>
+    public static new string FileExtension => "srv";
+    /// <inheritdoc cref="CodeGenerator.FileName"/>
     public static new string FileName => "service";
 
-    protected override List<string> GenerateSingle(string inPath, string? outPath, string? rosPackageName = "")
+    /// <inheritdoc/>
+    protected override void GenerateSingle(string inputPath, string? outputPath, string? rosPackageName)
     {
-        // If no ROS package name is provided, extract from path
-        rosPackageName ??= inPath.Split(Path.DirectorySeparatorChar)[^3];
-        outPath = Path.Combine(outPath ?? "", ResolvePackageName(rosPackageName));
+        // If no ROS package name is provided, extract from path (it should look like `{packageName}/{msg/srv/action}/*.{msg/srv/action}`)
+        rosPackageName ??= inputPath.Split(Path.DirectorySeparatorChar)[^3];
 
-        string inFileName = Path.GetFileNameWithoutExtension(inPath);
+        outputPath = Path.Combine(outputPath ?? "", ResolvePackageName(rosPackageName));
 
+        string rosMessageName = Path.GetFileNameWithoutExtension(inputPath);
 
-        _logger.LogDebug("Parsing: {file}", inPath);
-        _logger.LogDebug("Output Location: {file}", outPath);
+        if (rosPackageName == "std_msgs" || rosMessageName.ToLower() is "time" or "duration")
+        {
+            Logger.LogInformation("{File} will not be generated", rosMessageName);
+            return;
+        }
 
-        using var tokenizer = new MessageTokenizer(inPath, new HashSet<string>(BuiltInTypesMapping.Keys));
-        var listsOfTokens = tokenizer.Tokenize();
+        Logger.LogDebug("Parsing: {File}", inputPath);
+        Logger.LogDebug("Output Location: {File}", outputPath);
+        var f = File.ReadAllText(inputPath);
+        var tokens = MessageTokenizer.Tokenize(f);
 
-        if (listsOfTokens.Count != 2)
+        if (tokens.Count() != 2)
         {
             throw new MessageParserException("Unexpected number of sections. Service should have 2 sections.");
         }
 
-        var warnings = new List<string>();
+        Directory.CreateDirectory(outputPath);
 
-        for (int i = 0; i < listsOfTokens.Count; i++)
+        foreach (var (token, type) in tokens.Zip(Types))
         {
-            List<MessageToken> tokens = listsOfTokens[i];
+            var parsed = MessageParser.Parse(token, rosMessageName + type, rosPackageName);
+            var code = GenerateCode(parsed);
 
-            // Service is made up of request and response
-            string className = inFileName + Types[i];
-
-            MessageParser parser = new(tokens, outPath, rosPackageName, "srv", BuiltInTypesMapping, BuiltInTypesDefaultInitialValues, className);
-            parser.Parse();
-            warnings.AddRange(parser.GetWarnings());
+            var fileOutputPath = Path.Combine(outputPath, FileExtension, Path.ChangeExtension(parsed.RosMessageName, FileExtension));
+            File.WriteAllText(fileOutputPath, code);
         }
-        return warnings;
     }
 }
