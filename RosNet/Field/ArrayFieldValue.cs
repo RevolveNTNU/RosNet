@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using RosNet.Type;
+﻿using RosNet.Type;
 
 namespace RosNet.Field;
 

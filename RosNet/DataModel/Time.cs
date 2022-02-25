@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RosNet.DataModel;
+﻿namespace RosNet.DataModel;
 
 public class Time : IComparable<Time>, ITime
 {
