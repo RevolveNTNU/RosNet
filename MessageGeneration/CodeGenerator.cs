@@ -93,7 +93,6 @@ namespace RosNet.MessageTypes.{2}
     }
 
     // Missing from ROS# : Invalid C# indentifiers are allowed, so they add JsonProperty
-    // TODO (MAJOR SECURITY-ISSUE): ROS-comments can freely contain /* */
     internal static string ToDeclaration(Field f)
     {
         var leading = f.LeadingComments.Aggregate("", (s, c) => s + $"        // {c}\n");
