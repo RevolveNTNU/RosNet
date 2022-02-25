@@ -87,7 +87,7 @@ public static class MessageParser
             "double" when double.TryParse(val, out _) => val,
             _ => throw new MessageParserException($"Type mismatch: Expected {type.Name}, but value '{val}' is not {type.Name}.", type.StartPos),
         };
-        return new Constant(identifier.Name, type.Name, constDecl, Enumerable.Empty<string>(), trailingComments);
+        return new Constant(identifier.Name, type.Name, constDecl, Enumerable.Empty<string>(), type.Name is "string" ? Enumerable.Empty<string>() : trailingComments);
     }
 
     private static Parser<IEnumerable<IEnumerable<ICommented<FieldDeclaration>>>> RosParser()

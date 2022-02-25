@@ -18,13 +18,15 @@ public class ParserTests
         return Path.Combine(dirPath, "TestMessages", relativePath);
     }
 
-    private static MessageGeneration.Field Field(string type, string identifier, string? value = null)
+    private static MessageGeneration.Field Field(string type, string identifier, string? value = null, IEnumerable<string>? initialComments = null, string? trailingComment = null)
     {
         var split = type.Split('/', 2);
         var package = split.Length == 2 ? split.First() : null;
+        var tc = trailingComment is not null ? Enumerable.Repeat(trailingComment, 1) : Enumerable.Empty<string>();
+        var ic = initialComments ?? Enumerable.Empty<string>();
         return value != null
-                ? new Constant(identifier, split.Last(), value, Enumerable.Empty<string>(), Enumerable.Empty<string>())
-                : new MessageGeneration.Field(identifier, split.Last(), Enumerable.Empty<string>(), Enumerable.Empty<string>(), package);
+                ? new Constant(identifier, split.Last(), value, ic, tc)
+                : new MessageGeneration.Field(identifier, split.Last(), ic, tc, package);
     }
 
     private static MessageGeneration.Field ArrayField(string type, string identifier, uint? length)
@@ -83,9 +85,13 @@ public class ParserTests
         } },
         new object[] { "commented.msg", new Messages {
             new() {
-                Field("uint", "seq"),
-                Field("Time", "stamp"),
-                Field("string", "frame_id"),
+                Field("uint", "seq", null, new List<string>(){"Standard metadata for higher-level flow data types", "sequence ID: consecutively increasing ID"}),
+                Field("Time", "stamp", null, new List<string>() {
+                        "Two-integer timestamp that is expressed as:",
+                        " * stamp.secs: seconds (stamp_secs) since epoch",
+                        " * stamp.nsecs: nanoseconds since stamp_secs",
+                        " time-handling sugar is provided by the client library"}),
+                Field("string", "frame_id", null, new List<string>(){"Frame this data is associated with"}, " this is the frame_id"),
             },
         } },
         new object[] { "headerAfterConst.msg", new Messages {
@@ -134,23 +140,22 @@ public class ParserTests
 
 internal class FieldComparer : IEqualityComparer<MessageGeneration.Field>
 {
-    /// We want to ignore the position-specifiers (and comments) that comes with Sprache's position-awareness, makes test-data noisy
     public bool Equals(MessageGeneration.Field? x, MessageGeneration.Field? y)
     {
-        var xn = x?.Name;
-        var yn = y?.Name;
-        var xt = x?.Type + x?.Package;
-        var yt = y?.Type + y?.Package;
-        return (x, y) switch
+        if (x is null || y is null)
         {
-            (Constant { Value: var xv }, Constant { Value: var yv }) => xt == yt && xv == yv && xn == yn,
-            (Constant, MessageGeneration.Field) or (MessageGeneration.Field, Constant) => false,
-            (
-                ArrayField { ArraySize: var xas },
-                ArrayField { ArraySize: var yas }
-            ) => xt == yt && xas == yas && xn == yn,
-            (MessageGeneration.Field, MessageGeneration.Field) => xt == yt && xn == yn,
-            _ => x == y,
+            return false;
+        }
+        var nameEqual = x.Name == y.Name;
+        var typeEqual = (x.Type + x.Package) == (y.Type + y.Package);
+        var lcEq = x.LeadingComments.SequenceEqual(y.LeadingComments);
+        var ltEq = x.TrailingComments.SequenceEqual(y.TrailingComments);
+        return typeEqual && nameEqual && lcEq && ltEq && (x, y) switch
+        {
+            (Constant { Value: var xv }, Constant { Value: var yv }) => xv == yv,
+            (ArrayField { ArraySize: var xas }, ArrayField { ArraySize: var yas }) => xas == yas,
+            _ when x.GetType() != y.GetType() => false,
+            _ => true,
         };
     }
 

@@ -7,4 +7,4 @@ uint32 seq
 # time-handling sugar is provided by the client library
 time stamp
 #Frame this data is associated with
-string frame_id
+string frame_id # this is the frame_id
