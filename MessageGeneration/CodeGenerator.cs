@@ -96,8 +96,8 @@ namespace RosNet.MessageTypes.{2}
     // TODO (MAJOR SECURITY-ISSUE): ROS-comments can freely contain /* */
     internal static string ToDeclaration(Field f)
     {
-        var leading = f.LeadingComments.Any() ? $"        /* {f.LeadingComments} */\n" : "";
-        var trailing = f.TrailingComments.Any() ? $"        /* {f.TrailingComments} */\n" : "\n";
+        var leading = f.LeadingComments.Aggregate("", (s, c) => s + $"        // {c}\n");
+        var trailing = f.TrailingComment is not null ? $"        // {f.TrailingComment}\n" : "\n";
         var decl = f switch
         {
             Constant { Type: var t, Name: var n, Value: var d } => $"        public const {t} {n} = {d};",

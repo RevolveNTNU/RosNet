@@ -47,7 +47,7 @@ public static class MessageParser
     private static Field ParseField(in ICommented<FieldDeclaration> token, in HashSet<string> declaredFieldNames)
     {
         var lc = token.LeadingComments;
-        var tc = token.TrailingComments;
+        string? tc = token.TrailingComments.SingleOrDefault();
         var t = token.Value.Type;
         t = BuiltInTypesMapping.TryGetValue(t.Name, out var csharpType) && t.Package is null or "std_msgs" ? t with { Name = csharpType } : t;
         var i = token.Value.Identifier;
@@ -69,7 +69,7 @@ public static class MessageParser
     {
         var content = declaration.Split('#', 2);
         var val = content.First().Trim();
-        var trailingComments = content.Skip(1);
+        var trailingComment = content.Skip(1);
         var constDecl = type.Name switch
         {
             "string" => $"\"{declaration.Trim()}\"",
@@ -87,7 +87,7 @@ public static class MessageParser
             "double" when double.TryParse(val, out _) => val,
             _ => throw new MessageParserException($"Type mismatch: Expected {type.Name}, but value '{val}' is not {type.Name}.", type.StartPos),
         };
-        return new Constant(identifier.Name, type.Name, constDecl, Enumerable.Empty<string>(), type.Name is "string" ? Enumerable.Empty<string>() : trailingComments);
+        return new Constant(identifier.Name, type.Name, constDecl, Enumerable.Empty<string>(), type.Name is "string" ? null : trailingComment.SingleOrDefault());
     }
 
     private static Parser<IEnumerable<IEnumerable<ICommented<FieldDeclaration>>>> RosParser()
@@ -218,7 +218,7 @@ public record Field(
     string Name,
     string Type,
     IEnumerable<string> LeadingComments,
-    IEnumerable<string> TrailingComments,
+    string? TrailingComment=null,
     string? Package = null);
 
 /// <summary>
@@ -236,7 +236,7 @@ public record Constant(
     string Type,
     string Value,
     IEnumerable<string> LeadingComments,
-    IEnumerable<string> TrailingComments) : Field(Name, Type, LeadingComments, TrailingComments, null);
+    string? TrailingComment=null) : Field(Name, Type, LeadingComments, TrailingComment, null);
 
 /// <summary>
 /// An arrayfield declaration.
@@ -247,9 +247,9 @@ public record ArrayField(
     string Name,
     string Type,
     IEnumerable<string> LeadingComments,
-    IEnumerable<string> TrailingComments,
+    string? TrailingComment=null,
     string? Package = null,
-    uint? ArraySize = null) : Field(Name, Type, LeadingComments, TrailingComments, Package)
+    uint? ArraySize = null) : Field(Name, Type, LeadingComments, TrailingComment, Package)
 {
     /// <summary>The type defintion of this field</summary>
     public new string Type => base.Type + "[]";

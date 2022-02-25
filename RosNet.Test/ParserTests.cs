@@ -22,18 +22,17 @@ public class ParserTests
     {
         var split = type.Split('/', 2);
         var package = split.Length == 2 ? split.First() : null;
-        var tc = trailingComment is not null ? Enumerable.Repeat(trailingComment, 1) : Enumerable.Empty<string>();
         var ic = initialComments ?? Enumerable.Empty<string>();
         return value != null
-                ? new Constant(identifier, split.Last(), value, ic, tc)
-                : new MessageGeneration.Field(identifier, split.Last(), ic, tc, package);
+                ? new Constant(identifier, split.Last(), value, ic, trailingComment)
+                : new MessageGeneration.Field(identifier, split.Last(), ic, trailingComment, package);
     }
 
     private static MessageGeneration.Field ArrayField(string type, string identifier, uint? length)
     {
         var split = type.Split('/', 2);
         var package = split.Length == 2 ? split.First() : null;
-        return new ArrayField(identifier, split.Last(), Enumerable.Empty<string>(), Enumerable.Empty<string>(), package, length);
+        return new ArrayField(identifier, split.Last(), Enumerable.Empty<string>(), null, package, length);
     }
 
 
@@ -149,7 +148,7 @@ internal class FieldComparer : IEqualityComparer<MessageGeneration.Field>
         var nameEqual = x.Name == y.Name;
         var typeEqual = (x.Type + x.Package) == (y.Type + y.Package);
         var lcEq = x.LeadingComments.SequenceEqual(y.LeadingComments);
-        var ltEq = x.TrailingComments.SequenceEqual(y.TrailingComments);
+        var ltEq = x.TrailingComment == y.TrailingComment;
         return typeEqual && nameEqual && lcEq && ltEq && (x, y) switch
         {
             (Constant { Value: var xv }, Constant { Value: var yv }) => xv == yv,
