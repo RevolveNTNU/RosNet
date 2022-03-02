@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using RosNet.DataModel;
 using RosNet.Field;
 using RosNet.Type;
@@ -16,6 +12,18 @@ namespace RosNet.RosReader;
 /// </summary>
 public static class RosBagReader
 {
+
+    // Represents the different Op codes within the RosBag 2.0 format, with their respective bytes
+    internal enum OpCode
+    {
+        MessageData = 0x02,
+        BagHeader = 0x03,
+        IndexData = 0x04,
+        Chunk = 0x05,
+        ChunkInfo = 0x06,
+        Connection = 0x07
+    }
+
     //Dictionary containing the names of all header fields in record
     private static readonly Dictionary<OpCode, string[]> HeaderFieldsByOp = new Dictionary<OpCode, string[]>()
     {
@@ -33,57 +41,53 @@ public static class RosBagReader
     /// <returns>ROSbag-object</returns>
     public static RosBag Read(string path)
     {
-        if (File.Exists(path))
-        {
-            using BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open));
-            var rosBag = new RosBag();
-            var unParsedMessageHandler = new UnParsedMessageHandler(); //handles all message data
-
-            reader.ReadChars(13);
-
-            while (reader.BaseStream.Position != reader.BaseStream.Length)
-            {
-                Dictionary<String, FieldValue> header = ReadHeader(reader);
-
-                //reads record based on op value in header
-                switch ((OpCode)header["op"].Value.First())
-                {
-                    case OpCode.MessageData:
-                        var message = new Message(header["conn"], header["time"]);
-                        byte[] data = ReadMessageData(reader);
-                        unParsedMessageHandler.AddUnParsedMessage(message, data);
-                        break;
-                    case OpCode.Chunk:
-                        var chunkConnections = new List<Connection>();
-                        if (header["compression"].Value.Length == 3)
-                        {
-                            chunkConnections = ReadCompressedChunk(reader, unParsedMessageHandler);
-                        }
-                        else
-                        {
-                            chunkConnections = ReadUnCompressedChunk(reader, unParsedMessageHandler);
-                        }
-                        chunkConnections.Where(c => rosBag.AddConnection(c));
-                        break;
-                    case OpCode.Connection:
-                        var connection = new Connection(header["conn"], header["topic"]);
-                        SetConnectionData(reader, connection);
-                        rosBag.AddConnection(connection);
-                        break;
-                    default: //Other record types
-                        int dataLength = reader.ReadInt32();
-                        reader.ReadBytes(dataLength);
-                        break;
-                } 
-            }
-            unParsedMessageHandler.ParseMessages(rosBag); //Parses all message data  
-            return rosBag;
-        }
-        else
+        if (!File.Exists(path))
         {
             throw new FileNotFoundException($"File with path {path} does not exist");
-            
         }
+        using BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open));
+        var rosBag = new RosBag();
+        var unParsedMessageHandler = new UnParsedMessageHandler(); //handles all message data
+
+        reader.ReadChars(13);
+
+        while (reader.BaseStream.Position != reader.BaseStream.Length)
+        {
+            Dictionary<String, FieldValue> header = ReadHeader(reader);
+
+            //reads record based on op value in header
+            switch ((OpCode)header["op"].Value.First())
+            {
+                case OpCode.MessageData:
+                    var message = new Message(header["conn"], header["time"]);
+                    byte[] data = ReadMessageData(reader);
+                    unParsedMessageHandler.AddUnParsedMessage(message, data);
+                    break;
+                case OpCode.Chunk:
+                    var chunkConnections = new List<Connection>();
+                    if (header["compression"].Value.Length == 3)
+                    {
+                        chunkConnections = ReadCompressedChunk(reader, unParsedMessageHandler);
+                    }
+                    else
+                    {
+                        chunkConnections = ReadUnCompressedChunk(reader, unParsedMessageHandler);
+                    }
+                    chunkConnections.Where(c => rosBag.AddConnection(c));
+                    break;
+                case OpCode.Connection:
+                    var connection = new Connection(header["conn"], header["topic"]);
+                    SetConnectionData(reader, connection);
+                    rosBag.AddConnection(connection);
+                    break;
+                default: //Other record types
+                    int dataLength = reader.ReadInt32();
+                    reader.ReadBytes(dataLength);
+                    break;
+            } 
+        }
+        unParsedMessageHandler.ParseMessages(rosBag); //Parses all message data  
+        return rosBag;
     }
 
     /// <summary>
