@@ -164,17 +164,13 @@ public static class RosBagReader
     {
         int compressedDataLength = reader.ReadInt32();
         byte[] data = reader.ReadBytes(compressedDataLength);
-        byte[] unCompressedData = Array.Empty<byte>();
-        using MemoryStream source = new MemoryStream(data);
-        using MemoryStream target = new MemoryStream(compressedDataLength);
-        BZip2.Decompress(source, target, false);
-        unCompressedData = target.ToArray();
+        using var source = new MemoryStream(data);
+        using var uncompressed = new MemoryStream(compressedDataLength);
+        BZip2.Decompress(source, uncompressed, false);
 
-        var connections = new List<Connection>();
-        using (BinaryReader tempReader = new BinaryReader(new MemoryStream(unCompressedData)))
-        {
-            connections = ReadChunk(tempReader, unParsedMessageHandler, unCompressedData.Length);
-        }
+        using var uncompressedReader = new BinaryReader(uncompressed);
+        uncompressedReader.BaseStream.Seek(0, SeekOrigin.Begin);
+        var connections = ReadChunk(uncompressedReader, unParsedMessageHandler, (int)uncompressed.Length);
 
         return connections;
 
@@ -233,17 +229,14 @@ public static class RosBagReader
             headerFields.Add(fieldValue.Name, fieldValue);
         }
 
-        if (!headerFields.ContainsKey("op"))
+        if (!headerFields.TryGetValue("op", out var op))
             //TODO: More descriptive exception
             throw new Exception("Header is missing op definition");
 
-        foreach (string headerField in HeaderFieldsByOp[(OpCode)headerFields["op"].Value.First()])
+        if (!HeaderFieldsByOp[(OpCode)op.Value.First()].All(h => headerFields.ContainsKey(h)))
         {
-            if (!headerFields.ContainsKey(headerField))
-            {
-                //TODO: Better exception
-                throw new Exception($"Missing header field {headerField}");
-            }
+            //TODO: Better exception
+            throw new Exception($"Missing header field");
         }
 
         return headerFields;
@@ -258,53 +251,16 @@ public static class RosBagReader
         int fieldLen = reader.ReadInt32();
         string fieldName = ReadName(reader, fieldLen);
 
-        PrimitiveType dataType;
-        byte[] fieldValue;
-        switch (fieldName)
+        byte[] fieldValue = reader.ReadBytes(fieldLen - fieldName.Length - 1);
+        var dataType = fieldName switch
         {
-            case "index_pos":
-            case "time":
-            case "chunk_pos":
-            case "start_time":
-            case "end_time":
-                dataType = PrimitiveType.INT64;
-                fieldValue = reader.ReadBytes(8);
-                break;
-            case "conn_count":
-            case "chunk_count":
-            case "size":
-            case "conn":
-            case "ver":
-            case "count":
-            case "offset":
-                dataType = PrimitiveType.INT32;
-                fieldValue = reader.ReadBytes(4);
-                break;
-            case "op":
-                dataType = PrimitiveType.INT8;
-                fieldValue = reader.ReadBytes(1);
-                break;
-            case "compression":
-                dataType = PrimitiveType.STRING;
-                char firstChar = reader.ReadChar();
-                if (firstChar.Equals('n'))
-                {
-                    reader.ReadChars(3);
-                    fieldValue = Encoding.ASCII.GetBytes("none");
-                }
-                else
-                {
-                    reader.ReadChars(2);
-                    fieldValue = Encoding.ASCII.GetBytes("bz2");
-                }
-                break;
-            case "topic":
-                dataType = PrimitiveType.STRING;
-                fieldValue = Encoding.ASCII.GetBytes(new string(reader.ReadChars(fieldLen - 6)));
-                break;
-            default:
-                throw new Exception($"{fieldName} not defined in ROSbag-format");
-        }
+            "index_pos" or "time" or "chunk_pos" or "start_time" or "end_time" => PrimitiveType.INT64,
+            "conn_count" or "chunk_count" or "size" or "conn" or "ver" or "count" or "offset" => PrimitiveType.INT32,
+            "op" => PrimitiveType.UINT8,
+            "compression" or "topic" => PrimitiveType.STRING,
+            _ => throw new Exception($"{fieldName} not defined in ROSbag-format")
+        };
+
         return new FieldValue(fieldName, dataType, fieldValue);
     }
 
