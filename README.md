@@ -26,11 +26,11 @@ SharpZipLib used for decompression from bz2: http://icsharpcode.github.io/SharpZ
 ## Credits
 This library is made by the organization Revolve NTNU: https://www.revolve.no
 
-Contributors:
-Henrik Hørlück Berg https://github.com/henrikhorluck
-Inge Grelland https://github.com/Kytzis
-Juni Sæther Skarpaas https://github.com/Juni-hub
-Lars van der Lee https://github.com/TheLarsinator
+Contributors:\\
+Henrik Hørlück Berg https://github.com/henrikhorluck\\
+Inge Grelland https://github.com/Kytzis\\
+Juni Sæther Skarpaas https://github.com/Juni-hub\\
+Lars van der Lee https://github.com/TheLarsinator\\
 Mikael Steenbuch https://github.com/mikaelste
 
 <!-- License -->
