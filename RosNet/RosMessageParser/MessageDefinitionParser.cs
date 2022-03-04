@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using RosNet.Field;
+using RosNet.Exceptions;
 using RosNet.Type;
 
 namespace RosNet.RosMessageParser;
@@ -157,7 +158,7 @@ internal class MessageDefinitionParser
                         }
                         else
                         {
-                            throw new KeyNotFoundException($"Could not find {arrayDataTypeString}");
+                            throw new InvalidDataTypeException($"The dataType of array: { arrayDataTypeString } is not a primitive type or defined in MessageDefinition", arrayDataTypeString);
                         }
                     }
                 }
@@ -213,7 +214,7 @@ internal class MessageDefinitionParser
                         }
                         else
                         {
-                            throw new KeyNotFoundException($"The dataType of array: {arrayType} is not a primitive type or defined in MessageDefinition");
+                            throw new InvalidDataTypeException($"The dataType of array: {arrayType} is not a primitive type or defined in messageDefinition", arrayType);
                         }
                     }
                 }
@@ -241,7 +242,7 @@ internal class MessageDefinitionParser
                     }
                     else
                     {
-                        throw new KeyNotFoundException($"The dataType: {wordsInLine.First()} is not a primitive type or defined in MessageDefinition");
+                        throw new InvalidDataTypeException($"The dataType: {wordsInLine.First()} is not a primitive type or defined in messageDefinition", wordsInLine.First());
                     }
                 }
             }

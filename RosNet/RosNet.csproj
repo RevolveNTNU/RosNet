@@ -9,11 +9,13 @@
     <None Remove="RosMessageParser\" />
     <None Remove="Field\" />
     <None Remove="SharpZipLib" />
+    <None Remove="Exceptions\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Type\" />
     <Folder Include="RosMessageParser\" />
     <Folder Include="Field\" />
+    <Folder Include="Exceptions\" />
   </ItemGroup>
 
   <ItemGroup>

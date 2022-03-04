@@ -1,5 +1,6 @@
 ﻿using ICSharpCode.SharpZipLib.BZip2;
 using RosNet.DataModel;
+using RosNet.Exceptions;
 using RosNet.Field;
 using RosNet.RosMessageParser;
 using RosNet.Type;
@@ -47,7 +48,7 @@ internal class RosBagReader
     {
         if (!File.Exists(rosBag.Path))
         {
-            throw new FileNotFoundException($"File with path {rosBag.Path} does not exist");
+            throw new FileNotFoundException($"File with path {rosBag.Path} does not exist", rosBag.Path);
         }
         using BinaryReader reader = new BinaryReader(File.Open(rosBag.Path, FileMode.Open));
         var unParsedMessageHandler = new UnParsedMessageHandler(); //handles all message data
@@ -237,13 +238,12 @@ internal class RosBagReader
         }
 
         if (!headerFields.TryGetValue("op", out var op))
-            //TODO: More descriptive exception
-            throw new Exception("Header is missing op definition");
+            throw new MissingHeaderFieldException("Header is missing op definition", new List<string>("op"));
 
         if (!HeaderFieldsByOp[(OpCode)op.Value.First()].All(h => headerFields.ContainsKey(h)))
         {
-            //TODO: Better exception
-            throw new Exception($"Missing header field");
+            var missingFields = HeaderFieldsByOp[(OpCode)op.Value.First()].Except(headerFields.Keys);
+            throw new MissingHeaderFieldException($"Missing header field(s) {missingFields}",missingFields);
         }
 
         return headerFields;
@@ -289,8 +289,7 @@ internal class RosBagReader
             }
 
             if (reader.BaseStream.Position == fieldEndPos)
-                //TODO: More descriptive exception
-                throw new Exception($"Field \"{fieldName}\" exceeds the field length of {fieldLen}");
+                throw new FormatException($"Field \"{fieldName}\" exceeds the field length of {fieldLen}");
         }
         while (curChar != '=');
 

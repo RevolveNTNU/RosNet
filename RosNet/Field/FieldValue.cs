@@ -1,4 +1,5 @@
 ﻿using RosNet.Type;
+using RosNet.Exceptions;
 
 namespace RosNet.Field;
 
@@ -98,7 +99,7 @@ public class FieldValue
         PrimitiveType.STRING => System.Text.Encoding.Default.GetString(this.Value),
         PrimitiveType.TIME => ($"{BitConverter.ToUInt32(this.Value.Take(4).ToArray())} : {BitConverter.ToUInt32(this.Value.Skip(4).Take(4).ToArray())}"),
         PrimitiveType.DURATION => ($"{BitConverter.ToInt32(this.Value.Take(4).ToArray())} : {BitConverter.ToInt32(this.Value.Skip(4).Take(4).ToArray())}"),
-        _ => throw new Exception("Datatype is not a primitive type") //todo make exception
+        _ => throw new InvalidDataTypeException("Datatype is not a primitive type")
 
     };
 }

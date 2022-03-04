@@ -83,7 +83,7 @@ public class RosBag
     {
         var timeSeries = new List<(Time, FieldValue)>();
 
-        //todo:finn bedre løsning
+        //todo:finn bedre løsning og adde exception dersom topic eller fieldname ikke finnes i bagen
         foreach (Connection conn in Connections.Values)
         {
             if (!conn.Topic.Equals(topic))
@@ -102,7 +102,6 @@ public class RosBag
             }
         }
 
-        //todo: raise exception if timeseries is empty
         return timeSeries;
     }
 }

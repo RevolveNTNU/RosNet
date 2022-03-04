@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using RosNet.Exceptions;
 using RosNet.DataModel;
 using RosNet.Field;
 using RosNet.RosMessageParser;
@@ -54,7 +55,7 @@ internal class UnParsedMessageHandler
 
         if (UnParsedMessageByConn.Count != 0)
         {
-            throw new Exception("There are messages without the corresponding connection");
+            throw new MissingConnectionException("There are messages without the corresponding connection", UnParsedMessageByConn.Values);
         }
     }
 }
