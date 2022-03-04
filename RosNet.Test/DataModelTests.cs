@@ -1,6 +1,5 @@
-﻿using System;
+﻿using RosNet.DataModel;
 using Xunit;
-using RosNet.DataModel;
 
 namespace RosNet.Test;
 

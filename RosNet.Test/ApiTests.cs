@@ -1,11 +1,7 @@
-﻿using System;
-using Xunit;
-using System.IO;
+﻿using System.Reflection;
 using RosNet.DataModel;
-using RosNet.RosReader;
-using System.Collections.Generic;
 using RosNet.Field;
-using System.Reflection;
+using Xunit;
 
 namespace RosNet.Test;
 
