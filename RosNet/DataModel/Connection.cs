@@ -5,7 +5,7 @@ namespace RosNet.DataModel;
 /// <summary>
 /// Represents a ROSbag connection
 /// </summary>
-public class Connection : IConnection
+public class Connection
 {
     //Header fields in Connection record:
     public int Conn { get; } //unique ID for each connection

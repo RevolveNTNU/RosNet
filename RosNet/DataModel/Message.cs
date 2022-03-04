@@ -6,7 +6,7 @@ namespace RosNet.DataModel;
 /// <summary>
 /// Represents a ROSbag message
 /// </summary>
-public class Message : IMessage
+public class Message
 {
     //Header fields of message record:
     public int Conn { get; }

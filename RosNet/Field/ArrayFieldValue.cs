@@ -5,7 +5,7 @@ namespace RosNet.Field;
 /// <summary>
 /// Represents an arrayfield
 /// </summary>
-public class ArrayFieldValue : FieldValue, IArrayFieldValue
+public class ArrayFieldValue : FieldValue
 {
     public List<FieldValue> ArrayFields { get; set; }
     public uint FixedArrayLength { get; } //used if array has fixed length
