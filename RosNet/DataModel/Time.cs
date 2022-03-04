@@ -1,6 +1,6 @@
 ﻿namespace RosNet.DataModel;
 
-public class Time : IComparable<Time>, ITime
+public class Time : IComparable<Time>
 {
     // Time data stored as they come in
     public uint Secs { get; }

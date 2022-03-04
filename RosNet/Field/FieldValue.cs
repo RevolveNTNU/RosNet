@@ -5,7 +5,7 @@ namespace RosNet.Field;
 /// <summary>
 /// Represents a fieldvalue
 /// </summary>
-public class FieldValue : IFieldValue
+public class FieldValue
 {
     public string Name { get; set; }
     public PrimitiveType DataType { get; private set; }
