@@ -7,7 +7,7 @@ namespace RosNet.Exceptions;
 /// </summary>
 /// <param name="message">Message which explains the cause</param>
 /// <param name="missingHeaderFields">List of the missing header fields</param>
-public class MissingHeaderFieldException : Exceptions
+public class MissingHeaderFieldException : Exception
 {
     public List<string> MissingHeaderFields { get; }
 

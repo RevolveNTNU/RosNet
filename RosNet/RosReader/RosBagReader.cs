@@ -238,12 +238,12 @@ internal class RosBagReader
         }
 
         if (!headerFields.TryGetValue("op", out var op))
-            throw new MissingHeaderFieldException("Header is missing op definition", new List<string>("op"));
+            throw new MissingHeaderFieldException("Header is missing op definition", new List<string>() {"op"});
 
         if (!HeaderFieldsByOp[(OpCode)op.Value.First()].All(h => headerFields.ContainsKey(h)))
         {
             var missingFields = HeaderFieldsByOp[(OpCode)op.Value.First()].Except(headerFields.Keys);
-            throw new MissingHeaderFieldException($"Missing header field(s) {missingFields}",missingFields);
+            throw new MissingHeaderFieldException($"Missing header field(s) {missingFields}",missingFields.ToList());
         }
 
         return headerFields;

@@ -10,10 +10,10 @@ namespace RosNet.Exceptions;
 /// <param name="messages">List of the messages without the corresponding connection and the message data as bytearray</param>
 public class MissingConnectionException : Exception
 {
-    public List<(Message, byte[])>> Messages { get; }
+    public Dictionary<int, List<(Message, byte[])>> MessagesByConn { get; }
 
-    public MissingConnectionException(string message, List<(Message, byte[])>>  messages) : base(message)
+    public MissingConnectionException(string message, Dictionary<int, List<(Message, byte[])>> messagesByConn) : base(message)
     {
-        Messages = messages;
+        MessagesByConn = messagesByConn;
     }
 }

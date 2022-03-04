@@ -11,5 +11,5 @@ public class InvalidDataTypeException : Exception
 {
     public string DataType { get; }
 
-    public InvalidDataTypeException(string message, string dataType;) : base(message) { }
+    public InvalidDataTypeException(string message, string dataType) : base(message) { }
 }
