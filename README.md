@@ -7,7 +7,7 @@ RosNet is a .NET library used for parsing RosBags to a C# object. We are thinkin
 ## How to use the library:
 <!-- How to include library in project-->
 ```C#
-using RosNet.DataModel
+using RosNet.DataModel;
 
 # Convert a ROSBag to a C# object
 var rosBag = new RosBag(path);
