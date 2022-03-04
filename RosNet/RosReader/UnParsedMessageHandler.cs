@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-
 using RosNet.DataModel;
 using RosNet.Field;
 using RosNet.RosMessageParser;
@@ -41,12 +40,13 @@ internal class UnParsedMessageHandler
     /// </summary>
     public void ParseMessages(RosBag rosBag)
     {
+        var messageDataParser = new MessageDataParser();
         foreach (KeyValuePair<int, Connection> kvp in rosBag.Connections)
         {
             
             foreach((var message, var data) in UnParsedMessageByConn[kvp.Key])
             {
-                message.Data = new ReadOnlyDictionary<string, FieldValue>(MessageDataParser.ParseMessageData(data, kvp.Value.MessageDefinition));
+                message.Data = new ReadOnlyDictionary<string, FieldValue>(messageDataParser.ParseMessageData(data, kvp.Value.MessageDefinition));
                 rosBag.Connections[message.Conn].Messages.Add(message);
             }
             UnParsedMessageByConn.Remove(kvp.Key);

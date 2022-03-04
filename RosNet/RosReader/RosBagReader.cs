@@ -1,20 +1,19 @@
-﻿using System.Text;
+﻿using ICSharpCode.SharpZipLib.BZip2;
 using RosNet.DataModel;
 using RosNet.Field;
-using RosNet.Type;
 using RosNet.RosMessageParser;
-using ICSharpCode.SharpZipLib.BZip2;
+using RosNet.Type;
 
 namespace RosNet.RosReader;
 
 /// <summary>
 /// Reads a ROSbag
 /// </summary>
-public static class RosBagReader
+internal class RosBagReader
 {
 
     // Represents the different Op codes within the RosBag 2.0 format, with their respective bytes
-    internal enum OpCode
+    public enum OpCode
     {
         MessageData = 0x02,
         BagHeader = 0x03,
@@ -25,7 +24,7 @@ public static class RosBagReader
     }
 
     //Dictionary containing the names of all header fields in record
-    private static readonly Dictionary<OpCode, string[]> HeaderFieldsByOp = new Dictionary<OpCode, string[]>()
+    private readonly Dictionary<OpCode, string[]> HeaderFieldsByOp = new Dictionary<OpCode, string[]>()
     {
         { OpCode.MessageData, new string[] {"conn", "time"} },
         { OpCode.BagHeader,   new string[] {"index_pos", "conn_count", "chunk_count"} },
@@ -35,18 +34,22 @@ public static class RosBagReader
         { OpCode.Connection,  new string[] {"conn", "topic"} }
     };
 
+    public RosBagReader()
+    {
+
+    }
+
     /// <summary>
     /// Reads a ROSbag-file
     /// </summary>
     /// <returns>ROSbag-object</returns>
-    public static RosBag Read(string path)
+    public void Read(RosBag rosBag)
     {
-        if (!File.Exists(path))
+        if (!File.Exists(rosBag.Path))
         {
-            throw new FileNotFoundException($"File with path {path} does not exist");
+            throw new FileNotFoundException($"File with path {rosBag.Path} does not exist");
         }
-        using BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open));
-        var rosBag = new RosBag();
+        using BinaryReader reader = new BinaryReader(File.Open(rosBag.Path, FileMode.Open));
         var unParsedMessageHandler = new UnParsedMessageHandler(); //handles all message data
 
         reader.ReadChars(13);
@@ -87,14 +90,14 @@ public static class RosBagReader
             } 
         }
         unParsedMessageHandler.ParseMessages(rosBag); //Parses all message data  
-        return rosBag;
     }
 
     /// <summary>
     /// Reads a connection and sets the data
     /// </summary>
-    private static void SetConnectionData(BinaryReader reader, Connection connection)
+    private void SetConnectionData(BinaryReader reader, Connection connection)
     {
+        var messageDefinitionParser = new MessageDefinitionParser();
         int dataLen = reader.ReadInt32();
         long endPos = reader.BaseStream.Position + dataLen;
 
@@ -122,7 +125,7 @@ public static class RosBagReader
                     md5sum = fieldValue;
                     break;
                 case "message_definition":
-                    messageDefinition = MessageDefinitionParser.ParseMessageDefinition(fieldValue);
+                    messageDefinition = messageDefinitionParser.ParseMessageDefinition(fieldValue);
                     break;
                 case "callerid":
                     callerID = fieldValue;
@@ -140,7 +143,7 @@ public static class RosBagReader
     /// Reads message data
     /// </summary>
     /// <returns>message data in bytes</returns>
-    private static byte[] ReadMessageData(BinaryReader reader)
+    private byte[] ReadMessageData(BinaryReader reader)
     {
         var dataLength = reader.ReadInt32();
         var data = reader.ReadBytes(dataLength);
@@ -151,7 +154,7 @@ public static class RosBagReader
     /// Reads chunk and adds all messages and message data to unParsedMessageHandler
     /// </summary>
     /// <returns>List of connections in chunk</returns>
-    private static List<Connection> ReadUnCompressedChunk(BinaryReader reader, UnParsedMessageHandler unParsedMessageHandler)
+    private List<Connection> ReadUnCompressedChunk(BinaryReader reader, UnParsedMessageHandler unParsedMessageHandler)
     {
         int dataLength = reader.ReadInt32();
         List<Connection> connections = ReadChunk(reader, unParsedMessageHandler, dataLength);
@@ -164,7 +167,7 @@ public static class RosBagReader
     /// Decompresses and reads chunk and adds all messages and message data to unParsedMessageHandler
     /// </summary>
     /// <returns>List of connections in chunk</returns>
-    private static List<Connection> ReadCompressedChunk(BinaryReader reader, UnParsedMessageHandler unParsedMessageHandler)
+    private List<Connection> ReadCompressedChunk(BinaryReader reader, UnParsedMessageHandler unParsedMessageHandler)
     {
         int compressedDataLength = reader.ReadInt32();
         byte[] data = reader.ReadBytes(compressedDataLength);
@@ -184,7 +187,7 @@ public static class RosBagReader
     /// Reads chunk and adds all messages and message data to unParsedMessageHandler
     /// </summary>
     /// <returns>List of connections in chunk</returns>
-    private static List<Connection> ReadChunk(BinaryReader reader, UnParsedMessageHandler unParsedMessageHandler, int dataLength)
+    private List<Connection> ReadChunk(BinaryReader reader, UnParsedMessageHandler unParsedMessageHandler, int dataLength)
     {
         long endPos = reader.BaseStream.Position + dataLength;
 
@@ -220,7 +223,7 @@ public static class RosBagReader
     /// Reads a header
     /// </summary>
     /// <returns>Dictionary with fieldnames and fieldvalues in header</returns>
-    private static Dictionary<string, FieldValue> ReadHeader(BinaryReader reader)
+    private Dictionary<string, FieldValue> ReadHeader(BinaryReader reader)
     {
         int headerLen = reader.ReadInt32();
         long headerEnd = reader.BaseStream.Position + headerLen;
@@ -250,7 +253,7 @@ public static class RosBagReader
     /// Reads a field
     /// </summary>
     /// <returns>FieldValue containing name, datatype and value of field</returns>
-    private static FieldValue ReadField(BinaryReader reader)
+    private FieldValue ReadField(BinaryReader reader)
     {
         int fieldLen = reader.ReadInt32();
         string fieldName = ReadName(reader, fieldLen);
@@ -272,7 +275,7 @@ public static class RosBagReader
     /// Reads until first "=", returning what was read, discarding "="
     /// </summary>
     /// <returns> name of field </returns>
-    private static string ReadName(BinaryReader reader, int fieldLen)
+    private string ReadName(BinaryReader reader, int fieldLen)
     {
         long fieldEndPos = reader.BaseStream.Position + fieldLen;
         char curChar;

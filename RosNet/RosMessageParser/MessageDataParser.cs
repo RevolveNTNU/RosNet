@@ -5,14 +5,14 @@ namespace RosNet.RosMessageParser;
 /// <summary>
 /// Parses data in message record
 /// </summary>
-internal static class MessageDataParser
+internal class MessageDataParser
 {
 
     /// <summary>
     /// Parses messagedata from bytes to fieldvalues using messageDefinition
     /// </summary>
     /// <returns>Dictionary contatining the fields in the messageData. Key is name of field and value is the fieldValue</returns>
-    public static Dictionary<string, FieldValue> ParseMessageData(byte[] messageData, List<FieldValue> messageDefinition)
+    public Dictionary<string, FieldValue> ParseMessageData(byte[] messageData, List<FieldValue> messageDefinition)
     {
         var fieldValueByFieldName = new Dictionary<string, FieldValue>();
         int posBytes = 0;
@@ -38,7 +38,7 @@ internal static class MessageDataParser
     /// Parses an arrayfield in the messagedata on the position posBytes
     /// </summary>
     /// <returns> The parsed arrayfieldValue</returns>
-    public static ArrayFieldValue ParseArrayDefinitionField (ArrayFieldValue arrayDefinitionField, byte[] messageData, ref int posBytes )
+    private ArrayFieldValue ParseArrayDefinitionField (ArrayFieldValue arrayDefinitionField, byte[] messageData, ref int posBytes )
     {
         uint arrayLength;
         if (arrayDefinitionField.FixedArrayLength == 0)
@@ -83,7 +83,7 @@ internal static class MessageDataParser
     /// Parses a field in the messageData on the position posBytes
     /// </summary>
     /// <returns> The parsed fieldvalue</returns>
-    public static FieldValue ParseDefinitionField(FieldValue definitionField, byte[] messageData, ref int posBytes)
+    private FieldValue ParseDefinitionField(FieldValue definitionField, byte[] messageData, ref int posBytes)
     {
         byte[] value = messageData.Skip(posBytes).Take(definitionField.GetByteLength()).ToArray();
         var field = new FieldValue(definitionField.Name, definitionField.DataType, value);
