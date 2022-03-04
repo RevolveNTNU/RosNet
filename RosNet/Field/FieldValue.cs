@@ -1,146 +1,104 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using RosNet.Type;
+﻿using RosNet.Type;
 
-namespace RosNet.Field
+namespace RosNet.Field;
+
+/// <summary>
+/// Represents a fieldvalue
+/// </summary>
+public class FieldValue
 {
+    public string Name { get; set; }
+    public PrimitiveType DataType { get; private set; }
+    public byte[] Value { get; private set; }
+
     /// <summary>
-    /// Represents a fieldvalue
+    /// Creates a fieldvalue with name, datatype and value
     /// </summary>
-    public class FieldValue
+    public FieldValue(string Name, PrimitiveType DataType, byte[] Value)
     {
-        public string Name { get; set; }
-        public PrimitiveType DataType { get; private set; }
-        public byte[] Value { get; private set; }
+        this.Name = Name;
+        this.DataType = DataType;
+        this.Value = Value;
+    }
 
-        /// <summary>
-        /// Creates a fieldvalue with name, datatype and value
-        /// </summary>
-        public FieldValue(string Name, PrimitiveType DataType, byte[] Value)
+    /// <summary>
+    /// Creates a fieldvalue with name and datatype
+    /// </summary>
+    public FieldValue(string Name, PrimitiveType DataType)
+    {
+        this.Name = Name;
+        this.DataType = DataType;
+    }
+
+    /// <summary>
+    /// Finds the byte length of the fieldvalue using the datatype
+    /// </summary>
+    /// <returns>byte length of fieldvalue</returns>
+    public virtual int GetByteLength()
+    {
+        switch (this.DataType)
         {
-            this.Name = Name;
-            this.DataType = DataType;
-            this.Value = Value;
-        }
-
-        /// <summary>
-        /// Creates a fieldvalue with name and datatype
-        /// </summary>
-        public FieldValue(string Name, PrimitiveType DataType)
-        {
-            this.Name = Name;
-            this.DataType = DataType;
-        }
-
-        /// <summary>
-        /// Finds the byte length of the fieldvalue using the datatype
-        /// </summary>
-        /// <returns>byte length of fieldvalue</returns>
-        public virtual int GetByteLength()
-        {
-            switch (this.DataType)
-            {
-                case PrimitiveType.Bool:
-                case PrimitiveType.Int8:
-                case PrimitiveType.Uint8:
-                case PrimitiveType.Byte:
-                case PrimitiveType.Char:
-                    return 1;
-                case PrimitiveType.Int16:
-                case PrimitiveType.Uint16:
-                    return 2;
-                case PrimitiveType.Int32:
-                case PrimitiveType.Uint32:
-                case PrimitiveType.Float32:
-                case PrimitiveType.String:
-                    return 4;
-                case PrimitiveType.Int64:
-                case PrimitiveType.Uint64:
-                case PrimitiveType.Float64:
-                case PrimitiveType.Time:
-                case PrimitiveType.Duration:
-                    return 8;
-                default:
-                    return 0;
-            }
-        }
-
-        /// <summary>
-        /// Creates string with value if printValue is true, else string without value (used for messageDefinition)
-        /// </summary>
-        /// <returns>String with value if printValue is true, else returns string without value</returns>
-        public virtual string ToString(bool printValue)
-        {
-            if (printValue)
-            {
-                return this.ToString(); 
-            }
-            return ($"{DataType} {Name}");
-
-        }
-
-        /// <summary>
-        /// Creates string with value
-        /// </summary>
-        /// <returns>String with value</returns>
-        public override string ToString()
-        {
-            if (this.Value.Length == 0)
-            {
-                return ($"{DataType} {Name} noValue");
-            }
-            return ($"{DataType} {Name} {PrettyValue()}");
-        }
-
-        /// <summary>
-        /// Creates string of Value using datatype
-        /// </summary>
-        /// <returns>String of Value</returns>
-        public string PrettyValue()
-        {
-            switch (this.DataType)
-            {
-                case PrimitiveType.Bool:
-                    return ($"{BitConverter.ToBoolean(this.Value)}");
-                case PrimitiveType.Int8:
-                    return ((int)this.Value.First()).ToString();
-                case PrimitiveType.Uint8:
-                    return ((uint)this.Value.First()).ToString();
-                case PrimitiveType.Byte:
-                    return ($"{(sbyte) this.Value.First()}");
-                case PrimitiveType.Char:
-                    return ((char)this.Value.First()).ToString();
-                case PrimitiveType.Int16:
-                    return ($"{BitConverter.ToInt16(this.Value)}");
-                case PrimitiveType.Uint16:
-                    return ($"{BitConverter.ToUInt16(this.Value)}");
-                case PrimitiveType.Int32:
-                    return ($"{BitConverter.ToInt32(this.Value)}");
-                case PrimitiveType.Uint32:
-                    return ($"{BitConverter.ToUInt32(this.Value)}");
-                case PrimitiveType.Int64:
-                    return ($"{BitConverter.ToInt64(this.Value)}");
-                case PrimitiveType.Uint64:
-                    return ($"{BitConverter.ToUInt64(this.Value)}");
-                case PrimitiveType.Float32:
-                    return ($"{BitConverter.ToSingle(this.Value)}");
-                case PrimitiveType.Float64:
-                    return ($"{BitConverter.ToDouble(this.Value)}");
-                case PrimitiveType.String:
-                    return System.Text.Encoding.Default.GetString(this.Value); ;
-                case PrimitiveType.Time:
-                    uint timeSecs = BitConverter.ToUInt32(this.Value.Take(4).ToArray());
-                    uint timeNsecs = BitConverter.ToUInt32(this.Value.Skip(4).Take(4).ToArray());
-                    return ($"{timeSecs} : {timeNsecs}");
-                case PrimitiveType.Duration:
-                    int durationSecs = BitConverter.ToInt32(this.Value.Take(4).ToArray());
-                    int durationNsecs = BitConverter.ToInt32(this.Value.Skip(4).Take(4).ToArray());
-                    return ($"{durationSecs} : {durationNsecs}");
-                default:
-                    //TODO exception
-                    return "";
-            }
+            case PrimitiveType.BOOL:
+            case PrimitiveType.INT8:
+            case PrimitiveType.UINT8:
+            case PrimitiveType.BYTE:
+            case PrimitiveType.CHAR:
+                return 1;
+            case PrimitiveType.INT16:
+            case PrimitiveType.UINT16:
+                return 2;
+            case PrimitiveType.INT32:
+            case PrimitiveType.UINT32:
+            case PrimitiveType.FLOAT32:
+            case PrimitiveType.STRING:
+                return 4;
+            case PrimitiveType.INT64:
+            case PrimitiveType.UINT64:
+            case PrimitiveType.FLOAT64:
+            case PrimitiveType.TIME:
+            case PrimitiveType.DURATION:
+                return 8;
+            default:
+                return 0;
         }
     }
+
+    /// <summary>
+    /// Creates string with value
+    /// </summary>
+    /// <returns>String with value</returns>
+    public override string ToString()
+    {
+        if (this.Value.Length == 0)
+        {
+            return ($"{DataType} {Name} noValue");
+        }
+        return ($"{DataType} {Name} {PrettyValue()}");
+    }
+
+    /// <summary>
+    /// Creates string of Value using datatype
+    /// </summary>
+    /// <returns>String of Value</returns>
+    public string PrettyValue() => this.DataType switch
+    {
+        PrimitiveType.BOOL => ($"{BitConverter.ToBoolean(this.Value)}"),
+        PrimitiveType.INT8 => ((int)this.Value.First()).ToString(),
+        PrimitiveType.UINT8 => ((uint)this.Value.First()).ToString(),
+        PrimitiveType.BYTE => ($"{(sbyte)this.Value.First()}"),
+        PrimitiveType.CHAR => ((char)this.Value.First()).ToString(),
+        PrimitiveType.INT16 => ($"{BitConverter.ToInt16(this.Value)}"),
+        PrimitiveType.UINT16 => ($"{BitConverter.ToUInt16(this.Value)}"),
+        PrimitiveType.INT32 => ($"{BitConverter.ToInt32(this.Value)}"),
+        PrimitiveType.UINT32 => ($"{BitConverter.ToUInt32(this.Value)}"),
+        PrimitiveType.INT64 => ($"{BitConverter.ToInt64(this.Value)}"),
+        PrimitiveType.UINT64 => ($"{BitConverter.ToUInt64(this.Value)}"),
+        PrimitiveType.FLOAT32 => ($"{BitConverter.ToSingle(this.Value)}"),
+        PrimitiveType.FLOAT64 => ($"{BitConverter.ToDouble(this.Value)}"),
+        PrimitiveType.STRING => System.Text.Encoding.Default.GetString(this.Value),
+        PrimitiveType.TIME => ($"{BitConverter.ToUInt32(this.Value.Take(4).ToArray())} : {BitConverter.ToUInt32(this.Value.Skip(4).Take(4).ToArray())}"),
+        PrimitiveType.DURATION => ($"{BitConverter.ToInt32(this.Value.Take(4).ToArray())} : {BitConverter.ToInt32(this.Value.Skip(4).Take(4).ToArray())}"),
+        _ => throw new Exception("Datatype is not a primitive type") //todo make exception
+
+    };
 }
