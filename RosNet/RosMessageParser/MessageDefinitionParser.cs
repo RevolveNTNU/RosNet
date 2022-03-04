@@ -7,13 +7,13 @@ namespace RosNet.RosMessageParser;
 /// <summary>
 /// Parses messageDefinitionField in the data of connection record
 /// </summary>
-internal static class MessageDefinitionParser
+internal class MessageDefinitionParser
 {
     /// <summary>
     /// Parses the messageDefinition from bytes to list of fieldvalues
     /// </summary>
     /// <returns>List of fields in the messagedefinition</returns>
-    public static List<FieldValue> ParseMessageDefinition(byte[] messageDefinitionBytes)
+    public List<FieldValue> ParseMessageDefinition(byte[] messageDefinitionBytes)
     {
         string messageDefinition = System.Text.Encoding.Default.GetString(messageDefinitionBytes);
 
@@ -44,7 +44,7 @@ internal static class MessageDefinitionParser
     /// Parses a subdefinition in the messagedefinition
     /// </summary>
     /// <returns>name of subdefinition and list of fields in subdefinition</returns>
-    private static (string, List<FieldValue>) ParseSubDefinition(string subDefinition, Dictionary<string, List<FieldValue>> fieldValuesByDefinitionName )
+    private (string, List<FieldValue>) ParseSubDefinition(string subDefinition, Dictionary<string, List<FieldValue>> fieldValuesByDefinitionName )
     {
         //gets the definitionname from first line and skips "MSG: " before the name
         string definitionName = subDefinition.Split("\n").First().Split(" ").Last();
@@ -59,7 +59,7 @@ internal static class MessageDefinitionParser
     /// Parses the maindefinition using subdefinitions
     /// </summary>
     /// <returns>list of fields in mainmessage</returns>
-    private static List<FieldValue> ParseMainDefinition(string mainDefinition, Dictionary<string, List<FieldValue>> fieldValuesByDefinitionName)
+    private List<FieldValue> ParseMainDefinition(string mainDefinition, Dictionary<string, List<FieldValue>> fieldValuesByDefinitionName)
     {
         string[] lines = mainDefinition.Split("\n");
 
@@ -72,7 +72,7 @@ internal static class MessageDefinitionParser
     /// Parses a definition using subdefinitions
     /// </summary>
     /// <returns>list of fields in definition</returns>
-    private static List<FieldValue> ParseDefinition(IEnumerable<string> lines, Dictionary<string, List<FieldValue>> fieldValuesByDefinitionName)
+    private List<FieldValue> ParseDefinition(IEnumerable<string> lines, Dictionary<string, List<FieldValue>> fieldValuesByDefinitionName)
     {
         var validLines = new List<String>();
         var commentRegex = new Regex(@"#.*");

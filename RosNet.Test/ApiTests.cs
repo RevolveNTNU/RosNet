@@ -25,7 +25,8 @@ public class ApiTests
     public void TestGetConnectionFields()
     {
         string path = GetTestPath("TestBag.bag");
-        RosBag rosBag = RosBagReader.Read(path);
+        RosBag rosBag = new RosBag(path);
+        rosBag.Read();
         Dictionary<string, List<string>> fields = rosBag.GetConnectionFields();
 
         Assert.Equal(7, fields.Count);
@@ -38,7 +39,8 @@ public class ApiTests
     public void TestGetTimeSeries()
     {
         string path = GetTestPath("TestBag.bag");
-        RosBag rosBag = RosBagReader.Read(path);
+        RosBag rosBag = new RosBag(path);
+        rosBag.Read();
         List<(Time, FieldValue)> timeSeries = rosBag.GetTimeSeries("/amk/motor_moment", "FL_motor_moment");
 
         Assert.Equal((uint) 1622063787, timeSeries.First().Item1.Secs);

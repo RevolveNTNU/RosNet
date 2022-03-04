@@ -1,4 +1,5 @@
 ﻿using RosNet.Field;
+using RosNet.RosReader;
 
 namespace RosNet.DataModel;
 
@@ -8,13 +9,17 @@ namespace RosNet.DataModel;
 public class RosBag
 {
     public Dictionary<int, Connection> Connections { get; private set; } //List of connection records in rosbag
+    public string Path { get; private set; }
+    private RosBagReader _rosBagReader;
 
     /// <summary>
     /// Creates an empty rosbag
     /// </summary>
-    public RosBag()
+    public RosBag(string path)
     {
-        Connections = new Dictionary<int, Connection>();
+        this.Connections = new Dictionary<int, Connection>();
+        this.Path = path;
+        this._rosBagReader = new RosBagReader();
     }
 
     /// <summary>
@@ -42,6 +47,15 @@ public class RosBag
         }
         return s;
     }
+
+    /// <summary>
+    /// Reads the rosbag and updates the fields
+    /// </summary>
+    public void Read()
+    {
+        _rosBagReader.Read(this);
+    }
+
 
     /// <summary>
     /// Makes a dictionary of all the topics and fieldnames in rosbag
