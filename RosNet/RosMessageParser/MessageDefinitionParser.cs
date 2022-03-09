@@ -1,6 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 using RosNet.Field;
-using RosNet.Exceptions;
 using RosNet.Type;
 
 namespace RosNet.RosMessageParser;

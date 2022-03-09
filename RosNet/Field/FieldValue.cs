@@ -1,5 +1,4 @@
 ﻿using RosNet.Type;
-using RosNet.Exceptions;
 
 namespace RosNet.Field;
 

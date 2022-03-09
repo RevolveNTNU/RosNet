@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RosNet.Exceptions;
+namespace RosNet;
 
 /// <summary>
 /// Exception for when RosBag is corrupt or missing fields

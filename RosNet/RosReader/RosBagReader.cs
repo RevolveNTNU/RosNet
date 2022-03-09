@@ -1,6 +1,5 @@
 ﻿using ICSharpCode.SharpZipLib.BZip2;
 using RosNet.DataModel;
-using RosNet.Exceptions;
 using RosNet.Field;
 using RosNet.RosMessageParser;
 using RosNet.Type;

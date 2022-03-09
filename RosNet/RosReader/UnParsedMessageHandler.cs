@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using RosNet.Exceptions;
 using RosNet.DataModel;
 using RosNet.Field;
 using RosNet.RosMessageParser;
