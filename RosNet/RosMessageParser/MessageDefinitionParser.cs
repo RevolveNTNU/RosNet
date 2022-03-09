@@ -133,11 +133,10 @@ internal class MessageDefinitionParser
                     }
                     else
                     {
-                        if(!fieldValuesByDefinitionName.ContainsKey(arrayDataTypeString))
+                        if(!fieldValuesByDefinitionName.TryGetValue(arrayDataTypeString, out var subMessageFieldValues))
                         {
                             throw new KeyNotFoundException($"The dataType of array: { arrayDataTypeString } is not a primitive type or defined in MessageDefinition");
                         }
-                        List<FieldValue> subMessageFieldValues = fieldValuesByDefinitionName.GetValueOrDefault(arrayDataTypeString); //checks if datatype of array is a subdefinition
                         
                         // adds subDefinitionName to fieldName in fields from subDefinitions
                         var subFieldValuesCopy = new List<FieldValue>();
@@ -184,11 +183,10 @@ internal class MessageDefinitionParser
                     }
                     else
                     {
-                        if (!fieldValuesByDefinitionName.ContainsKey(arrayType))
+                        if (!fieldValuesByDefinitionName.TryGetValue(arrayType, out var subMessageFieldValues))
                         {
                             throw new KeyNotFoundException($"The dataType of array: {arrayType} is not a primitive type or defined in messageDefinition");
                         }
-                        List<FieldValue> subMessageFieldValues = fieldValuesByDefinitionName.GetValueOrDefault(arrayType);
                         
                         // adds subDefinitionName to fieldName in fields from subDefinitions
                         var subFieldValuesCopy = new List<FieldValue>();
@@ -214,11 +212,10 @@ internal class MessageDefinitionParser
                 }
                 else
                 {
-                    if(!fieldValuesByDefinitionName.ContainsKey(wordsInLine.First()))
+                    if(!fieldValuesByDefinitionName.TryGetValue(wordsInLine.First(),out var subFieldValues))//checks if field points to subdefiniition
                     {
                         throw new KeyNotFoundException($"The dataType: {wordsInLine.First()} is not a primitive type or defined in messageDefinition");
                     }
-                List<FieldValue> subFieldValues = fieldValuesByDefinitionName.GetValueOrDefault(wordsInLine.First()); //checks if field points to subdefiniition
                     
                     //adds subDefinitionName to fieldName in fields from subDefinitions
                     var subFieldValuesCopy = new List<FieldValue>();
