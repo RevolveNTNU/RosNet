@@ -1,5 +1,3 @@
-﻿using System;
-
 namespace RosNet;
 
 /// <summary>
@@ -8,4 +6,5 @@ namespace RosNet;
 public class RosBagException : Exception
 {
     public RosBagException(string message) : base(message) { }
+    public RosBagException(string message, Exception inner) : base(message, inner) { }
 }
