@@ -260,7 +260,7 @@ internal class RosBagReader
             "conn_count" or "chunk_count" or "size" or "conn" or "ver" or "count" or "offset" => PrimitiveType.Int32,
             "op" => PrimitiveType.Uint8,
             "compression" or "topic" => PrimitiveType.String,
-            _ => throw new Exception($"{fieldName} not defined in ROSbag-format")
+            _ => throw new RosBagException($"{fieldName} not defined in ROSbag-format")
         };
 
         return new FieldValue(fieldName, dataType, fieldValue);
