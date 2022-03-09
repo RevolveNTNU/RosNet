@@ -99,7 +99,7 @@ public class FieldValue
         PrimitiveType.STRING => System.Text.Encoding.Default.GetString(this.Value),
         PrimitiveType.TIME => ($"{BitConverter.ToUInt32(this.Value.Take(4).ToArray())} : {BitConverter.ToUInt32(this.Value.Skip(4).Take(4).ToArray())}"),
         PrimitiveType.DURATION => ($"{BitConverter.ToInt32(this.Value.Take(4).ToArray())} : {BitConverter.ToInt32(this.Value.Skip(4).Take(4).ToArray())}"),
-        _ => throw new InvalidDataTypeException("Datatype is not a primitive type", this.DataType.ToString())
+        _ => throw new RosBagException($"The datatype {this.DataType.ToString()} is not a primitive type")
 
     };
 }

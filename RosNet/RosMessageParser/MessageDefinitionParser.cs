@@ -158,7 +158,7 @@ internal class MessageDefinitionParser
                         }
                         else
                         {
-                            throw new InvalidDataTypeException($"The dataType of array: { arrayDataTypeString } is not a primitive type or defined in MessageDefinition", arrayDataTypeString);
+                            throw new KeyNotFoundException($"The dataType of array: { arrayDataTypeString } is not a primitive type or defined in MessageDefinition");
                         }
                     }
                 }
@@ -214,7 +214,7 @@ internal class MessageDefinitionParser
                         }
                         else
                         {
-                            throw new InvalidDataTypeException($"The dataType of array: {arrayType} is not a primitive type or defined in messageDefinition", arrayType);
+                            throw new KeyNotFoundException($"The dataType of array: {arrayType} is not a primitive type or defined in messageDefinition");
                         }
                     }
                 }
@@ -242,7 +242,7 @@ internal class MessageDefinitionParser
                     }
                     else
                     {
-                        throw new InvalidDataTypeException($"The dataType: {wordsInLine.First()} is not a primitive type or defined in messageDefinition", wordsInLine.First());
+                        throw new KeyNotFoundException($"The dataType: {wordsInLine.First()} is not a primitive type or defined in messageDefinition");
                     }
                 }
             }

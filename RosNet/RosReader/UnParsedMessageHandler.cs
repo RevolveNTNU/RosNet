@@ -55,7 +55,7 @@ internal class UnParsedMessageHandler
 
         if (UnParsedMessageByConn.Count != 0)
         {
-            throw new MissingConnectionException("There are messages without the corresponding connection", UnParsedMessageByConn);
+            throw new RosBagException($"There are messages without the corresponding connection: {UnParsedMessageByConn}");
         }
     }
 }
