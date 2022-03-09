@@ -5,8 +5,8 @@
 /// </summary>
 public enum PrimitiveType
 {
-    BOOL, INT8, UINT8, INT16, UINT16, INT32,
-    UINT32, INT64, UINT64, FLOAT32, FLOAT64,
-    STRING, TIME, DURATION,
-    BYTE, CHAR, ARRAY
+    Bool, Int8, Uint8, Int16, Uint16, Int32,
+    Uint32, Int64, Uint64, Float32, Float64,
+    String, Time, Duration,
+    Byte, Char, Array
 }
