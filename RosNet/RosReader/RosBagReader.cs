@@ -45,10 +45,6 @@ internal class RosBagReader
     /// <returns>ROSbag-object</returns>
     public void Read(RosBag rosBag)
     {
-        if (!File.Exists(rosBag.Path))
-        {
-            throw new FileNotFoundException($"File with path {rosBag.Path} does not exist");
-        }
         using BinaryReader reader = new BinaryReader(File.Open(rosBag.Path, FileMode.Open));
         var unParsedMessageHandler = new UnParsedMessageHandler(); //handles all message data
 
@@ -237,13 +233,12 @@ internal class RosBagReader
         }
 
         if (!headerFields.TryGetValue("op", out var op))
-            //TODO: More descriptive exception
-            throw new Exception("Header is missing op definition");
+            throw new RosBagException("Header is missing op definition");
 
         if (!HeaderFieldsByOp[(OpCode)op.Value.First()].All(h => headerFields.ContainsKey(h)))
         {
-            //TODO: Better exception
-            throw new Exception($"Missing header field");
+            var missingFields = HeaderFieldsByOp[(OpCode)op.Value.First()].Except(headerFields.Keys);
+            throw new RosBagException($"Missing header field(s) {missingFields}");
         }
 
         return headerFields;
@@ -289,8 +284,7 @@ internal class RosBagReader
             }
 
             if (reader.BaseStream.Position == fieldEndPos)
-                //TODO: More descriptive exception
-                throw new Exception($"Field \"{fieldName}\" exceeds the field length of {fieldLen}");
+                throw new RosBagException($"Field \"{fieldName}\" exceeds the field length of {fieldLen}");
         }
         while (curChar != '=');
 

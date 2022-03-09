@@ -133,32 +133,28 @@ internal class MessageDefinitionParser
                     }
                     else
                     {
-                        if (fieldValuesByDefinitionName.TryGetValue(arrayDataTypeString, out var subMessageFieldValues)) //checks if datatype of array is a subdefinition
+                        if(!fieldValuesByDefinitionName.TryGetValue(arrayDataTypeString, out var subMessageFieldValues))
                         {
-                            // adds subDefinitionName to fieldName in fields from subDefinitions
-                            var subFieldValuesCopy = new List<FieldValue>();
+                            throw new KeyNotFoundException($"The dataType of array: { arrayDataTypeString } is not a primitive type or defined in MessageDefinition");
+                        }
+                        
+                        // adds subDefinitionName to fieldName in fields from subDefinitions
+                        var subFieldValuesCopy = new List<FieldValue>();
 
-                            foreach (var subFieldValue in subMessageFieldValues)
+                        foreach (var subFieldValue in subMessageFieldValues)
+                        {
+                            if (subFieldValue is ArrayFieldValue)
                             {
-                                if (subFieldValue is ArrayFieldValue)
-                                {
-                                    var arrayFieldValue = subFieldValue as ArrayFieldValue;
-                                    subFieldValuesCopy.Add(new ArrayFieldValue(name + "." + arrayFieldValue.Name, arrayFieldValue.ArrayFields, arrayFieldValue.DataType));
-                                }
-                                else
-                                {
-                                    subFieldValuesCopy.Add(new FieldValue(name + "." + subFieldValue.Name, subFieldValue.DataType));
-                                }
-
+                                var arrayFieldValue = subFieldValue as ArrayFieldValue;
+                                subFieldValuesCopy.Add(new ArrayFieldValue(name + "." + arrayFieldValue.Name, arrayFieldValue.ArrayFields, arrayFieldValue.DataType));
                             }
-
-                            var fieldValue = new ArrayFieldValue(name, subFieldValuesCopy, PrimitiveType.ARRAY);
-
+                            else
+                            {
+                                subFieldValuesCopy.Add(new FieldValue(name + "." + subFieldValue.Name, subFieldValue.DataType));
+                            }
                         }
-                        else
-                        {
-                            throw new KeyNotFoundException($"Could not find {arrayDataTypeString}");
-                        }
+
+                        var fieldValue = new ArrayFieldValue(name, subFieldValuesCopy, PrimitiveType.ARRAY);
                     }
                 }
                 else if (fixedLengthArrayRegex.IsMatch(dataTypeString)) //check if field is array with fixed length
@@ -187,62 +183,58 @@ internal class MessageDefinitionParser
                     }
                     else
                     {
-                        if (fieldValuesByDefinitionName.TryGetValue(arrayType, out var subMessageFieldValues))
+                        if (!fieldValuesByDefinitionName.TryGetValue(arrayType, out var subMessageFieldValues))
                         {
-                            // adds subDefinitionName to fieldName in fields from subDefinitions
-                             var subFieldValuesCopy = new List<FieldValue>();
-
-                            foreach (var subFieldValue in subMessageFieldValues)
-                            {
-                                if (subFieldValue is ArrayFieldValue)
-                                {
-                                    var arrayFieldValue = subFieldValue as ArrayFieldValue;
-                                    subFieldValuesCopy.Add(new ArrayFieldValue(name + "." + arrayFieldValue.Name, arrayFieldValue.ArrayFields, arrayFieldValue.DataType));
-                                }
-                                else
-                                {
-                                    subFieldValuesCopy.Add(new FieldValue(name + "." + subFieldValue.Name, subFieldValue.DataType));
-                                }
-
-                            }
-
-                            var fieldValue = new ArrayFieldValue(name, subFieldValuesCopy, PrimitiveType.ARRAY,arrayLength);
-
-                            definitionFields.Add(fieldValue);
-
+                            throw new KeyNotFoundException($"The dataType of array: {arrayType} is not a primitive type or defined in messageDefinition");
                         }
-                        else
-                        {
-                            throw new KeyNotFoundException($"The dataType of array: {arrayType} is not a primitive type or defined in MessageDefinition");
-                        }
-                    }
-                }
-                else
-                {
-                    if (fieldValuesByDefinitionName.TryGetValue(wordsInLine.First(), out var subFieldValues)) //checks if field points to subdefiniition
-                    {
-                        //adds subDefinitionName to fieldName in fields from subDefinitions
+                        
+                        // adds subDefinitionName to fieldName in fields from subDefinitions
                         var subFieldValuesCopy = new List<FieldValue>();
 
-                        foreach (var subFieldValue in subFieldValues)
+                        foreach (var subFieldValue in subMessageFieldValues)
                         {
                             if (subFieldValue is ArrayFieldValue)
                             {
                                 var arrayFieldValue = subFieldValue as ArrayFieldValue;
                                 subFieldValuesCopy.Add(new ArrayFieldValue(name + "." + arrayFieldValue.Name, arrayFieldValue.ArrayFields, arrayFieldValue.DataType));
-                            } 
+                            }
                             else
                             {
                                 subFieldValuesCopy.Add(new FieldValue(name + "." + subFieldValue.Name, subFieldValue.DataType));
-                            } 
-                        }
-                        definitionFields.AddRange(subFieldValuesCopy);
+                            }
 
+                        }
+
+                        var fieldValue = new ArrayFieldValue(name, subFieldValuesCopy, PrimitiveType.ARRAY,arrayLength);
+
+                        definitionFields.Add(fieldValue);
                     }
-                    else
+                }
+                else
+                {
+                    if(!fieldValuesByDefinitionName.TryGetValue(wordsInLine.First(),out var subFieldValues))//checks if field points to subdefiniition
                     {
-                        throw new KeyNotFoundException($"The dataType: {wordsInLine.First()} is not a primitive type or defined in MessageDefinition");
+                        throw new KeyNotFoundException($"The dataType: {wordsInLine.First()} is not a primitive type or defined in messageDefinition");
                     }
+                    
+                    //adds subDefinitionName to fieldName in fields from subDefinitions
+                    var subFieldValuesCopy = new List<FieldValue>();
+
+                    foreach (var subFieldValue in subFieldValues)
+                    {
+                        if (subFieldValue is ArrayFieldValue)
+                        {
+                            var arrayFieldValue = subFieldValue as ArrayFieldValue;
+                            subFieldValuesCopy.Add(new ArrayFieldValue(name + "." + arrayFieldValue.Name, arrayFieldValue.ArrayFields, arrayFieldValue.DataType));
+                        } 
+                        else
+                        {
+                            subFieldValuesCopy.Add(new FieldValue(name + "." + subFieldValue.Name, subFieldValue.DataType));
+                        } 
+                    }
+                    definitionFields.AddRange(subFieldValuesCopy);
+
+                    
                 }
             }
             else
