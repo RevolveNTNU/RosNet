@@ -1,23 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="DataModel\" />
-    <None Remove="Enum\" />
-    <None Remove="RosMessageParser\" />
-    <None Remove="Field\" />
-    <None Remove="SharpZipLib" />
-    <None Remove="Exceptions\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Type\" />
-    <Folder Include="RosMessageParser\" />
-    <Folder Include="Field\" />
-    <Folder Include="Exceptions\" />
-  </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="SharpZipLib" Version="1.3.3" />
   </ItemGroup>
