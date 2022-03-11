@@ -48,7 +48,7 @@ public class ArrayFieldValue : FieldValue
     public override string ToString ()
     {
         string s;
-        if (this.DataType == PrimitiveType.STRING)
+        if (this.DataType == PrimitiveType.String)
         {
             s = ($"{DataType} {Name}: ");
             foreach (var fieldValue in ArrayFields)

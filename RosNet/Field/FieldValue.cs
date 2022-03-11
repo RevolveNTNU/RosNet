@@ -38,25 +38,25 @@ public class FieldValue
     {
         switch (this.DataType)
         {
-            case PrimitiveType.BOOL:
-            case PrimitiveType.INT8:
-            case PrimitiveType.UINT8:
-            case PrimitiveType.BYTE:
-            case PrimitiveType.CHAR:
+            case PrimitiveType.Bool:
+            case PrimitiveType.Int8:
+            case PrimitiveType.Uint8:
+            case PrimitiveType.Byte:
+            case PrimitiveType.Char:
                 return 1;
-            case PrimitiveType.INT16:
-            case PrimitiveType.UINT16:
+            case PrimitiveType.Int16:
+            case PrimitiveType.Uint16:
                 return 2;
-            case PrimitiveType.INT32:
-            case PrimitiveType.UINT32:
-            case PrimitiveType.FLOAT32:
-            case PrimitiveType.STRING:
+            case PrimitiveType.Int32:
+            case PrimitiveType.Uint32:
+            case PrimitiveType.Float32:
+            case PrimitiveType.String:
                 return 4;
-            case PrimitiveType.INT64:
-            case PrimitiveType.UINT64:
-            case PrimitiveType.FLOAT64:
-            case PrimitiveType.TIME:
-            case PrimitiveType.DURATION:
+            case PrimitiveType.Int64:
+            case PrimitiveType.Uint64:
+            case PrimitiveType.Float64:
+            case PrimitiveType.Time:
+            case PrimitiveType.Duration:
                 return 8;
             default:
                 return 0;
@@ -82,22 +82,22 @@ public class FieldValue
     /// <returns>String of Value</returns>
     public string PrettyValue() => this.DataType switch
     {
-        PrimitiveType.BOOL => ($"{BitConverter.ToBoolean(this.Value)}"),
-        PrimitiveType.INT8 => ((int)this.Value.First()).ToString(),
-        PrimitiveType.UINT8 => ((uint)this.Value.First()).ToString(),
-        PrimitiveType.BYTE => ($"{(sbyte)this.Value.First()}"),
-        PrimitiveType.CHAR => ((char)this.Value.First()).ToString(),
-        PrimitiveType.INT16 => ($"{BitConverter.ToInt16(this.Value)}"),
-        PrimitiveType.UINT16 => ($"{BitConverter.ToUInt16(this.Value)}"),
-        PrimitiveType.INT32 => ($"{BitConverter.ToInt32(this.Value)}"),
-        PrimitiveType.UINT32 => ($"{BitConverter.ToUInt32(this.Value)}"),
-        PrimitiveType.INT64 => ($"{BitConverter.ToInt64(this.Value)}"),
-        PrimitiveType.UINT64 => ($"{BitConverter.ToUInt64(this.Value)}"),
-        PrimitiveType.FLOAT32 => ($"{BitConverter.ToSingle(this.Value)}"),
-        PrimitiveType.FLOAT64 => ($"{BitConverter.ToDouble(this.Value)}"),
-        PrimitiveType.STRING => System.Text.Encoding.Default.GetString(this.Value),
-        PrimitiveType.TIME => ($"{BitConverter.ToUInt32(this.Value.Take(4).ToArray())} : {BitConverter.ToUInt32(this.Value.Skip(4).Take(4).ToArray())}"),
-        PrimitiveType.DURATION => ($"{BitConverter.ToInt32(this.Value.Take(4).ToArray())} : {BitConverter.ToInt32(this.Value.Skip(4).Take(4).ToArray())}"),
+        PrimitiveType.Bool => ($"{BitConverter.ToBoolean(this.Value)}"),
+        PrimitiveType.Int8 => ((int)this.Value.First()).ToString(),
+        PrimitiveType.Uint8 => ((uint)this.Value.First()).ToString(),
+        PrimitiveType.Byte => ($"{(sbyte)this.Value.First()}"),
+        PrimitiveType.Char => ((char)this.Value.First()).ToString(),
+        PrimitiveType.Int16 => ($"{BitConverter.ToInt16(this.Value)}"),
+        PrimitiveType.Uint16 => ($"{BitConverter.ToUInt16(this.Value)}"),
+        PrimitiveType.Int32 => ($"{BitConverter.ToInt32(this.Value)}"),
+        PrimitiveType.Uint32 => ($"{BitConverter.ToUInt32(this.Value)}"),
+        PrimitiveType.Int64 => ($"{BitConverter.ToInt64(this.Value)}"),
+        PrimitiveType.Uint64 => ($"{BitConverter.ToUInt64(this.Value)}"),
+        PrimitiveType.Float32 => ($"{BitConverter.ToSingle(this.Value)}"),
+        PrimitiveType.Float64 => ($"{BitConverter.ToDouble(this.Value)}"),
+        PrimitiveType.String => System.Text.Encoding.Default.GetString(this.Value),
+        PrimitiveType.Time => ($"{BitConverter.ToUInt32(this.Value.Take(4).ToArray())} : {BitConverter.ToUInt32(this.Value.Skip(4).Take(4).ToArray())}"),
+        PrimitiveType.Duration => ($"{BitConverter.ToInt32(this.Value.Take(4).ToArray())} : {BitConverter.ToInt32(this.Value.Skip(4).Take(4).ToArray())}"),
         _ => throw new RosBagException($"The datatype {this.DataType.ToString()} is not a primitive type")
 
     };

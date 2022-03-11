@@ -256,11 +256,11 @@ internal class RosBagReader
         byte[] fieldValue = reader.ReadBytes(fieldLen - fieldName.Length - 1);
         var dataType = fieldName switch
         {
-            "index_pos" or "time" or "chunk_pos" or "start_time" or "end_time" => PrimitiveType.INT64,
-            "conn_count" or "chunk_count" or "size" or "conn" or "ver" or "count" or "offset" => PrimitiveType.INT32,
-            "op" => PrimitiveType.UINT8,
-            "compression" or "topic" => PrimitiveType.STRING,
-            _ => throw new Exception($"{fieldName} not defined in ROSbag-format")
+            "index_pos" or "time" or "chunk_pos" or "start_time" or "end_time" => PrimitiveType.Int64,
+            "conn_count" or "chunk_count" or "size" or "conn" or "ver" or "count" or "offset" => PrimitiveType.Int32,
+            "op" => PrimitiveType.Uint8,
+            "compression" or "topic" => PrimitiveType.String,
+            _ => throw new RosBagException($"{fieldName} not defined in ROSbag-format")
         };
 
         return new FieldValue(fieldName, dataType, fieldValue);
