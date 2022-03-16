@@ -33,3 +33,15 @@ jobs:
 
       - name: Push package to NuGet
         run: dotnet nuget push nupkg/RosNet.${{steps.get-version.outputs.version}}.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+      # Create the release:  https://github.com/actions/create-release
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: v${{ steps.get-version.outputs.version}}
+          release_name: RosNet ${{ steps.get-version.outputs.version }}
+          draft: false
+          prerelease: false
