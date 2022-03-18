@@ -20,7 +20,7 @@ public class ApiTests
     [Fact]
     public void TestGetConnectionFields()
     {
-        string path = GetTestPath("TestBag.bag");
+        string path = GetTestPath("ApiTestBag.bag");
         RosBag rosBag = new RosBag(path);
         rosBag.Read();
         Dictionary<string, List<string>> fields = rosBag.GetConnectionFields();
@@ -34,7 +34,7 @@ public class ApiTests
     [Fact]
     public void TestGetTimeSeries()
     {
-        string path = GetTestPath("TestBag.bag");
+        string path = GetTestPath("ApiTestBag.bag");
         RosBag rosBag = new RosBag(path);
         rosBag.Read();
         List<(Time, FieldValue)> timeSeries = rosBag.GetTimeSeries("/amk/motor_moment", "FL_motor_moment");

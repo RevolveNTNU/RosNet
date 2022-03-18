@@ -10,7 +10,7 @@ public class Message
 {
     //Header fields of message record:
     public int Conn { get; }
-    public Time TimeStamp { get;  }
+    public Time TimeStamp { get; }
 
     //Data in message record:
     public ReadOnlyDictionary<string,FieldValue> Data { get; internal set; }
