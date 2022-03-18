@@ -16,4 +16,15 @@ public class DataModelTests
         // 1 tick is 100 nano seconds
         Assert.Equal(test.ToDateTime(), new DateTime(2022, 02, 15, 14, 35, 8).AddSeconds(epochNano * Math.Pow(10, -9)));
     }
+
+    [Fact]
+    public void TestBagStartTime()
+    {
+        string path = ApiTests.GetTestPath("DataModelTestBag.bag");
+        RosBag rosBag = new RosBag(path);
+        rosBag.Read();
+        Assert.Equal(new Time(1622060004, 130476520), rosBag.BagStartTime);
+
+
+    }
 }
