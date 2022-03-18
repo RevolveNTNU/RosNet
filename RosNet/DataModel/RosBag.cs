@@ -10,6 +10,7 @@ public class RosBag
 {
     public Dictionary<int, Connection> Connections { get; private set; } //List of connection records in rosbag
     public string Path { get; private set; }
+    public Time BagStartTime { get; private set; }
     private RosBagReader _rosBagReader;
 
     /// <summary>
@@ -20,6 +21,7 @@ public class RosBag
         this.Connections = new Dictionary<int, Connection>();
         this.Path = path;
         this._rosBagReader = new RosBagReader();
+        this.BagStartTime = new Time(uint.MaxValue, uint.MaxValue);
     }
 
     /// <summary>
@@ -103,5 +105,18 @@ public class RosBag
         }
 
         return timeSeries;
+    }
+
+    /// <summary>
+    /// Sets the bag start time to the variable "time", if this is lower
+    /// than the current bag start time
+    /// </summary>
+    /// <param name="time">The Time object that might be the new bag start time</param>
+    internal void SetBagStartTime(Time time)
+    {
+        if (time.CompareTo(BagStartTime) < 0)
+        {
+            BagStartTime = time;
+        }
     }
 }

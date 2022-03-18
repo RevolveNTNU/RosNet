@@ -48,6 +48,7 @@ internal class UnParsedMessageHandler
             {
                 message.Data = new ReadOnlyDictionary<string, FieldValue>(messageDataParser.ParseMessageData(data, kvp.Value.MessageDefinition));
                 rosBag.Connections[message.Conn].Messages.Add(message);
+                rosBag.SetBagStartTime(message.TimeStamp);
             }
             UnParsedMessageByConn.Remove(kvp.Key);
         }
