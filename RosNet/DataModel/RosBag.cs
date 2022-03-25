@@ -119,4 +119,16 @@ public class RosBag
             BagStartTime = time;
         }
     }
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        int hash = 64073717;
+        hash *= 89357897 ^ Path.GetHashCode();
+        foreach (var (_, conn) in Connections)
+        {
+            hash *= 89357897 ^ conn.Topic.GetHashCode();
+        }
+        return hash;
+    }
 }

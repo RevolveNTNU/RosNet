@@ -24,7 +24,20 @@ public class DataModelTests
         RosBag rosBag = new RosBag(path);
         rosBag.Read();
         Assert.Equal(new Time(1622060004, 130476520), rosBag.BagStartTime);
+    }
 
-
+    [Fact]
+    public void TestHashCode()
+    {
+        string path1 = ApiTests.GetTestPath("HashCodeTest1.bag");
+        string path2 = ApiTests.GetTestPath("HashCodeTest2.bag");
+        RosBag bag1 = new RosBag(path1);
+        bag1.Read();
+        RosBag bag1copy = new RosBag(path1);
+        bag1copy.Read();
+        RosBag bag2 = new RosBag(path2);
+        bag2.Read();
+        Assert.Equal(bag1.GetHashCode(), bag1copy.GetHashCode());
+        Assert.NotEqual(bag1.GetHashCode(), bag2.GetHashCode());
     }
 }
