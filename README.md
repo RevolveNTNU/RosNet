@@ -7,8 +7,8 @@
   </div>
 </div>
 <p float="left">
-    <a href="https://revolve.no/"><img align=left src="https://raw.githubusercontent.com/RevolveNTNU/RosNet/master/.github/main/revolve.svg" width="30%"/></a>
-    <a href="https://uavcan.org/"><img align=right margin src="https://raw.githubusercontent.com/RevolveNTNU/RosNet/master/.github/main/ros.svg" width="30%"/></a>
+    <a href="https://revolve.no/"><img align=left src="https://raw.githubusercontent.com/RevolveNTNU/RosNet/86-improve-readme/.github/main/revolve.svg" width="30%"/></a>
+    <a href="https://ros.org/"><img align=right margin src="https://raw.githubusercontent.com/RevolveNTNU/RosNet/86-improve-readme/.github/main/ros.svg" width="30%"/></a>
 </p>
 <br>
 <br>
