@@ -1,4 +1,21 @@
-# <img src=	https://upload.wikimedia.org/wikipedia/commons/7/7a/ROS_cat.png width="250" height="140">
+<div class="row">
+  <div class="column">
+
+  </div>
+  <div class="column">
+
+  </div>
+</div>
+<p float="left">
+    <a href="https://revolve.no/"><img align=left src="https://raw.githubusercontent.com/RevolveNTNU/RosNet/master/.github/main/revolve.svg" width="30%"/></a>
+    <a href="https://uavcan.org/"><img align=right margin src="https://raw.githubusercontent.com/RevolveNTNU/RosNet/master/.github/main/ros.svg" width="30%"/></a>
+</p>
+<br>
+<br>
+<br>
+<br>
+<br>
+
 
 # RosNet
 ## What is RosNet?
