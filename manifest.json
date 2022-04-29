@@ -1,0 +1,272 @@
+{
+  "homepages": [],
+  "source_base_path": "/github/workspace/DocFX",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/RosNet.DataModel.Connection.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/RosNet.DataModel.Connection.html",
+          "hash": "m1nN43j/kLCZq24U70jPfQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/RosNet.DataModel.Message.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/RosNet.DataModel.Message.html",
+          "hash": "k+eYR/KnPPmJniN3IduFuQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/RosNet.DataModel.RosBag.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/RosNet.DataModel.RosBag.html",
+          "hash": "CiwKKa848BV2uSf/XAxuag=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/RosNet.DataModel.Time.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/RosNet.DataModel.Time.html",
+          "hash": "b1l0QPXBFqtpbpioCIdiMA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/RosNet.DataModel.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/RosNet.DataModel.html",
+          "hash": "p4IHjRiIRfE7Bm3SJq9IpA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/RosNet.Field.ArrayFieldValue.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/RosNet.Field.ArrayFieldValue.html",
+          "hash": "QYO4qYekLj69wEDiBOZ4cQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/RosNet.Field.FieldValue.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/RosNet.Field.FieldValue.html",
+          "hash": "Tt0+50SL26S7fBJsq8T9Yw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/RosNet.Field.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/RosNet.Field.html",
+          "hash": "3sc7NSwshrtnqKZ1J9JBnw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/RosNet.RosBagException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/RosNet.RosBagException.html",
+          "hash": "FkTiMWrox5fOr/wJY4WOQg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/RosNet.Type.PrimitiveType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/RosNet.Type.PrimitiveType.html",
+          "hash": "nU3/r1musdoCL44gouPl0g=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/RosNet.Type.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/RosNet.Type.html",
+          "hash": "QwWfqq21nvk/itnpdfbSjw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/RosNet.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/RosNet.html",
+          "hash": "/grA0tZ0jBqZSB3C3jKfOg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "api/index.md",
+      "output": {
+        ".html": {
+          "relative_path": "api/index.html",
+          "hash": "cumQ0Ooj84km1/JarHZMJA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "api/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/toc.html",
+          "hash": "eDFF1+reVzqywTMuLo4vng=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/intro.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/intro.html",
+          "hash": "EXI2PakUT4MGKKifjO3FCA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "articles/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "articles/toc.html",
+          "hash": "gB8AESyvNru97tzIZofEEg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html",
+          "hash": "nNVYyHd3vvxuRoJkZFVxRA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "toc.html",
+          "hash": "+rHUkRZHZRi5gd1aTU6lJA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    }
+  ],
+  "incremental_info": [
+    {
+      "status": {
+        "can_incremental": false,
+        "details": "Cannot build incrementally because docfx version changed from 2.59.2.0 to 2.56.7.0.",
+        "incrementalPhase": "build",
+        "total_file_count": 0,
+        "skipped_file_count": 0,
+        "full_build_reason_code": "DocfxVersionChanged"
+      },
+      "processors": {
+        "ConceptualDocumentProcessor": {
+          "can_incremental": false,
+          "incrementalPhase": "build",
+          "total_file_count": 3,
+          "skipped_file_count": 0
+        },
+        "ManagedReferenceDocumentProcessor": {
+          "can_incremental": false,
+          "incrementalPhase": "build",
+          "total_file_count": 12,
+          "skipped_file_count": 0
+        },
+        "TocDocumentProcessor": {
+          "can_incremental": false,
+          "details": "Processor TocDocumentProcessor cannot support incremental build because the processor doesn't implement ISupportIncrementalDocumentProcessor interface.",
+          "incrementalPhase": "build",
+          "total_file_count": 0,
+          "skipped_file_count": 0
+        }
+      }
+    },
+    {
+      "status": {
+        "can_incremental": true,
+        "details": "Can support incremental post processing.",
+        "incrementalPhase": "postProcessing",
+        "total_file_count": 0,
+        "skipped_file_count": 0
+      },
+      "processors": {}
+    }
+  ],
+  "version_info": {},
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}
