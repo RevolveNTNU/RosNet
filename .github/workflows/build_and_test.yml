@@ -52,16 +52,3 @@ jobs:
         name: Test Report            # Name of the check run which will be created
         path: RosNet.Test/TestResults/test-results.trx    # Path to test results
         reporter: dotnet-trx        # Format of test results
-
-
-    # Release new DocFX online documentation
-    - name: Build DocFX documentation
-      uses: nikeee/docfx-action@v1.0.0
-      with:
-        args: DocFX/docfx.json
-    
-    - name: Desploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs
