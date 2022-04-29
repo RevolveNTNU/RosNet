@@ -19,6 +19,7 @@ Dictionary<string, List<string>> fieldNamesByTopic = rosBag.GetConnectionFields(
 # Obtain list of tuples with timestamp and fieldvalue
 List<(Time, FieldValue)> timeSeries = rosBag.GetTimeSeries(topic, fieldName);
 ```
+For full API documentation go to: https://revolventnu.github.io/RosNet/
 
 ## External dependencies
 SharpZipLib used for decompression from bz2: http://icsharpcode.github.io/SharpZipLib/
