@@ -19,10 +19,10 @@
 
 # RosNet
 ## What is RosNet?
-RosNet is a .NET library used for parsing RosBags to a C# object. We are thinking of adding support for writing as well. 
+RosNet is a .NET library for deserializing rosbags version 2.0 to C#-objects.
 
 ## How to use the library:
-<!-- How to include library in project-->
+<!-- User documentation-->
 To use RosNet in a C#-based application: Install RosNet as a NuGet Package
 
 ### Using statement
@@ -48,7 +48,7 @@ List<(Time, FieldValue)> timeSeries = rosBag.GetTimeSeries(topic, fieldName);
 FieldValue is a custom data type with a 
 
 - string name -  name of the field
-- PrimitiveType DataType -  datatype of the value. PrimitiveType is an Enum with possible values: Bool, Int8, Uint8, Int16, Unit16, Int32, Uint32, Int64, Uint64, Float32, Float64, String, Time, Duration, Byte, Char and Array. The datatypes correspond to the standard datatypes in ROS messages and array used for arrays of values.
+- PrimitiveType DataType -  datatype of the value. PrimitiveType is an Enum with possible values: Bool, Int8, Uint8, Int16, Unit16, Int32, Uint32, Int64, Uint64, Float32, Float64, String, Time, Duration, Byte, Char and Array. The datatypes correspond to the [standard datatypes](https://wiki.ros.org/msg) in ROS messages and Array used for arrays of values.
 - byte[] Value - is the value of the field
 
 #### Conversion between PrimitiveType and C# types:
