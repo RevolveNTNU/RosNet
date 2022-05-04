@@ -16,6 +16,8 @@
 <br>
 <br>
 
+[![Build, run tests and generate report](https://github.com/RevolveNTNU/RosNet/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/RevolveNTNU/RosNet/actions/workflows/build_and_test.yml)
+[![Coverage Status](https://coveralls.io/repos/github/RevolveNTNU/RosNet/badge.svg?branch=86-improve-readme)](https://coveralls.io/github/RevolveNTNU/RosNet?branch=86-improve-readme)
 
 # RosNet
 ## What is RosNet?
