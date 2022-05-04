@@ -42,6 +42,7 @@ public class DataModelTests
         Assert.Equal(testOne.CompareTo(testOne), 0);
         Assert.True(testThree.CompareTo(testTwo) < 0);
         Assert.True(testTwo.CompareTo(testThree) > 0);
+        Assert.Equal(testOne.CompareTo(null), 1);
     }
 }
 }
