@@ -25,7 +25,7 @@ RosNet is a .NET library for deserializing rosbags version 2.0 to C#-objects.
 ## How to use the library:
 For full API documentation go to: https://revolventnu.github.io/RosNet/
 <!-- User documentation-->
-To use RosNet in a C#-based application: Install RosNet as a NuGet Package
+To use RosNet in a C#-based application: Install RosNet as a NuGet Package.
 
 ### Using statement
 ```C#
@@ -95,4 +95,4 @@ Mikael Steenbuch https://github.com/mikaelste
 
 ## License
 This software is licensed with the Apache 2.0 license.
-See [LICENSE](https://github.com/RevolveNTNU/RosNet/blob/86-improve-readme/LICENSE) for more information
+See [LICENSE](https://github.com/RevolveNTNU/RosNet/blob/86-improve-readme/LICENSE) for more information.
