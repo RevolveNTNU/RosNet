@@ -1,26 +1,85 @@
-# <img src=	https://upload.wikimedia.org/wikipedia/commons/7/7a/ROS_cat.png width="250" height="140">
+<div class="row">
+  <div class="column">
 
+  </div>
+  <div class="column">
+
+  </div>
+</div>
+<p float="left">
+    <a href="https://revolve.no/"><img align=left src="https://raw.githubusercontent.com/RevolveNTNU/RosNet/86-improve-readme/.github/main/revolve.svg" width="30%" height="100"/></a>
+    <a href="https://ros.org/"><img align=right margin src="https://raw.githubusercontent.com/RevolveNTNU/RosNet/86-improve-readme/.github/main/ros.png" height="100"/></a>
+</p>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+[![Build, run tests and generate report](https://github.com/RevolveNTNU/RosNet/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/RevolveNTNU/RosNet/actions/workflows/build_and_test.yml)
+[![Coverage Status](https://coveralls.io/repos/github/RevolveNTNU/RosNet/badge.svg?branch=master)](https://coveralls.io/github/RevolveNTNU/RosNet?branch=master)
 # RosNet
 ## What is RosNet?
-RosNet is a .NET library used for parsing RosBags to a C# object. We are thinking of adding support for writing as well. 
+RosNet is a .NET library for deserializing rosbags version 2.0 to C#-objects.
 
 ## How to use the library:
-<!-- How to include library in project-->
+For full API documentation go to: https://revolventnu.github.io/RosNet/
+<!-- User documentation-->
+To use RosNet in a C#-based application: Install RosNet as a NuGet Package.
+
+### Using statement
 ```C#
 using RosNet.DataModel;
-
-# Convert a ROSBag to a C# object
+```
+### Convert a ROSBag to a C# object
+```C#
 var rosBag = new RosBag(path);
 rosBag.Read();
-
-# Obtain possible ROS topics and fields in the topics
+```
+### Obtain possible ROS topics and fields in the topics
+```C#
 Dictionary<string, List<string>> fieldNamesByTopic = rosBag.GetConnectionFields();
+```
 
-# Obtain list of tuples with timestamp and fieldvalue
+### Obtain list of tuples with timestamp and fieldvalue
+```C#
 List<(Time, FieldValue)> timeSeries = rosBag.GetTimeSeries(topic, fieldName);
 ```
-For full API documentation go to: https://revolventnu.github.io/RosNet/
 
+### FieldValue
+
+You will primarily interact with `FieldValue` which has the following fields
+
+- `string Name` -  name of the field
+- `PrimitiveType DataType` -  datatype of the value. PrimitiveType is an Enum with possible values: Bool, Int8, Uint8, Int16, Unit16, Int32, Uint32, Int64, Uint64, Float32, Float64, String, Time, Duration, Byte, Char and Array. The datatypes correspond to the [standard datatypes](https://wiki.ros.org/msg) in ROS messages and Array used for arrays of values.
+- `byte[] Value` - is the value of the field
+
+#### Conversion between PrimitiveType and C# types:
+| PrimitiveType | C# type               |
+| -----------   | -----------           |
+| Bool          | bool                  |
+| Byte          | sbyte                 |
+| Char          | char                  |
+| Duration      | RosNet.DataModel.Time |
+| Float32       | float                 |
+| Float64       | double                |
+| Int8          | sbyte                 |
+| Int16         | short                 |
+| Int32         | int                   |
+| Int64         | long                  |
+| Time          | RosNet.DataModel.Time |
+| Uint8         | byte                  |
+| Uint16        | ushort                |
+| Uint32        | uint                  |
+| Uint64        | ulong                 |
+
+#### ArrayFieldValue
+
+ArrayFieldValue represents a fieldvalue that is an array of fieldvalues. The class inherits from FieldValue and has an additional list of fieldvalues.
+
+### Time
+
+Time is a custom data type with a uint called Secs and a uint called NSecs. The class is comparable and has the function ToDateTime() that returns the Time as a DateTime object.
 ## External dependencies
 SharpZipLib used for decompression from bz2: http://icsharpcode.github.io/SharpZipLib/
 
@@ -34,4 +93,6 @@ Juni Sæther Skarpaas https://github.com/Juni-hub
 Lars van der Lee https://github.com/TheLarsinator  
 Mikael Steenbuch https://github.com/mikaelste
 
-<!-- License -->
+## License
+This software is licensed with the Apache 2.0 license.
+See [LICENSE](https://github.com/RevolveNTNU/RosNet/blob/86-improve-readme/LICENSE) for more information.
