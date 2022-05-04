@@ -7,6 +7,7 @@ RosNet uses the [rosbag version 2.0 format](https://wiki.ros.org/Bags/Format/2.0
     * conn: the id of the connection record to which the message data record is connected 
 
     * time: the time that the message data record was received.
+
     The data of the message data record is the data we want to extract from the bag.
 
 - Connection record: The connection record contains two guaranteed header fields: 
@@ -16,7 +17,8 @@ RosNet uses the [rosbag version 2.0 format](https://wiki.ros.org/Bags/Format/2.0
     * topic: the plain text name of the connection
 
     The connection record also contains a guaranteed data field that is used in RosNet: message_definition is the definition of how the message record data of the message records connected to the connection is formatted. A message definition can for instance look like this:
-    ![Message definition picture](../src/MessageDefinition.png "Message definition") 
+
+![Message definition picture](../src/MessageDefinition.png "Message definition") 
 
 - Chunk record: The chunk record data consists of message records and connection records. The chunk record contains a compression header field which states whether the chunk is compressed (bz2) or not (none). 
 
