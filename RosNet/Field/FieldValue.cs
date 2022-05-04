@@ -70,7 +70,7 @@ public class FieldValue
     /// <returns>String with value</returns>
     public override string ToString()
     {
-        if (this.Value.Equals(null))
+        if (this.Value == null))
         {
             return ($"{DataType} {Name} noValue");
         }
