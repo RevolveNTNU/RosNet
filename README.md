@@ -93,4 +93,6 @@ Juni Sæther Skarpaas https://github.com/Juni-hub
 Lars van der Lee https://github.com/TheLarsinator  
 Mikael Steenbuch https://github.com/mikaelste
 
-<!-- License -->
+## License
+This software is licensed with the Apache 2.0 license.
+See [LICENSE](https://github.com/RevolveNTNU/RosNet/blob/86-improve-readme/LICENSE) for more information
