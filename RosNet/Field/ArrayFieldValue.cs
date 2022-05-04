@@ -56,6 +56,9 @@ public class ArrayFieldValue : FieldValue
                 if (fieldValue.Value != null)
                 {
                     s += fieldValue.PrettyValue();
+                } else
+                {
+                    s += "noValue";
                 }
             }
             return s;

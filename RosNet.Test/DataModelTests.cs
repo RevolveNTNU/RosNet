@@ -48,7 +48,7 @@ public class DataModelTests
     [Fact]
     public void TestToString()
     {
-        string path = ApiTests.GetTestPath("DataModelTestBag.bag");
+        string path = ApiTests.GetTestPath("ToStringTestBag.bag");
         RosBag rosBag = new RosBag(path);
         rosBag.Read();
         Assert.False(rosBag.ToString().Equals(""));
