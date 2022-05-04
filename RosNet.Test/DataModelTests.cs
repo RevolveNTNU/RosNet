@@ -44,5 +44,13 @@ public class DataModelTests
         Assert.True(testTwo.CompareTo(testThree) > 0);
         Assert.Equal(testOne.CompareTo(null), 1);
     }
-}
+
+    [Fact]
+    public void TestToString()
+    {
+        string path = ApiTests.GetTestPath("DataModelTestBag.bag");
+        RosBag rosBag = new RosBag(path);
+        rosBag.Read();
+        Assert.True(rosBag.ToString() != null);
+    }
 }
