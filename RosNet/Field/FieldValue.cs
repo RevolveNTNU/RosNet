@@ -28,6 +28,7 @@ public class FieldValue
     {
         this.Name = Name;
         this.DataType = DataType;
+        this.Value = null;
     }
 
     /// <summary>
