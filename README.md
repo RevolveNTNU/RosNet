@@ -48,11 +48,11 @@ List<(Time, FieldValue)> timeSeries = rosBag.GetTimeSeries(topic, fieldName);
 
 ### FieldValue
 
-FieldValue is a custom data type with a 
+You will primarily interact with `FieldValue` which has the following fields
 
-- string name -  name of the field
-- PrimitiveType DataType -  datatype of the value. PrimitiveType is an Enum with possible values: Bool, Int8, Uint8, Int16, Unit16, Int32, Uint32, Int64, Uint64, Float32, Float64, String, Time, Duration, Byte, Char and Array. The datatypes correspond to the [standard datatypes](https://wiki.ros.org/msg) in ROS messages and Array used for arrays of values.
-- byte[] Value - is the value of the field
+- `string Name` -  name of the field
+- `PrimitiveType DataType` -  datatype of the value. PrimitiveType is an Enum with possible values: Bool, Int8, Uint8, Int16, Unit16, Int32, Uint32, Int64, Uint64, Float32, Float64, String, Time, Duration, Byte, Char and Array. The datatypes correspond to the [standard datatypes](https://wiki.ros.org/msg) in ROS messages and Array used for arrays of values.
+- `byte[] Value` - is the value of the field
 
 #### Conversion between PrimitiveType and C# types:
 | PrimitiveType | C# type               |
