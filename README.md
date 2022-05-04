@@ -24,6 +24,7 @@
 RosNet is a .NET library for deserializing rosbags version 2.0 to C#-objects.
 
 ## How to use the library:
+For full API documentation go to: https://revolventnu.github.io/RosNet/
 <!-- User documentation-->
 To use RosNet in a C#-based application: Install RosNet as a NuGet Package
 
@@ -45,6 +46,7 @@ Dictionary<string, List<string>> fieldNamesByTopic = rosBag.GetConnectionFields(
 ```C#
 List<(Time, FieldValue)> timeSeries = rosBag.GetTimeSeries(topic, fieldName);
 ```
+
 ### FieldValue
 
 FieldValue is a custom data type with a 
