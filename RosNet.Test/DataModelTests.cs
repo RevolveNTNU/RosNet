@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Text;
 using RosNet.DataModel;
+using RosNet.Field;
+using RosNet.Type;
+
 using Xunit;
 
 namespace RosNet.Test;
@@ -52,5 +56,21 @@ public class DataModelTests
         RosBag rosBag = new RosBag(path);
         rosBag.Read();
         Assert.False(rosBag.ToString().Equals(""));
+    }
+
+    [Fact]
+    public void TestGetByteLength()
+    {
+        var firstFieldValue = new FieldValue("first", PrimitiveType.String, Encoding.ASCII.GetBytes("test"));
+        var secondFieldValue = new FieldValue("second", PrimitiveType.Int16, BitConverter.GetBytes(3));
+        var thirdFieldValue = new FieldValue("third", PrimitiveType.Char, Encoding.ASCII.GetBytes("a"));
+        var defaultFieldValue = new FieldValue("defaultTest", PrimitiveType.Array, new byte[3]);
+        var arrayFields = new List<FieldValue>(){firstFieldValue, secondFieldValue, thirdFieldValue};
+        var arrayFieldValue = new ArrayFieldValue("arrayTest", arrayFields, PrimitiveType.Array);
+
+        Assert.Equal(2, secondFieldValue.GetByteLength());
+        Assert.Equal(0, defaultFieldValue.GetByteLength());
+        Assert.Equal(7, arrayFieldValue.GetByteLength());
+
     }
 }
