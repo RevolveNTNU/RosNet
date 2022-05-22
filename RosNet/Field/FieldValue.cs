@@ -28,6 +28,7 @@ public class FieldValue
     {
         this.Name = Name;
         this.DataType = DataType;
+        this.Value = null;
     }
 
     /// <summary>
@@ -69,7 +70,7 @@ public class FieldValue
     /// <returns>String with value</returns>
     public override string ToString()
     {
-        if (this.Value.Length == 0)
+        if (this.Value == null)
         {
             return ($"{DataType} {Name} noValue");
         }

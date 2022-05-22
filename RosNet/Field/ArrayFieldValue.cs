@@ -53,7 +53,13 @@ public class ArrayFieldValue : FieldValue
             s = ($"{DataType} {Name}: ");
             foreach (var fieldValue in ArrayFields)
             {
-                s += fieldValue.PrettyValue();
+                if (fieldValue.Value != null)
+                {
+                    s += fieldValue.PrettyValue();
+                } else
+                {
+                    s += "noValue";
+                }
             }
             return s;
         }
@@ -68,7 +74,7 @@ public class ArrayFieldValue : FieldValue
            {
               s += ", ";
            }
-           if (fieldValue.Value.Length == 0)
+           if (fieldValue.Value == null)
            {
               s += "noValue";
            }
