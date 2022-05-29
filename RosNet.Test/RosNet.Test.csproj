@@ -25,6 +25,14 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RosNet\RosNet.csproj" />
+    <ProjectReference Include="..\MessageGeneration\MessageGeneration.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+      <None 
+     Include="TestMessages\**" 
+     CopyToOutputDirectory="PreserveNewest" 
+     LinkBase="TestMessages\" />
   </ItemGroup>
 
   <ItemGroup>
